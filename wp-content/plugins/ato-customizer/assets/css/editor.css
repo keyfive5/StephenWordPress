@@ -1,0 +1,404 @@
+/*
+ * ATO Customizer — editor UI.
+ * Self-contained: works on the storefront (any theme) and in wp-admin.
+ */
+
+:root {
+  --atoe-ink: #1b2a20;
+  --atoe-ink-soft: #43544a;
+  --atoe-green: #1d5b33;
+  --atoe-green-dark: #12351f;
+  --atoe-accent: #e8590c;
+  --atoe-paper: #fbf9f4;
+  --atoe-border: #e4decf;
+  --atoe-radius: 12px;
+  --atoe-shadow: 0 6px 16px rgba(27, 42, 32, 0.08), 0 24px 56px rgba(27, 42, 32, 0.14);
+}
+
+/* ---------- Product page button ---------- */
+.ato-customize-wrap { margin: 0 0 1.25rem; }
+.ato-customize-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  min-height: 52px;
+  padding: 0.8rem 1.75rem;
+  border: none;
+  border-radius: 999px;
+  background: var(--atoe-accent);
+  color: #fff;
+  font-size: 1.05rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: background-color 200ms ease, transform 200ms ease;
+}
+.ato-customize-btn:hover { background: #c94a08; transform: translateY(-1px); }
+.ato-customize-hint { margin: 0.5rem 0 0; font-size: 0.85rem; color: var(--atoe-ink-soft); }
+.ato-design-summary {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin-top: 0.75rem;
+  padding: 0.75rem;
+  border: 1px dashed var(--atoe-accent);
+  border-radius: var(--atoe-radius);
+  background: #fff7f1;
+}
+.ato-design-summary img { width: 64px; height: 64px; object-fit: contain; background: #fff; border-radius: 8px; }
+.ato-design-summary strong { display: block; color: var(--atoe-green-dark); }
+.ato-design-summary span { font-size: 0.8rem; color: var(--atoe-ink-soft); }
+
+/* ---------- Overlay ---------- */
+.ato-editor-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 999999;
+  background: var(--atoe-paper);
+  display: flex;
+  flex-direction: column;
+  font-family: "DM Sans", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  color: var(--atoe-ink);
+}
+.ato-editor-overlay[hidden] { display: none; }
+
+/* ---------- Top bar ---------- */
+.ato-ed-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 0.75rem 1.25rem;
+  background: #fff;
+  border-bottom: 1px solid var(--atoe-border);
+  flex: none;
+}
+.ato-ed-title { display: flex; align-items: center; gap: 0.6rem; min-width: 0; color: var(--atoe-green); }
+.ato-ed-title strong { color: var(--atoe-ink); font-size: 1.05rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.ato-ed-config-summary { font-size: 0.8rem; color: var(--atoe-ink-soft); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.ato-ed-top-actions { display: flex; align-items: center; gap: 0.5rem; flex: none; }
+.ato-ed-sep { width: 1px; height: 24px; background: var(--atoe-border); margin: 0 0.25rem; }
+
+.ato-ed-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.4rem;
+  min-height: 42px;
+  padding: 0.5rem 1.4rem;
+  border-radius: 999px;
+  border: 2px solid transparent;
+  font-family: inherit;
+  font-size: 0.95rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: background-color 180ms ease, border-color 180ms ease, color 180ms ease;
+}
+.ato-ed-btn--primary { background: var(--atoe-green); color: #fff; }
+.ato-ed-btn--primary:hover { background: var(--atoe-green-dark); }
+.ato-ed-btn--primary:disabled { opacity: 0.5; cursor: default; }
+.ato-ed-btn--ghost { background: transparent; color: var(--atoe-ink); border-color: var(--atoe-border); }
+.ato-ed-btn--ghost:hover { border-color: var(--atoe-ink); }
+
+.ato-ed-icon-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 42px; height: 42px;
+  border-radius: 10px;
+  border: 1px solid var(--atoe-border);
+  background: #fff;
+  color: var(--atoe-ink);
+  cursor: pointer;
+  transition: border-color 180ms ease, background-color 180ms ease;
+}
+.ato-ed-icon-btn:hover { border-color: var(--atoe-ink); }
+.ato-ed-icon-btn:disabled { opacity: 0.4; cursor: default; }
+
+/* ---------- Wizard ---------- */
+.ato-ed-wizard {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1.5rem;
+  overflow: auto;
+}
+.ato-ed-wizard[hidden] { display: none; }
+.ato-ed-wizard-card {
+  width: 100%;
+  max-width: 720px;
+  background: #fff;
+  border-radius: 20px;
+  box-shadow: var(--atoe-shadow);
+  padding: 2rem;
+}
+.ato-ed-wizard-steps {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+  list-style: none;
+  margin: 0 0 1.5rem;
+  padding: 0;
+}
+.ato-ed-wizard-steps li {
+  font-size: 0.78rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--atoe-ink-soft);
+  padding: 0.35rem 0.9rem;
+  border-radius: 999px;
+  background: var(--atoe-paper);
+  border: 1px solid var(--atoe-border);
+}
+.ato-ed-wizard-steps li.is-active { background: var(--atoe-green); border-color: var(--atoe-green); color: #fff; }
+.ato-ed-wizard-steps li.is-done { background: #e2efe4; border-color: #e2efe4; color: var(--atoe-green-dark); }
+.ato-ed-wizard-body h3 { margin: 0 0 1rem; font-size: 1.35rem; color: var(--atoe-ink); }
+.ato-ed-option-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+  gap: 0.75rem;
+}
+.ato-ed-option {
+  border: 2px solid var(--atoe-border);
+  border-radius: var(--atoe-radius);
+  background: #fff;
+  padding: 0.9rem;
+  text-align: center;
+  cursor: pointer;
+  font-family: inherit;
+  font-size: 0.95rem;
+  font-weight: 500;
+  color: var(--atoe-ink);
+  transition: border-color 160ms ease, box-shadow 160ms ease;
+}
+.ato-ed-option:hover { border-color: var(--atoe-green); }
+.ato-ed-option.is-selected {
+  border-color: var(--atoe-green);
+  box-shadow: 0 0 0 3px rgba(29, 91, 51, 0.15);
+  font-weight: 700;
+}
+.ato-ed-option img {
+  width: 100%;
+  aspect-ratio: 1;
+  object-fit: contain;
+  border-radius: 8px;
+  background: var(--atoe-paper);
+  margin-bottom: 0.5rem;
+  display: block;
+}
+.ato-ed-option .ato-ed-option-price { display: block; font-size: 0.8rem; color: var(--atoe-accent); font-weight: 700; margin-top: 0.2rem; }
+.ato-ed-wizard-nav {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 1.75rem;
+}
+
+/* ---------- Workspace ---------- */
+.ato-ed-main {
+  flex: 1;
+  display: grid;
+  grid-template-columns: 96px minmax(0, 1fr) 280px;
+  min-height: 0;
+}
+.ato-ed-main[hidden] { display: none; }
+
+.ato-ed-tools {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 0.5rem;
+  padding: 1rem 0.6rem;
+  background: #fff;
+  border-right: 1px solid var(--atoe-border);
+  overflow-y: auto;
+}
+.ato-ed-tool {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.3rem;
+  padding: 0.7rem 0.25rem;
+  border: 1px solid transparent;
+  border-radius: 10px;
+  background: transparent;
+  color: var(--atoe-ink);
+  font-family: inherit;
+  font-size: 0.72rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: background-color 160ms ease, border-color 160ms ease;
+}
+.ato-ed-tool:hover { background: var(--atoe-paper); border-color: var(--atoe-border); }
+.ato-ed-tool svg { color: var(--atoe-green); }
+
+.ato-ed-canvas-col {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 1.25rem;
+  min-width: 0;
+  overflow: auto;
+}
+.ato-ed-canvas-wrap {
+  background:
+    linear-gradient(45deg, #eee 25%, transparent 25%, transparent 75%, #eee 75%),
+    linear-gradient(45deg, #eee 25%, #fff 25%, #fff 75%, #eee 75%);
+  background-size: 20px 20px;
+  background-position: 0 0, 10px 10px;
+  border-radius: var(--atoe-radius);
+  box-shadow: var(--atoe-shadow);
+  padding: 12px;
+  max-width: 100%;
+}
+.ato-ed-canvas-hint { margin: 0.75rem 0 0; font-size: 0.8rem; color: var(--atoe-ink-soft); }
+
+.ato-ed-side {
+  background: #fff;
+  border-left: 1px solid var(--atoe-border);
+  padding: 1rem;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+.ato-ed-panel h4 {
+  margin: 0 0 0.6rem;
+  font-size: 0.78rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--atoe-ink-soft);
+}
+.ato-ed-field { display: flex; flex-direction: column; gap: 0.25rem; margin-bottom: 0.6rem; }
+.ato-ed-field label { font-size: 0.8rem; font-weight: 700; color: var(--atoe-ink-soft); }
+.ato-ed-field select,
+.ato-ed-field input[type="number"] {
+  width: 100%;
+  min-height: 40px;
+  padding: 0.4rem 0.6rem;
+  border: 1px solid var(--atoe-border);
+  border-radius: 8px;
+  font-family: inherit;
+  font-size: 0.9rem;
+  background: #fff;
+  color: var(--atoe-ink);
+}
+.ato-ed-field input[type="color"] {
+  width: 100%;
+  height: 40px;
+  padding: 2px;
+  border: 1px solid var(--atoe-border);
+  border-radius: 8px;
+  background: #fff;
+  cursor: pointer;
+}
+.ato-ed-field-row { display: grid; grid-template-columns: 1fr 1fr; gap: 0.5rem; }
+.ato-ed-btn-row { display: flex; flex-wrap: wrap; gap: 0.4rem; }
+.ato-ed-mini-btn {
+  min-width: 40px;
+  min-height: 36px;
+  padding: 0.3rem 0.7rem;
+  border: 1px solid var(--atoe-border);
+  border-radius: 8px;
+  background: #fff;
+  color: var(--atoe-ink);
+  font-family: inherit;
+  font-size: 0.82rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: border-color 160ms ease, background-color 160ms ease;
+}
+.ato-ed-mini-btn:hover { border-color: var(--atoe-ink); }
+.ato-ed-mini-btn.is-active { background: var(--atoe-green); border-color: var(--atoe-green); color: #fff; }
+.ato-ed-mini-btn--danger { color: #c22f2f; border-color: #ecc8c8; }
+.ato-ed-mini-btn--danger:hover { background: #fdf1f1; border-color: #c22f2f; }
+
+.ato-ed-clipart-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 0.4rem;
+}
+.ato-ed-clipart-grid button {
+  aspect-ratio: 1;
+  border: 1px solid var(--atoe-border);
+  border-radius: 8px;
+  background: #fff;
+  cursor: pointer;
+  padding: 6px;
+  transition: border-color 160ms ease;
+}
+.ato-ed-clipart-grid button:hover { border-color: var(--atoe-green); }
+.ato-ed-clipart-grid img { width: 100%; height: 100%; object-fit: contain; display: block; }
+
+.ato-ed-layer-list { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 0.3rem; }
+.ato-ed-layer-list li {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.45rem 0.6rem;
+  border: 1px solid var(--atoe-border);
+  border-radius: 8px;
+  font-size: 0.85rem;
+  cursor: pointer;
+  background: #fff;
+  transition: border-color 160ms ease, background-color 160ms ease;
+}
+.ato-ed-layer-list li:hover { border-color: var(--atoe-green); }
+.ato-ed-layer-list li.is-active { border-color: var(--atoe-green); background: #e2efe4; font-weight: 700; }
+.ato-ed-layer-list li .ato-layer-type {
+  font-size: 0.68rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--atoe-green);
+  background: var(--atoe-paper);
+  border-radius: 4px;
+  padding: 1px 6px;
+  flex: none;
+}
+.ato-ed-layer-list li span.ato-layer-name { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+/* ---------- Toast ---------- */
+.ato-ed-toast {
+  position: fixed;
+  bottom: 24px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: var(--atoe-ink);
+  color: #fff;
+  padding: 0.75rem 1.5rem;
+  border-radius: 999px;
+  font-size: 0.9rem;
+  font-weight: 500;
+  box-shadow: var(--atoe-shadow);
+  z-index: 1000000;
+}
+.ato-ed-toast[hidden] { display: none; }
+.ato-ed-toast.is-error { background: #c22f2f; }
+
+/* ---------- Responsive ---------- */
+@media (max-width: 960px) {
+  .ato-ed-main { grid-template-columns: 72px minmax(0, 1fr); grid-template-rows: minmax(0, 1fr) auto; }
+  .ato-ed-side {
+    grid-column: 1 / -1;
+    border-left: none;
+    border-top: 1px solid var(--atoe-border);
+    flex-direction: row;
+    flex-wrap: wrap;
+    max-height: 220px;
+  }
+  .ato-ed-panel { min-width: 200px; flex: 1; }
+  .ato-ed-tool span { font-size: 0.62rem; }
+  .ato-ed-config-summary { display: none; }
+}
+@media (max-width: 560px) {
+  .ato-ed-top { flex-wrap: wrap; }
+  .ato-ed-wizard-card { padding: 1.25rem; }
+  .ato-ed-btn { padding: 0.5rem 1rem; font-size: 0.85rem; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ato-editor-overlay *, .ato-customize-btn { transition: none !important; }
+}

@@ -1,0 +1,191 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>All Take Out — label editor preview (static)</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;700&family=Fraunces:opsz,wght@9..144,600&family=Oswald:wght@500&family=Playfair+Display:wght@600&family=Pacifico&family=Bebas+Neue&family=Caveat:wght@600&family=Montserrat:wght@500;700&family=Lobster&family=Abril+Fatface&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../wp-content/plugins/ato-customizer/assets/css/editor.css">
+<style>
+	body { font-family: "DM Sans", sans-serif; background: #FBF9F4; margin: 0; padding: 3rem 1.5rem; color: #1b2a20; }
+	.demo-card { max-width: 560px; margin: 0 auto; background: #fff; border-radius: 20px; padding: 2rem; box-shadow: 0 6px 16px rgba(27,42,32,.08), 0 24px 56px rgba(27,42,32,.14); }
+	.demo-card h1 { font-family: "Fraunces", serif; margin-top: 0; }
+</style>
+</head>
+<body>
+
+<div class="demo-card">
+	<h1>Round Social Label — 3" Sticker</h1>
+	<p>This is a static preview of the product-page customizer. In WordPress this button renders inside the WooCommerce add-to-cart form. Saving is mocked here (no server).</p>
+
+	<div class="ato-customize-wrap">
+		<button type="button" class="ato-customize-btn" id="ato-open-editor">
+			<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 20h9M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg>
+			Customize this label
+		</button>
+		<p class="ato-customize-hint">Design it live — add your logo, text and QR codes before you order.</p>
+		<input type="hidden" name="ato_design_id" id="ato_design_id" value="">
+		<input type="hidden" name="ato_config" id="ato_config" value="">
+		<div class="ato-design-summary" id="ato-design-summary" hidden>
+			<img src="" alt="Your design preview" id="ato-design-thumb">
+			<div><strong id="ato-design-ref"></strong> <span id="ato-design-config"></span></div>
+		</div>
+	</div>
+</div>
+
+<!-- ================= Editor overlay (mirror of templates/editor.php) ================= -->
+<div class="ato-editor-overlay" id="ato-editor" hidden aria-modal="true" role="dialog" aria-label="Label design editor">
+
+	<div class="ato-ed-top">
+		<div class="ato-ed-title">
+			<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 3h6a6 6 0 0 1 6 6v6a6 6 0 0 1-6 6H9a6 6 0 0 1-6-6V9a6 6 0 0 1 6-6Z"/><path d="M15 3v4a2 2 0 0 0 2 2h4"/></svg>
+			<strong id="ato-ed-product-name">Label editor</strong>
+			<span class="ato-ed-config-summary" id="ato-ed-config-summary"></span>
+		</div>
+		<div class="ato-ed-top-actions">
+			<button type="button" class="ato-ed-icon-btn" id="ato-ed-undo" title="Undo" aria-label="Undo"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 14 4 9l5-5"/><path d="M4 9h10a6 6 0 0 1 0 12h-3"/></svg></button>
+			<button type="button" class="ato-ed-icon-btn" id="ato-ed-redo" title="Redo" aria-label="Redo"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m15 14 5-5-5-5"/><path d="M20 9H10a6 6 0 0 0 0 12h3"/></svg></button>
+			<span class="ato-ed-sep"></span>
+			<button type="button" class="ato-ed-btn ato-ed-btn--ghost" id="ato-ed-close">Cancel</button>
+			<button type="button" class="ato-ed-btn ato-ed-btn--primary" id="ato-ed-save">Save design</button>
+		</div>
+	</div>
+
+	<div class="ato-ed-wizard" id="ato-ed-wizard" hidden>
+		<div class="ato-ed-wizard-card">
+			<ol class="ato-ed-wizard-steps" id="ato-ed-wizard-steps"></ol>
+			<div class="ato-ed-wizard-body" id="ato-ed-wizard-body"></div>
+			<div class="ato-ed-wizard-nav">
+				<button type="button" class="ato-ed-btn ato-ed-btn--ghost" id="ato-ed-wizard-back">Back</button>
+				<button type="button" class="ato-ed-btn ato-ed-btn--primary" id="ato-ed-wizard-next">Next</button>
+			</div>
+		</div>
+	</div>
+
+	<div class="ato-ed-main" id="ato-ed-main" hidden>
+
+		<div class="ato-ed-tools" role="toolbar" aria-label="Design tools">
+			<button type="button" class="ato-ed-tool" id="ato-tool-text">
+				<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 7V4h16v3M12 4v16m-3 0h6"/></svg>
+				<span>Text</span>
+			</button>
+			<label class="ato-ed-tool" for="ato-tool-upload-input">
+				<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 16V4m0 0L7 9m5-5 5 5"/><path d="M4 16v3a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-3"/></svg>
+				<span>Image</span>
+				<input type="file" id="ato-tool-upload-input" accept="image/png,image/jpeg,image/svg+xml,image/webp" hidden>
+			</label>
+			<button type="button" class="ato-ed-tool" id="ato-tool-clipart">
+				<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m12 2 3.1 6.3 6.9 1-5 4.9 1.2 6.8L12 17.8 5.8 21l1.2-6.8-5-4.9 6.9-1L12 2Z"/></svg>
+				<span>Clipart</span>
+			</button>
+			<button type="button" class="ato-ed-tool" id="ato-tool-qr">
+				<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><path d="M14 14h3v3h-3zM21 14v.01M14 21v.01M21 21v.01M17.5 17.5H21M17.5 17.5V21"/></svg>
+				<span>QR code</span>
+			</button>
+			<label class="ato-ed-tool" for="ato-tool-bg-input">
+				<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 22a10 10 0 1 1 10-10c0 2.2-1.8 3-3.5 3H16a2 2 0 0 0-1.5 3.3c.6.7.2 1.7-.7 1.7H12Z"/><circle cx="7.5" cy="11.5" r="1"/><circle cx="11" cy="7.5" r="1"/><circle cx="16" cy="9" r="1"/></svg>
+				<span>Colour</span>
+				<input type="color" id="ato-tool-bg-input" value="#ffffff" hidden>
+			</label>
+		</div>
+
+		<div class="ato-ed-canvas-col">
+			<div class="ato-ed-canvas-wrap" id="ato-ed-canvas-wrap">
+				<canvas id="ato-canvas"></canvas>
+			</div>
+			<p class="ato-ed-canvas-hint">The dashed line is the cut line — keep important content inside it.</p>
+		</div>
+
+		<div class="ato-ed-side">
+			<div class="ato-ed-panel" id="ato-ed-props" hidden>
+				<h4>Selected element</h4>
+				<div class="ato-ed-field" id="ato-prop-font-row">
+					<label for="ato-prop-font">Font</label>
+					<select id="ato-prop-font"></select>
+				</div>
+				<div class="ato-ed-field-row">
+					<div class="ato-ed-field" id="ato-prop-size-row">
+						<label for="ato-prop-size">Size</label>
+						<input type="number" id="ato-prop-size" min="8" max="200" step="1">
+					</div>
+					<div class="ato-ed-field" id="ato-prop-color-row">
+						<label for="ato-prop-color">Colour</label>
+						<input type="color" id="ato-prop-color">
+					</div>
+				</div>
+				<div class="ato-ed-btn-row">
+					<button type="button" class="ato-ed-mini-btn" id="ato-prop-bold"><strong>B</strong></button>
+					<button type="button" class="ato-ed-mini-btn" id="ato-prop-center" title="Center on label">Center</button>
+					<button type="button" class="ato-ed-mini-btn" id="ato-layer-up" title="Bring forward">&#9650;</button>
+					<button type="button" class="ato-ed-mini-btn" id="ato-layer-down" title="Send backward">&#9660;</button>
+					<button type="button" class="ato-ed-mini-btn ato-ed-mini-btn--danger" id="ato-prop-delete">Delete</button>
+				</div>
+			</div>
+
+			<div class="ato-ed-panel" id="ato-ed-clipart-panel" hidden>
+				<h4>Clipart</h4>
+				<div class="ato-ed-clipart-grid" id="ato-ed-clipart-grid"></div>
+			</div>
+
+			<div class="ato-ed-panel">
+				<h4>Layers</h4>
+				<ul class="ato-ed-layer-list" id="ato-ed-layer-list"></ul>
+			</div>
+		</div>
+
+	</div>
+
+	<div class="ato-ed-toast" id="ato-ed-toast" role="status" aria-live="polite" hidden></div>
+	<div id="ato-qr-holder" style="position:absolute;left:-9999px;top:-9999px;" aria-hidden="true"></div>
+</div>
+
+<script>
+// Mock of the data WordPress injects via wp_localize_script, plus a fetch stub
+// so "Save design" works without a server in this static preview.
+window.atoEditorData = {
+	ajaxUrl: '/mock-ajax',
+	nonce: 'preview',
+	mode: 'customer',
+	productId: 1,
+	productName: 'Round Social Label — 3" Sticker',
+	clipartUrl: '../wp-content/plugins/ato-customizer/assets/clipart/',
+	clipart: [
+		{ file: 'burger.svg', label: 'Burger' },
+		{ file: 'pizza.svg', label: 'Pizza slice' },
+		{ file: 'coffee.svg', label: 'Coffee cup' },
+		{ file: 'star.svg', label: 'Star' },
+		{ file: 'heart.svg', label: 'Heart' },
+		{ file: 'leaf.svg', label: 'Leaf' },
+		{ file: 'chef-hat.svg', label: 'Chef hat' },
+		{ file: 'sparkle.svg', label: 'Sparkle' }
+	],
+	fonts: ['DM Sans', 'Fraunces', 'Montserrat', 'Oswald', 'Playfair Display', 'Bebas Neue', 'Pacifico', 'Caveat', 'Lobster', 'Abril Fatface'],
+	config: {
+		templates: [ { name: 'Blank canvas', image: '' }, { name: 'Kraft circle', image: '' } ],
+		materials: ['Glossy paper', 'Matte paper', 'Waterproof vinyl'],
+		sizes: ['2" x 2"', '3" x 3"', '4" x 4"'],
+		shapes: [ { shape: 'circle', label: 'Round' }, { shape: 'square', label: 'Square' }, { shape: 'rectangle', label: 'Rectangle' } ],
+		quantities: [ { qty: 100, price: 19 }, { qty: 250, price: 39 }, { qty: 500, price: 69 }, { qty: 1000, price: 119 } ]
+	},
+	i18n: {}
+};
+
+var _realFetch = window.fetch.bind(window);
+window.fetch = function (url, opts) {
+	if (typeof url === 'string' && url.indexOf('/mock-ajax') === 0) {
+		return new Promise(function (resolve) {
+			setTimeout(function () {
+				var preview = '';
+				try { preview = opts && opts.body ? opts.body.get('preview') : ''; } catch (e) {}
+				resolve({ json: function () { return Promise.resolve({ success: true, data: { design_id: 123, ref: 'ATO-PREVIEW', preview: preview } }); } });
+			}, 300);
+		});
+	}
+	return _realFetch(url, opts);
+};
+</script>
+<script src="../wp-content/plugins/ato-customizer/assets/vendor/fabric.min.js"></script>
+<script src="../wp-content/plugins/ato-customizer/assets/vendor/qrcode.min.js"></script>
+<script src="../wp-content/plugins/ato-customizer/assets/js/editor.js"></script>
+</body>
+</html>
