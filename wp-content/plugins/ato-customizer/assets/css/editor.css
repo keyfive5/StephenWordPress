@@ -34,6 +34,7 @@
 }
 .ato-customize-btn:hover { background: #c94a08; transform: translateY(-1px); }
 .ato-customize-hint { margin: 0.5rem 0 0; font-size: 0.85rem; color: var(--atoe-ink-soft); }
+.ato-design-summary[hidden] { display: none; }
 .ato-design-summary {
   display: flex;
   align-items: center;
