@@ -1,0 +1,135 @@
+// pages/api/stripe/checkout.js
+
+import { connectDB } from "../../lib/mongodb.js";
+import Order from "../../module/Order.js";
+import Stripe from "stripe";
+
+const stripe = new Stripe('STRIPE_KEY_REDACTED_SEE_ENV');
+
+export default async function handler(req, res) {
+  res.setHeader("Access-Control-Allow-Origin", "*");
+  res.setHeader(
+    "Access-Control-Allow-Methods",
+    "POST, OPTIONS"
+  );
+  res.setHeader(
+    "Access-Control-Allow-Headers",
+    "Content-Type, Authorization"
+  );
+
+  if (req.method === "OPTIONS") {
+    return res.status(200).end();
+  }
+
+  if (req.method !== "POST") {
+    return res.status(405).json({
+      success: false,
+      message: "Method not allowed",
+    });
+  }
+
+  try {
+    await connectDB();
+
+    const {
+      id,
+      customer,
+      shipping,
+      payment,
+      order,
+    } = req.body;
+
+    if (!id) {
+      return res.status(400).json({
+        success: false,
+        message: "User id is required",
+      });
+    }
+
+    if (!customer?.email || !order?.total) {
+      return res.status(400).json({
+        success: false,
+        message: "Missing required fields",
+      });
+    }
+
+    const paymentToken = String(payment?.paymentToken || "").trim();
+
+    if (!paymentToken || !payment?.cardName) {
+      return res.status(400).json({
+        success: false,
+        message: "Invalid payment details. Provide a Stripe test token and cardholder name.",
+      });
+    }
+
+    const paymentIntent = await stripe.paymentIntents.create({
+      amount: Math.round(order.total * 100),
+      currency: "usd",
+      receipt_email: customer.email,
+      payment_method_types: ["card"],
+
+      payment_method_data: {
+        type: "card",
+        card: {
+          token: paymentToken,
+        },
+
+        billing_details: {
+          name: payment.cardName,
+          email: customer.email,
+          phone: customer.phone,
+          address: {
+            line1: shipping.address,
+            city: shipping.city,
+            state: shipping.state,
+            postal_code: shipping.zipCode,
+          },
+        },
+      },
+
+      confirm: true,
+
+      metadata: {
+        userId: id,
+        productId: order.productId,
+        productName: order.name,
+      },
+    });
+
+    const newOrder = await Order.create({
+      userId: id,
+
+      customer,
+      shipping,
+
+      payment: {
+        method: "stripe",
+        paymentIntentId: paymentIntent.id,
+        status: paymentIntent.status,
+      },
+
+      order,
+
+      status:
+        paymentIntent.status === "succeeded"
+          ? "paid"
+          : "pending",
+    });
+
+    return res.status(200).json({
+      success: true,
+      message: "Payment successful",
+      paymentId: paymentIntent.id,
+      orderId: newOrder._id,
+      status: paymentIntent.status,
+    });
+  } catch (error) {
+    return res.status(500).json({
+      success: false,
+      message:
+        error?.raw?.message ||
+        error.message ||
+        "Payment failed",
+    });
+  }
+}

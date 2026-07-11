@@ -1,5 +1,7 @@
 # Developer Handoff Checklist — call with Joseph (Exceed North)
 
+> **Status July 11, 2026** — received `all-take-out-software.rar` (full source of all three apps: backend microservices, user frontend, admin frontend — archived in `legacy/`, audited in [LEGACY-AUDIT.md](LEGACY-AUDIT.md)). **Still outstanding:** ~~source code~~ → ✅; MongoDB data export (URI is in the RAR's `.env` files — export with Compass before the cluster disappears); Stripe (only a hardcoded *test* key existed — nothing real to hand over, Stephen connects his own account); real brand assets (the archive contains only placeholder logos/stock photos — ask **Stephen**, the developer never had them); domain ownership; Hostinger/WP admin access for the aqua-viper content site.
+
 What to ask for on the call, in priority order. Get everything in writing (email/Drive links), not promises. The goal: **nothing about the old build should be only in his head or only on his machines.**
 
 ## 1. Access & ownership (the non-negotiables)
