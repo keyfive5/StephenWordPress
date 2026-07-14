@@ -1,0 +1,54 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>All Take Out — One Question poll preview (static)</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../wp-content/plugins/ato-customizer/assets/css/poll.css">
+<style>body { font-family: "DM Sans", sans-serif; background: #FBF9F4; margin: 0; padding: 3rem 1.5rem; }</style>
+</head>
+<body>
+
+<!-- Mirror of the [ato_poll] shortcode output -->
+<div class="ato-poll" data-poll="demo1234abcd" data-voted="0">
+	<h3 class="ato-poll-question">Would custom-branded labels make you order takeout from a restaurant again?</h3>
+	<div class="ato-poll-options">
+		<button type="button" class="ato-poll-option" data-choice="0">Yes, absolutely</button>
+		<button type="button" class="ato-poll-option" data-choice="1">Maybe</button>
+		<button type="button" class="ato-poll-option" data-choice="2">No difference to me</button>
+	</div>
+	<div class="ato-poll-results" hidden aria-live="polite">
+		<div class="ato-poll-row" data-choice="0">
+			<div class="ato-poll-row-head"><span class="ato-poll-label">Yes, absolutely</span><span class="ato-poll-pct" data-pct="0">0%</span></div>
+			<div class="ato-poll-bar"><i style="width:0%"></i></div>
+		</div>
+		<div class="ato-poll-row" data-choice="1">
+			<div class="ato-poll-row-head"><span class="ato-poll-label">Maybe</span><span class="ato-poll-pct" data-pct="0">0%</span></div>
+			<div class="ato-poll-bar"><i style="width:0%"></i></div>
+		</div>
+		<div class="ato-poll-row" data-choice="2">
+			<div class="ato-poll-row-head"><span class="ato-poll-label">No difference to me</span><span class="ato-poll-pct" data-pct="0">0%</span></div>
+			<div class="ato-poll-bar"><i style="width:0%"></i></div>
+		</div>
+		<p class="ato-poll-total">0 votes so far</p>
+	</div>
+</div>
+
+<script>
+// Mock WordPress AJAX for the static preview.
+window.atoPollData = { ajaxUrl: '/mock-ajax', nonce: 'preview' };
+var _realFetch = window.fetch.bind(window);
+window.fetch = function (url, opts) {
+	if (typeof url === 'string' && url.indexOf('/mock-ajax') === 0) {
+		var choice = 0;
+		try { choice = parseInt(opts.body.get('choice'), 10); } catch (e) {}
+		var pcts = { 0: 62, 1: 27, 2: 11 };
+		return Promise.resolve({ json: function () { return Promise.resolve({ success: true, data: { percentages: pcts, total: 137 } }); } });
+	}
+	return _realFetch(url, opts);
+};
+</script>
+<script src="../wp-content/plugins/ato-customizer/assets/js/poll.js"></script>
+</body>
+</html>

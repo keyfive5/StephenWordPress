@@ -16,6 +16,8 @@
 			if (progress < 1) window.requestAnimationFrame(step);
 		}
 		window.requestAnimationFrame(step);
+		// rAF is throttled in background tabs — guarantee the final value.
+		setTimeout(function () { el.textContent = target + '%'; }, duration + 150);
 	}
 
 	function showResults(poll, percentages, total, chosen) {
@@ -32,13 +34,12 @@
 			var bar = row.querySelector('.ato-poll-bar i');
 			var pctEl = row.querySelector('.ato-poll-pct');
 			pctEl.textContent = '0%';
-			// Next frame so the width transition runs.
-			window.requestAnimationFrame(function () {
-				window.requestAnimationFrame(function () {
-					bar.style.width = pct + '%';
-					animateCount(pctEl, pct);
-				});
-			});
+			// Delay one tick so the CSS width transition runs
+			// (setTimeout, not rAF — it must fire in background tabs too).
+			setTimeout(function () {
+				bar.style.width = pct + '%';
+				animateCount(pctEl, pct);
+			}, 30);
 		});
 
 		if (typeof total === 'number') {
