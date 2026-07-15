@@ -64,6 +64,7 @@ document.getElementById('vip-cards').innerHTML = [
 ].map(function (c) {
 	return '<div class="cat-card reveal"><span class="cat-icon">' + window.ATO_DATA.icon(c[0], 28) + '</span><h3>' + c[1] + '</h3><p>' + c[2] + '</p></div>';
 }).join('');
+if (window.atoRevealScan) window.atoRevealScan();
 </script>
 </body>
 </html>

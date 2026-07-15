@@ -182,6 +182,81 @@
 	}
 
 	// ------------------------------------------------------------------
+	// One Question poll (client spec): one vote per device, percentages
+	// always total exactly 100 (largest-remainder rounding), and when the
+	// question changes the old results are archived for the admin area.
+	// ------------------------------------------------------------------
+	function pollDef() { return D.poll || { id: 'q1', question: '', options: [], seed: [] }; }
+
+	function pollMigrate() {
+		var def = pollDef();
+		var state = read('ato_poll_state', null);
+		if (state && state.id !== def.id) {
+			var archives = read('ato_poll_archive', []);
+			archives.push({
+				id: state.id,
+				question: state.question,
+				options: state.options,
+				counts: state.counts,
+				total: state.counts.reduce(function (a, b) { return a + b; }, 0),
+				archivedAt: now()
+			});
+			write('ato_poll_archive', archives);
+			state = null;
+		}
+		if (!state) {
+			state = {
+				id: def.id,
+				question: def.question,
+				options: def.options.slice(),
+				counts: (def.seed && def.seed.length === def.options.length) ? def.seed.slice() : def.options.map(function () { return 0; }),
+				voted: false,
+				choice: -1
+			};
+			write('ato_poll_state', state);
+		}
+		return state;
+	}
+
+	function pollState() {
+		var s = pollMigrate();
+		return {
+			id: s.id,
+			question: s.question,
+			options: s.options,
+			counts: s.counts,
+			total: s.counts.reduce(function (a, b) { return a + b; }, 0),
+			voted: !!s.voted,
+			choice: typeof s.choice === 'number' ? s.choice : -1
+		};
+	}
+
+	function pollVote(choice) {
+		var s = pollMigrate();
+		if (s.voted || choice < 0 || choice >= s.counts.length) return pollState();
+		s.counts[choice] += 1;
+		s.voted = true;
+		s.choice = choice;
+		write('ato_poll_state', s);
+		return pollState();
+	}
+
+	function pollArchives() { return read('ato_poll_archive', []); }
+
+	/** Whole-number percentages that always sum to exactly 100. */
+	function pollPercentages(counts) {
+		var total = counts.reduce(function (a, b) { return a + b; }, 0);
+		if (!total) return counts.map(function () { return 0; });
+		var exact = counts.map(function (c) { return c * 100 / total; });
+		var floors = exact.map(Math.floor);
+		var used = floors.reduce(function (a, b) { return a + b; }, 0);
+		var order = exact.map(function (v, i) { return { i: i, rem: v - floors[i] }; })
+			.sort(function (a, b) { return b.rem - a.rem; });
+		for (var k = 0; k < 100 - used; k++) floors[order[k % order.length].i] += 1;
+		return floors;
+	}
+
+	// ------------------------------------------------------------------
 	// Header / footer
 	// ------------------------------------------------------------------
 	var NAV = [
@@ -294,6 +369,10 @@
 		logout: logout,
 		listOrders: listOrders,
 		placeOrder: placeOrder,
-		updateBadge: updateBadge
+		updateBadge: updateBadge,
+		pollState: pollState,
+		pollVote: pollVote,
+		pollArchives: pollArchives,
+		pollPercentages: pollPercentages
 	};
 })();

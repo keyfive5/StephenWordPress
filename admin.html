@@ -27,9 +27,11 @@
 		<div class="admin-tabs">
 			<button class="admin-tab is-active" data-tab="designs">Customer designs</button>
 			<button class="admin-tab" data-tab="orders">Orders &amp; production</button>
+			<button class="admin-tab" data-tab="poll">One Question results</button>
 		</div>
 		<div id="tab-designs"></div>
 		<div id="tab-orders" hidden></div>
+		<div id="tab-poll" hidden></div>
 	</div>
 </main>
 
@@ -173,7 +175,8 @@
 				'<td><strong>' + d.ref + '</strong><span class="cart-config">' + d.created + '</span></td>' +
 				'<td>' + A.esc((D.productBySlug(d.product) || {}).name || d.product) + '<span class="cart-config">' + A.esc(conf) + '</span>' +
 				'<ul class="log-list">' + log + '</ul></td>' +
-				'<td><a class="btn btn--primary btn--sm" href="admin.html?design=' + n + '">Review / edit</a></td>' +
+				'<td><a class="btn btn--primary btn--sm" href="admin.html?design=' + n + '">Review / edit</a><br>' +
+				'<button class="btn btn--ghost btn--sm" data-psd="' + d.id + '" style="margin-top:6px;">PSD for Illustrator</button></td>' +
 				'</tr>';
 		}).join('');
 		return '<table class="ato-table"><thead><tr><th>Preview</th><th>Reference</th><th>Product / configuration / edit history</th><th></th></tr></thead><tbody>' + rows + '</tbody></table>';
@@ -228,8 +231,29 @@
 			'<button class="btn btn--primary" id="prod-close">Close</button>';
 	}
 
+	// --- One Question results (current + archived, per client spec) ---
+	function pollPanel() {
+		var s = A.pollState();
+		var pcts = A.pollPercentages(s.counts);
+		var rows = s.options.map(function (opt, i) {
+			return '<tr><td>' + A.esc(opt) + '</td><td>' + s.counts[i] + '</td><td><strong>' + pcts[i] + '%</strong></td></tr>';
+		}).join('');
+		var archives = A.pollArchives();
+		var archiveHtml = archives.length ? archives.slice().reverse().map(function (ar) {
+			var apcts = A.pollPercentages(ar.counts);
+			return '<div class="notice" style="margin-top: var(--sp-4);"><strong>' + A.esc(ar.question) + '</strong> <span class="cart-config">archived ' + A.esc(ar.archivedAt) + ' — based on ' + ar.total + ' responses</span>' +
+				'<ul class="log-list">' + ar.options.map(function (opt, i) { return '<li>' + A.esc(opt) + ' — ' + ar.counts[i] + ' (' + apcts[i] + '%)</li>'; }).join('') + '</ul></div>';
+		}).join('') : '<p class="cart-config">No archived questions yet. When a new One Question replaces this one, these results are preserved here automatically.</p>';
+		return '<h3 style="margin-top:0;">Current question</h3>' +
+			'<p class="lede" style="font-size: var(--text-base);">' + A.esc(s.question) + '</p>' +
+			'<table class="ato-table" style="max-width:640px;"><thead><tr><th>Answer</th><th>Responses</th><th>Share</th></tr></thead><tbody>' + rows + '</tbody></table>' +
+			'<p style="margin-top: var(--sp-3);"><strong>Based on ' + s.total + ' responses.</strong></p>' +
+			'<h3 style="margin-top: var(--sp-6);">Archived questions</h3>' + archiveHtml;
+	}
+
 	document.getElementById('tab-designs').innerHTML = designsTable();
 	document.getElementById('tab-orders').innerHTML = ordersTable();
+	document.getElementById('tab-poll').innerHTML = pollPanel();
 
 	document.querySelectorAll('.admin-tab').forEach(function (tab) {
 		tab.addEventListener('click', function () {
@@ -237,6 +261,7 @@
 			tab.classList.add('is-active');
 			document.getElementById('tab-designs').hidden = tab.getAttribute('data-tab') !== 'designs';
 			document.getElementById('tab-orders').hidden = tab.getAttribute('data-tab') !== 'orders';
+			document.getElementById('tab-poll').hidden = tab.getAttribute('data-tab') !== 'poll';
 		});
 	});
 
@@ -255,6 +280,26 @@
 		if (e.target === this) this.hidden = true;
 	});
 
+	// PSD export: one layer per element, ready for Illustrator review.
+	document.getElementById('tab-designs').addEventListener('click', function (e) {
+		var btn = e.target.closest('[data-psd]');
+		if (!btn) return;
+		var d = A.getDesign(btn.getAttribute('data-psd'));
+		if (!d) return;
+		var cfg = d.config || {};
+		btn.disabled = true;
+		btn.textContent = 'Building PSD…';
+		window.atoExportPsd({
+			json: d.json,
+			width: parseInt(cfg.canvas_w, 10) || 500,
+			height: parseInt(cfg.canvas_h, 10) || 500,
+			name: d.ref
+		}).then(function () {
+			btn.disabled = false;
+			btn.textContent = 'PSD for Illustrator';
+		});
+	});
+
 	// Auto-open the editor when arriving via "Review / edit".
 	if (openIdx > 0) {
 		window.addEventListener('load', function () {
@@ -266,6 +311,8 @@
 </script>
 <script src="assets/vendor/fabric.min.js"></script>
 <script src="assets/vendor/qrcode.min.js"></script>
+<script src="assets/vendor/ag-psd.js"></script>
+<script src="assets/js/psd-export.js"></script>
 <script src="assets/js/editor.js"></script>
 </body>
 </html>

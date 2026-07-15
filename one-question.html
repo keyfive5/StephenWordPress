@@ -9,22 +9,21 @@
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,600;9..144,700&family=DM+Sans:wght@400;500;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="assets/css/site.css">
 <style>
-	/* Poll visual language matched to the design system */
 	.ato-poll { max-width: 620px; margin: 0 auto var(--sp-8); padding: var(--sp-6); background: var(--white); border: 1px solid var(--color-border); border-radius: var(--radius-lg); box-shadow: var(--shadow-md); }
 	.ato-poll-question { margin: 0 0 var(--sp-5); font-size: var(--text-xl); }
 	.ato-poll-options { display: grid; gap: var(--sp-3); }
-	.ato-poll-options[hidden], .ato-poll-results[hidden] { display: none; }
 	.ato-poll-option { min-height: 48px; padding: 0.7rem 1.25rem; border: 2px solid var(--color-border); border-radius: var(--radius-pill); background: var(--white); font: inherit; font-weight: 700; cursor: pointer; text-align: left; transition: border-color 180ms var(--ease-out), transform 180ms var(--ease-out); }
 	.ato-poll-option:hover { border-color: var(--green-700); transform: translateY(-1px); }
 	.ato-poll-results { display: grid; gap: var(--sp-4); }
 	.ato-poll-row-head { display: flex; justify-content: space-between; margin-bottom: 6px; gap: var(--sp-4); }
 	.ato-poll-label { font-weight: 700; }
+	.ato-poll-row.is-choice .ato-poll-label::after { content: " ✓ your answer"; color: var(--accent); font-size: var(--text-xs); }
 	.ato-poll-pct { font-weight: 700; color: var(--green-700); font-variant-numeric: tabular-nums; }
 	.ato-poll-row.is-choice .ato-poll-pct { color: var(--accent); }
 	.ato-poll-bar { height: 12px; border-radius: var(--radius-pill); background: var(--paper-2); overflow: hidden; }
 	.ato-poll-bar i { display: block; height: 100%; width: 0; border-radius: var(--radius-pill); background: var(--green-700); transition: width 900ms var(--ease-out); }
 	.ato-poll-row.is-choice .ato-poll-bar i { background: var(--accent); }
-	.ato-poll-total { margin: var(--sp-2) 0 0; font-size: var(--text-xs); color: var(--ink-faint); }
+	.ato-poll-total { margin: var(--sp-2) 0 0; font-size: var(--text-sm); color: var(--ink-soft); font-weight: 700; }
 </style>
 </head>
 <body data-page="poll">
@@ -35,25 +34,12 @@
 		<div class="container">
 			<span class="eyebrow">One question</span>
 			<h1>Thirty seconds, one answer</h1>
-			<p class="lede">Answer once and watch the live results count up — every response shapes what we print next.</p>
+			<p class="lede">Answer once per device and watch the live results count up. Percentages always total 100%.</p>
 		</div>
 	</div>
 
 	<div class="container">
-		<div class="ato-poll" data-poll="atoq1" data-voted="0" id="the-poll">
-			<h3 class="ato-poll-question">Would custom-branded labels make you order takeout from a restaurant again?</h3>
-			<div class="ato-poll-options">
-				<button type="button" class="ato-poll-option" data-choice="0">Yes, absolutely</button>
-				<button type="button" class="ato-poll-option" data-choice="1">Maybe</button>
-				<button type="button" class="ato-poll-option" data-choice="2">No difference to me</button>
-			</div>
-			<div class="ato-poll-results" hidden aria-live="polite">
-				<div class="ato-poll-row" data-choice="0"><div class="ato-poll-row-head"><span class="ato-poll-label">Yes, absolutely</span><span class="ato-poll-pct" data-pct="0">0%</span></div><div class="ato-poll-bar"><i style="width:0%"></i></div></div>
-				<div class="ato-poll-row" data-choice="1"><div class="ato-poll-row-head"><span class="ato-poll-label">Maybe</span><span class="ato-poll-pct" data-pct="0">0%</span></div><div class="ato-poll-bar"><i style="width:0%"></i></div></div>
-				<div class="ato-poll-row" data-choice="2"><div class="ato-poll-row-head"><span class="ato-poll-label">No difference to me</span><span class="ato-poll-pct" data-pct="0">0%</span></div><div class="ato-poll-bar"><i style="width:0%"></i></div></div>
-				<p class="ato-poll-total">0 votes so far</p>
-			</div>
-		</div>
+		<div class="ato-poll" id="the-poll"></div>
 	</div>
 </main>
 
@@ -63,51 +49,69 @@
 <script src="assets/js/store.js"></script>
 <script src="assets/js/main.js"></script>
 <script>
-// Poll persistence: seeded baseline + local votes (a shared counter at
-// launch — same UI, the endpoint swaps in).
 (function () {
-	var KEY = 'ato_poll_atoq1';
-	var seed = { 0: 84, 1: 37, 2: 16 };
-	function counts() {
-		var extra;
-		try { extra = JSON.parse(window.localStorage.getItem(KEY) || '{}'); } catch (e) { extra = {}; }
-		var out = {}; var total = 0;
-		[0, 1, 2].forEach(function (i) { out[i] = seed[i] + (extra['c' + i] || 0); total += out[i]; });
-		return { counts: out, total: total, voted: !!extra.voted };
-	}
-	window.atoPollData = { ajaxUrl: '/ato-poll', nonce: 'custom' };
-	var realFetch = window.fetch.bind(window);
-	window.fetch = function (url, opts) {
-		if (typeof url === 'string' && url.indexOf('/ato-poll') === 0) {
-			var choice = 0;
-			try { choice = parseInt(opts.body.get('choice'), 10); } catch (e) {}
-			var extra;
-			try { extra = JSON.parse(window.localStorage.getItem(KEY) || '{}'); } catch (e) { extra = {}; }
-			extra['c' + choice] = (extra['c' + choice] || 0) + 1;
-			extra.voted = true;
-			window.localStorage.setItem(KEY, JSON.stringify(extra));
-			var c = counts();
-			var pcts = {};
-			[0, 1, 2].forEach(function (i) { pcts[i] = Math.round(c.counts[i] * 100 / c.total); });
-			return Promise.resolve({ json: function () { return Promise.resolve({ success: true, data: { percentages: pcts, total: c.total } }); } });
+	var A = window.ATO;
+	var root = document.getElementById('the-poll');
+
+	function animateCount(el, target) {
+		var start = null;
+		var duration = 900;
+		function step(ts) {
+			if (!start) start = ts;
+			var progress = Math.min((ts - start) / duration, 1);
+			el.textContent = Math.round((1 - Math.pow(1 - progress, 3)) * target) + '%';
+			if (progress < 1) window.requestAnimationFrame(step);
 		}
-		return realFetch(url, opts);
-	};
-	// If this visitor already voted, render results state before poll.js binds.
-	var c = counts();
-	if (c.voted) {
-		var poll = document.getElementById('the-poll');
-		poll.setAttribute('data-voted', '1');
-		poll.querySelector('.ato-poll-options').hidden = true;
-		poll.querySelector('.ato-poll-results').hidden = false;
-		poll.querySelectorAll('.ato-poll-row').forEach(function (row) {
-			var i = parseInt(row.getAttribute('data-choice'), 10);
-			row.querySelector('.ato-poll-pct').setAttribute('data-pct', String(Math.round(c.counts[i] * 100 / c.total)));
-		});
-		poll.querySelector('.ato-poll-total').textContent = c.total + ' votes so far';
+		window.requestAnimationFrame(step);
+		setTimeout(function () { el.textContent = target + '%'; }, duration + 150);
 	}
+
+	function render(animate) {
+		var s = A.pollState();
+		var pcts = A.pollPercentages(s.counts);
+
+		if (!s.voted) {
+			root.innerHTML = '<h3 class="ato-poll-question">' + A.esc(s.question) + '</h3>' +
+				'<div class="ato-poll-options">' +
+				s.options.map(function (opt, i) {
+					return '<button type="button" class="ato-poll-option" data-choice="' + i + '">' + A.esc(opt) + '</button>';
+				}).join('') + '</div>';
+			root.querySelectorAll('.ato-poll-option').forEach(function (btn) {
+				btn.addEventListener('click', function () {
+					A.pollVote(parseInt(btn.getAttribute('data-choice'), 10));
+					render(true);
+				});
+			});
+			return;
+		}
+
+		root.innerHTML = '<h3 class="ato-poll-question">' + A.esc(s.question) + '</h3>' +
+			'<div class="ato-poll-results" aria-live="polite">' +
+			s.options.map(function (opt, i) {
+				return '<div class="ato-poll-row' + (i === s.choice ? ' is-choice' : '') + '">' +
+					'<div class="ato-poll-row-head"><span class="ato-poll-label">' + A.esc(opt) + '</span>' +
+					'<span class="ato-poll-pct">0%</span></div>' +
+					'<div class="ato-poll-bar"><i style="width:0%"></i></div></div>';
+			}).join('') +
+			'<p class="ato-poll-total">Based on ' + s.total + ' responses.</p></div>';
+
+		var rows = root.querySelectorAll('.ato-poll-row');
+		rows.forEach(function (row, i) {
+			var bar = row.querySelector('.ato-poll-bar i');
+			var pctEl = row.querySelector('.ato-poll-pct');
+			setTimeout(function () {
+				bar.style.width = pcts[i] + '%';
+				if (animate) {
+					animateCount(pctEl, pcts[i]);
+				} else {
+					pctEl.textContent = pcts[i] + '%';
+				}
+			}, 30);
+		});
+	}
+
+	render(true);
 })();
 </script>
-<script src="assets/js/poll.js"></script>
 </body>
 </html>

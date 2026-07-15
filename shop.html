@@ -33,7 +33,10 @@
 (function () {
 	var D = window.ATO_DATA;
 
-	function swatch(p, sizePx) {
+	function swatch(p) {
+		if (p.templates && p.templates[0] && p.templates[0].image) {
+			return '<img src="' + p.templates[0].image + '" alt="" loading="lazy" style="max-width:86%;max-height:86%;object-fit:contain;">';
+		}
 		var square = p.shapeHint !== 'circle' ? ' p-swatch--square' : '';
 		return '<span class="p-swatch' + square + '" style="background:' + p.swatch + '">' + D.icon(p.icon, 48) + '</span>';
 	}
@@ -54,11 +57,13 @@
 				'<span class="p-price">From $' + from.price + ' <span>/ ' + from.qty + ' labels</span></span>' +
 				'</span></a>';
 		}).join('');
+		var tplCount = prods.reduce(function (n, p) { return n + (p.templates && p.templates[0].image ? p.templates.length : 0); }, 0);
 		return '<section class="section--tight" id="' + cat.slug + '" style="padding-top: var(--sp-7);">' +
 			'<div class="section-head"><span class="eyebrow">' + cat.name + '</span>' +
 			'<p class="lede" style="font-size: var(--text-base);">' + cat.desc + '</p>' + subs + '</div>' +
 			'<div class="product-grid">' + cards + '</div></section>';
 	}).join('');
+	if (window.atoRevealScan) window.atoRevealScan();
 })();
 </script>
 </body>

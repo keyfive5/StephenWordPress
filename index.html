@@ -165,6 +165,7 @@
 		return '<div class="quote-card reveal">' + stars + '<blockquote>' + q[0] + '</blockquote>' +
 			'<div class="quote-who"><span class="quote-avatar">' + q[1] + '</span><div><strong>' + q[2] + '</strong><span>' + q[3] + '</span></div></div></div>';
 	}).join('');
+	if (window.atoRevealScan) window.atoRevealScan();
 })();
 </script>
 </body>

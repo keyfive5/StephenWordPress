@@ -1,7 +1,9 @@
 /**
  * All Take Out — catalog data (custom edition).
- * Categories mirror the client-approved tree from the legacy database,
- * including the Social Media subcategories.
+ * Categories mirror the client-approved tree from the legacy database.
+ * Products use Stephen's real template graphics (assets/templates/) —
+ * each template has fixed artwork plus a defined printable area
+ * (fractions of the image: x, y, w, h) that customers can customize.
  */
 (function () {
 	'use strict';
@@ -47,6 +49,10 @@
 		{ qty: 1000, price: 119 }
 	];
 
+	function tpl(name, file, area) {
+		return { name: name, image: 'assets/templates/' + file, area: area };
+	}
+
 	var CATEGORIES = [
 		{ slug: 'social-media-labels', name: 'Social Media Labels', icon: 'megaphone', desc: 'Turn every bag into a follow — Instagram, TikTok and Facebook handles your customers can scan.', subs: ['TikTok', 'Facebook', 'Instagram', 'X (Twitter)'] },
 		{ slug: 'qr-code-labels', name: 'QR Code Labels', icon: 'qr', desc: 'Link menus, review pages or loyalty programs with crisp, scannable QR stickers.', subs: [] },
@@ -57,26 +63,81 @@
 		{ slug: 'food-identification-labels', name: 'Food Identification', icon: 'utensils', desc: 'Allergens, spice levels, prep dates — clear info, zero mix-ups.', subs: [] }
 	];
 
-	function product(slug, name, cat, sub, iconName, shapeHint, swatchColor, desc) {
+	function product(slug, name, cat, sub, iconName, shapeHint, swatchColor, desc, templates) {
 		return {
 			slug: slug, name: name, cat: cat, sub: sub, icon: iconName,
 			shapeHint: shapeHint, swatch: swatchColor, desc: desc,
 			materials: MATERIALS, sizes: SIZES, shapes: SHAPES, tiers: TIERS,
-			templates: [{ name: 'Blank canvas', image: '' }]
+			templates: templates && templates.length ? templates : [{ name: 'Blank canvas', image: '' }]
 		};
 	}
 
 	var PRODUCTS = [
-		product('tiktok-round-sticker', 'TikTok Handle Sticker', 'social-media-labels', 'TikTok', 'megaphone', 'circle', '#1B2A20', 'Your @handle where hungry people already look — right on the bag. Designed live in the editor.'),
-		product('instagram-round-sticker', 'Instagram Handle Sticker', 'social-media-labels', 'Instagram', 'megaphone', 'circle', '#E8590C', 'A follow-us sticker your customers will actually photograph. Add your handle, colours and logo.'),
-		product('facebook-label', 'Facebook Page Label', 'social-media-labels', 'Facebook', 'megaphone', 'square', '#1D5B33', 'Point customers to your page for reviews, events and specials.'),
-		product('x-twitter-label', 'X (Twitter) Label', 'social-media-labels', 'X (Twitter)', 'megaphone', 'square', '#1B2A20', 'Short, sharp and scannable — your X handle on every order.'),
-		product('qr-menu-label', 'QR Code Menu Label', 'qr-code-labels', '', 'qr', 'square', '#1D5B33', 'Paste a link — we generate the QR code. Menus, review pages, loyalty signups.'),
-		product('promo-sale-sticker', 'Promo & Sale Sticker', 'promotional-labels', '', 'tag', 'circle', '#E8590C', 'Limited offers that move the needle: 20% off, BOGO, new item launches.'),
-		product('branded-logo-label', 'Branded Logo Label', 'branded-labels', '', 'badge', 'circle', '#1D5B33', 'Your logo, front and centre, on bags, boxes and cups.'),
-		product('tamper-seal', 'Tamper-Evident Seal', 'tamper-evident-labels', '', 'shield', 'rectangle', '#1B2A20', 'Splits cleanly when opened — customers see their food arrives untouched.'),
-		product('thank-you-pack', 'Thank You Sticker Pack', 'customer-appreciation-stickers', '', 'heart', 'circle', '#E8590C', 'A warm thank-you on every order turns first-timers into regulars.'),
-		product('food-id-label', 'Food ID & Allergen Label', 'food-identification-labels', '', 'utensils', 'rectangle', '#1D5B33', 'Allergens, spice levels, prep dates — clear info, zero mix-ups.')
+		product('tiktok-label', 'TikTok Label', 'social-media-labels', 'TikTok', 'megaphone', 'rectangle', '#1B2A20',
+			'Your TikTok where hungry people already look — right on the bag. Pick a layout, then customize the editable zone.',
+			[
+				tpl('Address zone', 'tt-address.png', { x: 0.42, y: 0.58, w: 0.54, h: 0.24 }),
+				tpl('Bottom strip', 'tt-bottom.png', { x: 0.04, y: 0.76, w: 0.92, h: 0.20 }),
+				tpl('Message panel', 'tt-message.png', { x: 0.43, y: 0.10, w: 0.53, h: 0.80 })
+			]),
+		product('instagram-label', 'Instagram Label', 'social-media-labels', 'Instagram', 'megaphone', 'rectangle', '#E8590C',
+			'A follow-us sticker your customers will actually photograph. Fixed Instagram artwork, your details in the printable area.',
+			[
+				tpl('Address zone', 'ig-address.png', { x: 0.36, y: 0.60, w: 0.60, h: 0.24 }),
+				tpl('Message panel', 'ig-message.png', { x: 0.40, y: 0.10, w: 0.56, h: 0.80 })
+			]),
+		product('facebook-label', 'Facebook Label', 'social-media-labels', 'Facebook', 'megaphone', 'rectangle', '#1D5B33',
+			'Point customers to your page for reviews, events and specials — three layouts, one editable zone each.',
+			[
+				tpl('Address zone', 'fb-address.png', { x: 0.41, y: 0.60, w: 0.55, h: 0.23 }),
+				tpl('Bottom strip', 'fb-bottom.png', { x: 0.04, y: 0.76, w: 0.92, h: 0.20 }),
+				tpl('Message panel', 'fb-message.png', { x: 0.43, y: 0.10, w: 0.53, h: 0.80 })
+			]),
+		product('x-twitter-label', 'X (Twitter) Label', 'social-media-labels', 'X (Twitter)', 'megaphone', 'rectangle', '#1B2A20',
+			'Short, sharp and scannable — your X handle on every order.',
+			[
+				tpl('Address zone', 'x-address.png', { x: 0.40, y: 0.61, w: 0.56, h: 0.22 }),
+				tpl('Bottom strip', 'x-bottom.png', { x: 0.04, y: 0.76, w: 0.92, h: 0.20 }),
+				tpl('Message panel', 'x-message.png', { x: 0.43, y: 0.10, w: 0.53, h: 0.80 })
+			]),
+		product('qr-code-label', 'QR Code Label', 'qr-code-labels', '', 'qr', 'square', '#1D5B33',
+			'Paste a link — the editor generates the QR code. Four layouts: from a blank QR canvas to menu and thank-you designs.',
+			[
+				tpl('Generate your QR', 'qr-generate.png', { x: 0.06, y: 0.06, w: 0.88, h: 0.88 }),
+				tpl('Our Menu — scan here', 'qr-menu.png', { x: 0.06, y: 0.29, w: 0.88, h: 0.57 }),
+				tpl('Thank You + QR', 'qr-thankyou.png', { x: 0.03, y: 0.07, w: 0.27, h: 0.86 }),
+				tpl('Social Media + QR', 'qr-social.png', { x: 0.03, y: 0.07, w: 0.27, h: 0.86 })
+			]),
+		product('promo-label', 'Promotional Label', 'promotional-labels', '', 'tag', 'rectangle', '#E8590C',
+			'Create your own promotion: sales, launches and limited offers on a full-canvas template.',
+			[
+				tpl('Portrait', 'promo-rect.png', { x: 0.08, y: 0.06, w: 0.84, h: 0.88 }),
+				tpl('Square', 'promo-square.png', { x: 0.06, y: 0.06, w: 0.88, h: 0.88 })
+			]),
+		product('branded-label', 'Branded Label', 'branded-labels', '', 'badge', 'rectangle', '#1D5B33',
+			'Your logo, your colours — a full printable canvas in two formats.',
+			[
+				tpl('Portrait', 'brand-rect.png', { x: 0.08, y: 0.06, w: 0.84, h: 0.88 }),
+				tpl('Square', 'brand-square.png', { x: 0.06, y: 0.06, w: 0.88, h: 0.88 })
+			]),
+		product('tamper-seal', 'Tamper-Evident Seal', 'tamper-evident-labels', '', 'shield', 'rectangle', '#1B2A20',
+			'Splits cleanly when opened — customers see their food arrives untouched.', null),
+		product('thank-you-stickers', 'Thank You Stickers', 'customer-appreciation-stickers', '', 'heart', 'square', '#E8590C',
+			'Five designer thank-you layouts — drop your restaurant name into the printable zone and go.',
+			[
+				tpl('Thanks — blue', 'thanks-blue.png', { x: 0.18, y: 0.25, w: 0.64, h: 0.19 }),
+				tpl('Thanks · Gracias · Merci', 'thanks-multi.png', { x: 0.14, y: 0.30, w: 0.70, h: 0.42 }),
+				tpl('You Rock!', 'thanks-rock.png', { x: 0.05, y: 0.06, w: 0.52, h: 0.52 }),
+				tpl('Your Support', 'thanks-support.png', { x: 0.13, y: 0.05, w: 0.74, h: 0.15 }),
+				tpl('Gratitude Grows', 'thanks-gratitude.png', { x: 0.03, y: 0.09, w: 0.55, h: 0.21 })
+			]),
+		product('food-certification-label', 'Food Certification Label', 'food-identification-labels', '', 'utensils', 'rectangle', '#1D5B33',
+			'Allergy, Halal and Kosher certification labels — your brand in the top zone, the certification mark stays fixed.',
+			[
+				tpl('Allergy', 'food-allergy.png', { x: 0.05, y: 0.03, w: 0.90, h: 0.28 }),
+				tpl('Halal Certified', 'food-halal.png', { x: 0.05, y: 0.03, w: 0.90, h: 0.28 }),
+				tpl('Kosher Certified', 'food-kosher.png', { x: 0.05, y: 0.03, w: 0.90, h: 0.28 })
+			])
 	];
 
 	// US state tax demo table (rates approximate, for demonstration —
@@ -106,6 +167,16 @@
 		{ file: 'sparkle.svg', label: 'Sparkle' }
 	];
 
+	// The One Question poll (per client spec): changing the id replaces the
+	// question — the new one starts at zero and old results stay archived
+	// in the admin area.
+	var POLL = {
+		id: 'q1',
+		question: 'What matters most to your business on takeout packaging?',
+		options: ['Getting more social media followers', 'Reviews and repeat orders', 'Food safety and certification info'],
+		seed: [61, 48, 28]
+	};
+
 	window.ATO_DATA = {
 		icon: icon,
 		categories: CATEGORIES,
@@ -113,6 +184,7 @@
 		taxRates: TAX_RATES,
 		fonts: FONTS,
 		clipart: CLIPART,
+		poll: POLL,
 		productBySlug: function (slug) {
 			for (var i = 0; i < PRODUCTS.length; i++) {
 				if (PRODUCTS[i].slug === slug) return PRODUCTS[i];

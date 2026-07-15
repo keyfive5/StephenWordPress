@@ -167,9 +167,14 @@
 	document.getElementById('p-pills').innerHTML =
 		product.materials.map(function (m) { return '<li>' + m + '</li>'; }).join('') +
 		product.shapes.map(function (s) { return '<li>' + s.label + '</li>'; }).join('');
-	var square = product.shapeHint !== 'circle' ? ' p-swatch--square' : '';
-	document.getElementById('product-stage').innerHTML =
-		'<span class="p-swatch' + square + '" id="stage-swatch" style="background:' + product.swatch + '">' + product.name + '</span>';
+	if (product.templates && product.templates[0] && product.templates[0].image) {
+		document.getElementById('product-stage').innerHTML =
+			'<img class="p-designed" src="' + product.templates[0].image + '" alt="' + product.name + ' template">';
+	} else {
+		var square = product.shapeHint !== 'circle' ? ' p-swatch--square' : '';
+		document.getElementById('product-stage').innerHTML =
+			'<span class="p-swatch' + square + '" id="stage-swatch" style="background:' + product.swatch + '">' + product.name + '</span>';
+	}
 
 	// --- Editor wiring: same engine as the WordPress plugin; the page
 	// provides the data and persists saves into the local store. ---

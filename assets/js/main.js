@@ -41,18 +41,45 @@
 	}
 
 	// Scroll reveal (respects reduced motion via CSS override).
-	var revealEls = document.querySelectorAll('.reveal');
-	if (revealEls.length && 'IntersectionObserver' in window) {
-		var io = new IntersectionObserver(function (entries) {
+	// Exposed as window.atoRevealScan so pages that inject .reveal content
+	// after this script runs can register the new elements — otherwise
+	// they would stay at opacity 0 forever.
+	var revealIO = null;
+	if ('IntersectionObserver' in window) {
+		revealIO = new IntersectionObserver(function (entries) {
 			entries.forEach(function (entry) {
 				if (entry.isIntersecting) {
 					entry.target.classList.add('is-visible');
-					io.unobserve(entry.target);
+					revealIO.unobserve(entry.target);
 				}
 			});
 		}, { rootMargin: '0px 0px -8% 0px', threshold: 0.1 });
-		revealEls.forEach(function (el) { io.observe(el); });
-	} else {
-		revealEls.forEach(function (el) { el.classList.add('is-visible'); });
 	}
+	function revealScan() {
+		// Hidden pages (background tabs) suspend timers and observers -
+		// skip the animation and show everything immediately.
+		if (document.hidden) {
+			document.querySelectorAll('.reveal:not(.is-visible)').forEach(function (el) {
+				el.classList.add('is-visible');
+			});
+			return;
+		}
+		document.querySelectorAll('.reveal:not(.is-visible)').forEach(function (el) {
+			if (revealIO) {
+				revealIO.observe(el);
+			} else {
+				el.classList.add('is-visible');
+			}
+		});
+		// Failsafe: content must never stay invisible (throttled observers,
+		// background tabs, exotic mobile browsers). Animation is optional,
+		// visibility is not.
+		setTimeout(function () {
+			document.querySelectorAll('.reveal:not(.is-visible)').forEach(function (el) {
+				el.classList.add('is-visible');
+			});
+		}, 1500);
+	}
+	revealScan();
+	window.atoRevealScan = revealScan;
 })();
