@@ -1,0 +1,47 @@
+.addBtn {
+  background-color: #28a745;
+  color: #fff;
+  padding: 8px 14px;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+}
+.addBtn:hover {
+  background-color: #42ca61;
+}
+.updateBtn {
+  background-color: #007bff;
+  color: #fff;
+  padding: 8px 14px;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+}
+.updateBtn:hover {
+  background-color: #288ffd;
+}
+.deleteBtn {
+  background-color: #dc3545;
+  color: #fff;
+  padding: 8px 14px;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+}
+.deleteBtn:hover {
+  background-color: #e63946;
+}
+.canclenbtn{
+  background-color: #6c757d;
+  color: #fff;
+  padding: 8px 14px;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+}
+.canclenbtn:hover {
+  background-color: #868e96;
+}
+.primaryColor{
+  background-color: #f9f9f9;
+}
