@@ -29,6 +29,37 @@ class ATO_Poll {
 	}
 
 	/**
+	 * Whole-number percentages that always sum to exactly 100
+	 * (largest-remainder rounding, per the client spec).
+	 *
+	 * @param int[] $votes option index => count.
+	 * @return int[] option index => percentage.
+	 */
+	public static function lr_percentages( $votes ) {
+		$total = array_sum( $votes );
+		if ( $total <= 0 ) {
+			return array_map( function () { return 0; }, $votes );
+		}
+		$exact  = array();
+		$floors = array();
+		foreach ( $votes as $i => $count ) {
+			$exact[ $i ]  = $count * 100 / $total;
+			$floors[ $i ] = (int) floor( $exact[ $i ] );
+		}
+		$left = 100 - array_sum( $floors );
+		$rem  = array();
+		foreach ( $exact as $i => $v ) {
+			$rem[ $i ] = $v - $floors[ $i ];
+		}
+		arsort( $rem );
+		$keys = array_keys( $rem );
+		for ( $k = 0; $k < $left; $k++ ) {
+			$floors[ $keys[ $k % count( $keys ) ] ]++;
+		}
+		return $floors;
+	}
+
+	/**
 	 * Stable key for a poll based on its question text.
 	 */
 	protected static function poll_key( $question ) {
@@ -63,6 +94,18 @@ class ATO_Poll {
 		$key   = self::poll_key( $atts['question'] );
 		$votes = self::get_votes( $key, count( $options ) );
 		$total = array_sum( $votes );
+		$pcts  = self::lr_percentages( $votes );
+
+		// Remember question + options so past polls stay readable in the
+		// admin area after the question is replaced.
+		$meta = get_option( 'ato_poll_meta_' . $key, array() );
+		if ( empty( $meta ) || $meta['question'] !== $atts['question'] ) {
+			update_option( 'ato_poll_meta_' . $key, array(
+				'question' => wp_strip_all_tags( $atts['question'] ),
+				'options'  => $options,
+				'since'    => current_time( 'mysql' ),
+			), false );
+		}
 		$voted = isset( $_COOKIE[ 'ato_poll_' . $key ] ); // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- display state only.
 
 		wp_enqueue_style( 'ato-poll' );
@@ -87,7 +130,7 @@ class ATO_Poll {
 
 			<div class="ato-poll-results" <?php echo $voted ? '' : 'hidden'; ?> aria-live="polite">
 				<?php foreach ( $options as $i => $label ) : ?>
-					<?php $pct = $total > 0 ? round( $votes[ $i ] * 100 / $total ) : 0; ?>
+					<?php $pct = $pcts[ $i ]; ?>
 					<div class="ato-poll-row" data-choice="<?php echo esc_attr( $i ); ?>">
 						<div class="ato-poll-row-head">
 							<span class="ato-poll-label"><?php echo esc_html( $label ); ?></span>
@@ -99,8 +142,8 @@ class ATO_Poll {
 				<p class="ato-poll-total">
 					<?php
 					printf(
-						/* translators: %s: number of votes. */
-						esc_html( _n( '%s vote so far', '%s votes so far', max( 1, $total ), 'ato-customizer' ) ),
+						/* translators: %s: number of responses. */
+						esc_html__( 'Based on %s responses.', 'ato-customizer' ),
 						esc_html( number_format_i18n( $total ) )
 					);
 					?>
@@ -126,11 +169,9 @@ class ATO_Poll {
 		$votes[ $choice ] = isset( $votes[ $choice ] ) ? (int) $votes[ $choice ] + 1 : 1;
 		update_option( $option_name, $votes, false );
 
-		$total = array_sum( array_map( 'intval', $votes ) );
-		$pcts  = array();
-		foreach ( $votes as $i => $count ) {
-			$pcts[ $i ] = $total > 0 ? round( (int) $count * 100 / $total ) : 0;
-		}
+		$counts = array_map( 'intval', $votes );
+		$total  = array_sum( $counts );
+		$pcts   = self::lr_percentages( $counts );
 
 		wp_send_json_success( array(
 			'percentages' => $pcts,

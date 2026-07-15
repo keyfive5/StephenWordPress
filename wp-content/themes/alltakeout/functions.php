@@ -7,7 +7,7 @@
 
 defined( 'ABSPATH' ) || exit;
 
-define( 'ATO_THEME_VERSION', '1.0.0' );
+define( 'ATO_THEME_VERSION', '1.0.1' );
 
 require get_template_directory() . '/inc/icons.php';
 

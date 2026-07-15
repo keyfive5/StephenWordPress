@@ -30,6 +30,8 @@
 	var redoStack = [];
 	var suppressHistory = false;
 	var dirty = false;
+	var printArea = null;   // px rect when a template defines a printable area
+	var templateUrl = '';
 
 	// ---------------------------------------------------------------------
 	// DOM helpers
@@ -86,7 +88,7 @@
 		selections = {};
 
 		if (cfg.templates && cfg.templates.length) {
-			wizardSteps.push({ key: 'template', label: I18N.stepTemplate || 'Template', options: cfg.templates.map(function (t) { return { label: t.name, image: t.image }; }) });
+			wizardSteps.push({ key: 'template', label: I18N.stepTemplate || 'Template', options: cfg.templates.map(function (t) { return { label: t.name, image: t.image, area: t.area || null }; }) });
 		}
 		if (cfg.materials && cfg.materials.length) {
 			wizardSteps.push({ key: 'material', label: I18N.stepMaterial || 'Material', options: cfg.materials.map(function (m) { return { label: m }; }) });
@@ -152,6 +154,7 @@
 				selections[step.key] = opt.label;
 				if (opt.value) selections[step.key + '_value'] = opt.value;
 				if (opt.image) selections[step.key + '_image'] = opt.image;
+				if (opt.area) selections[step.key + '_area'] = opt.area;
 				grid.querySelectorAll('.ato-ed-option').forEach(function (b) { b.classList.remove('is-selected'); });
 				btn.classList.add('is-selected');
 			});
@@ -170,6 +173,7 @@
 			selections[step.key] = step.options[0].label;
 			if (step.options[0].value) selections[step.key + '_value'] = step.options[0].value;
 			if (step.options[0].image) selections[step.key + '_image'] = step.options[0].image;
+			if (step.options[0].area) selections[step.key + '_area'] = step.options[0].area;
 		}
 		if (wizardIndex < wizardSteps.length - 1) {
 			wizardIndex++;
@@ -177,7 +181,11 @@
 		} else {
 			$('ato-ed-wizard').hidden = true;
 			$('ato-ed-main').hidden = false;
-			initCanvas(selections.shape_value || 'square', selections.template_image || '');
+			if (selections.template_image && selections.template_area) {
+				initCanvasFromTemplate(selections.template_image, selections.template_area);
+			} else {
+				initCanvas(selections.shape_value || 'square', selections.template_image || '');
+			}
 			updateConfigSummary();
 		}
 	}
@@ -202,6 +210,8 @@
 	// Canvas
 	// ---------------------------------------------------------------------
 	function initCanvas(shape, templateImage) {
+		printArea = null;
+		templateUrl = '';
 		currentShape = shape || 'square';
 		logicalW = currentShape === 'rectangle' ? 600 : 500;
 		logicalH = currentShape === 'rectangle' ? 400 : 500;
@@ -227,7 +237,7 @@
 		canvas.on('selection:created', refreshProps);
 		canvas.on('selection:updated', refreshProps);
 		canvas.on('selection:cleared', refreshProps);
-		canvas.on('object:added', onCanvasChange);
+		canvas.on('object:added', onObjectAdded);
 		canvas.on('object:removed', onCanvasChange);
 		canvas.on('object:modified', onCanvasChange);
 		canvas.on('text:changed', function () { dirty = true; });
@@ -241,6 +251,109 @@
 		refreshProps();
 
 		window.addEventListener('resize', fitCanvas);
+	}
+
+	/**
+	 * Printable-area mode: the product template is fixed artwork; only the
+	 * defined region is editable. The template loads as a locked bottom
+	 * layer, the area gets a dashed guide, and every user object is
+	 * clipped to the area so the surrounding artwork stays untouched.
+	 *
+	 * @param {string} url      Template image URL.
+	 * @param {object} areaFrac Printable area as fractions {x, y, w, h}.
+	 */
+	function initCanvasFromTemplate(url, areaFrac) {
+		fabric.Image.fromURL(url, function (img) {
+			if (!img || !img.width) { initCanvas('square', ''); return; }
+			currentShape = 'template';
+			logicalW = img.width;
+			logicalH = img.height;
+			if (canvas) { canvas.dispose(); canvas = null; }
+			canvas = new fabric.Canvas('ato-canvas', {
+				width: logicalW,
+				height: logicalH,
+				backgroundColor: '#ffffff',
+				preserveObjectStacking: true,
+				selection: true
+			});
+			printArea = {
+				left: Math.round(areaFrac.x * logicalW),
+				top: Math.round(areaFrac.y * logicalH),
+				width: Math.round(areaFrac.w * logicalW),
+				height: Math.round(areaFrac.h * logicalH)
+			};
+			templateUrl = url;
+			img.set({ left: 0, top: 0, selectable: false, evented: false, atoType: 'template', atoName: 'Template (locked)' });
+			canvas.add(img);
+			canvas.sendToBack(img);
+			addAreaCutline();
+
+			canvas.on('selection:created', refreshProps);
+			canvas.on('selection:updated', refreshProps);
+			canvas.on('selection:cleared', refreshProps);
+			canvas.on('object:added', onObjectAdded);
+			canvas.on('object:removed', onCanvasChange);
+			canvas.on('object:modified', onCanvasChange);
+			canvas.on('text:changed', function () { dirty = true; });
+
+			undoStack = [];
+			redoStack = [];
+			dirty = false;
+			pushHistory();
+			fitCanvas();
+			refreshLayers();
+			refreshProps();
+			window.addEventListener('resize', fitCanvas);
+		}, { crossOrigin: 'anonymous' });
+	}
+
+	/** Dashed guide around the printable area. */
+	function addAreaCutline() {
+		if (!printArea || !canvas) return;
+		var cut = new fabric.Rect({
+			left: printArea.left,
+			top: printArea.top,
+			width: printArea.width,
+			height: printArea.height,
+			fill: 'transparent',
+			stroke: '#E8590C',
+			strokeDashArray: [7, 6],
+			strokeWidth: 2,
+			selectable: false,
+			evented: false,
+			excludeFromExport: true,
+			atoType: 'cutline'
+		});
+		canvas.add(cut);
+		canvas.bringToFront(cut);
+	}
+
+	/** Clip a user object to the printable area (template mode only). */
+	function clipToArea(obj) {
+		if (!printArea || !obj || obj.atoType === 'cutline' || obj.atoType === 'template' || obj.clipPath) return;
+		obj.clipPath = new fabric.Rect({
+			left: printArea.left,
+			top: printArea.top,
+			width: printArea.width,
+			height: printArea.height,
+			absolutePositioned: true
+		});
+	}
+
+	function onObjectAdded(e) {
+		if (e && e.target) clipToArea(e.target);
+		onCanvasChange();
+	}
+
+	/** Where new elements land + how big they start. */
+	function contentCenter() {
+		if (printArea) {
+			return { x: printArea.left + printArea.width / 2, y: printArea.top + printArea.height / 2 };
+		}
+		return { x: logicalW / 2, y: logicalH / 2 };
+	}
+	function refBox() {
+		return printArea ? { w: printArea.width, h: printArea.height } : { w: logicalW, h: logicalH };
 	}
 
 	/** Dashed cut line + clip mask matching the chosen shape. */
@@ -338,9 +451,13 @@
 	function restoreState(state) {
 		suppressHistory = true;
 		canvas.loadFromJSON(state, function () {
+			canvas.getObjects().forEach(function (o) {
+				if (o.atoType === 'template') { o.set({ selectable: false, evented: false }); canvas.sendToBack(o); }
+				else if (o.atoType !== 'cutline') { o.set({ selectable: true, evented: true }); }
+			});
 			// Cut line is excluded from export/serialization — put it back.
 			var hasCut = canvas.getObjects().some(function (o) { return o.atoType === 'cutline'; });
-			if (!hasCut) applyShapeMask();
+			if (!hasCut) { if (printArea) { addAreaCutline(); } else { applyShapeMask(); } }
 			canvas.renderAll();
 			suppressHistory = false;
 			refreshLayers();
@@ -371,13 +488,15 @@
 	// Tools
 	// ---------------------------------------------------------------------
 	function addText() {
+		var c = contentCenter();
+		var box = refBox();
 		var text = new fabric.IText(I18N.yourText || 'Your text', {
-			left: logicalW / 2,
-			top: logicalH / 2,
+			left: c.x,
+			top: c.y,
 			originX: 'center',
 			originY: 'center',
 			fontFamily: (DATA.fonts && DATA.fonts[0]) || 'DM Sans',
-			fontSize: 36,
+			fontSize: Math.max(20, Math.round(Math.min(box.w, box.h) * 0.2)),
 			fill: '#1b2a20',
 			atoName: 'Text'
 		});
@@ -396,10 +515,12 @@
 		var reader = new FileReader();
 		reader.onload = function (e) {
 			fabric.Image.fromURL(e.target.result, function (img) {
-				var scale = Math.min((logicalW * 0.6) / img.width, (logicalH * 0.6) / img.height, 1);
+				var c = contentCenter();
+				var box = refBox();
+				var scale = Math.min((box.w * 0.8) / img.width, (box.h * 0.8) / img.height, 1);
 				img.set({
-					left: logicalW / 2,
-					top: logicalH / 2,
+					left: c.x,
+					top: c.y,
 					originX: 'center',
 					originY: 'center',
 					scaleX: scale,
@@ -437,10 +558,12 @@
 	function addClipart(url, label) {
 		fabric.Image.fromURL(url, function (img) {
 			if (!img || !img.width) return;
-			var scale = Math.min((logicalW * 0.3) / img.width, (logicalH * 0.3) / img.height);
+			var c = contentCenter();
+			var box = refBox();
+			var scale = Math.min((box.w * 0.5) / img.width, (box.h * 0.5) / img.height);
 			img.set({
-				left: logicalW / 2,
-				top: logicalH / 2,
+				left: c.x,
+				top: c.y,
 				originX: 'center',
 				originY: 'center',
 				scaleX: scale,
@@ -468,10 +591,12 @@
 			var dataUrl = qrCanvas ? qrCanvas.toDataURL('image/png') : (qrImg ? qrImg.src : '');
 			if (!dataUrl) return;
 			fabric.Image.fromURL(dataUrl, function (img) {
-				var scale = (logicalW * 0.28) / img.width;
+				var box = refBox();
+				var c = contentCenter();
+				var scale = (Math.min(box.w, box.h) * 0.8) / img.width;
 				img.set({
-					left: logicalW / 2,
-					top: logicalH / 2,
+					left: c.x,
+					top: c.y,
 					originX: 'center',
 					originY: 'center',
 					scaleX: scale,
@@ -532,6 +657,7 @@
 		if (obj.type === 'i-text' || obj.type === 'text') {
 			return { type: 'Text', name: (obj.text || '').slice(0, 24) || 'Text' };
 		}
+		if (obj.atoType === 'template') return { type: 'Lock', name: obj.atoName || 'Template (locked)' };
 		if (obj.atoType === 'qr') return { type: 'QR', name: obj.atoName || 'QR code' };
 		if (obj.atoType === 'clipart') return { type: 'Art', name: obj.atoName || 'Clipart' };
 		if (obj.type === 'image') return { type: 'Img', name: obj.atoName || 'Image' };
@@ -586,7 +712,9 @@
 			shape_value: selections.shape_value || currentShape,
 			quantity: selections.quantity || '',
 			canvas_w: logicalW,
-			canvas_h: logicalH
+			canvas_h: logicalH,
+			template_image: templateUrl || '',
+			area: printArea ? JSON.stringify(printArea) : ''
 		};
 		return payload;
 	}
@@ -693,12 +821,22 @@
 					quantity: cfg.quantity || ''
 				};
 				initCanvas(selections.shape_value, '');
+				if (cfg.template_image && cfg.area) {
+					templateUrl = cfg.template_image;
+					try { printArea = typeof cfg.area === 'string' ? JSON.parse(cfg.area) : cfg.area; } catch (e2) { printArea = null; }
+					logicalW = parseInt(cfg.canvas_w, 10) || logicalW;
+					logicalH = parseInt(cfg.canvas_h, 10) || logicalH;
+				}
 				$('ato-ed-product-name').textContent = json.data.ref || 'Design';
 				updateConfigSummary();
 				suppressHistory = true;
 				canvas.loadFromJSON(json.data.design_json, function () {
+					canvas.getObjects().forEach(function (o) {
+						if (o.atoType === 'template') { o.set({ selectable: false, evented: false }); canvas.sendToBack(o); }
+						else if (o.atoType !== 'cutline') { o.set({ selectable: true, evented: true }); }
+					});
 					var hasCut = canvas.getObjects().some(function (o) { return o.atoType === 'cutline'; });
-					if (!hasCut) applyShapeMask();
+					if (!hasCut) { if (printArea) { addAreaCutline(); } else { applyShapeMask(); } }
 					canvas.renderAll();
 					suppressHistory = false;
 					undoStack = [JSON.stringify(canvas.toJSON(EXTRA_PROPS))];
@@ -781,7 +919,8 @@
 		$('ato-prop-center').addEventListener('click', function () {
 			var obj = activeObj();
 			if (obj) {
-				obj.set({ left: logicalW / 2, top: logicalH / 2, originX: 'center', originY: 'center' });
+				var c = contentCenter();
+				obj.set({ left: c.x, top: c.y, originX: 'center', originY: 'center' });
 				obj.setCoords();
 				canvas.requestRenderAll();
 				onCanvasChange();
@@ -797,7 +936,7 @@
 		});
 		$('ato-prop-delete').addEventListener('click', function () {
 			var obj = activeObj();
-			if (obj && obj.atoType !== 'cutline') {
+			if (obj && obj.atoType !== 'cutline' && obj.atoType !== 'template') {
 				canvas.remove(obj);
 				canvas.discardActiveObject();
 				canvas.requestRenderAll();
@@ -812,7 +951,7 @@
 			var tag = (document.activeElement && document.activeElement.tagName) || '';
 			if (tag === 'INPUT' || tag === 'TEXTAREA' || tag === 'SELECT') return;
 			var obj = activeObj();
-			if (obj && !obj.isEditing && obj.atoType !== 'cutline') {
+			if (obj && !obj.isEditing && obj.atoType !== 'cutline' && obj.atoType !== 'template') {
 				e.preventDefault();
 				canvas.remove(obj);
 				canvas.discardActiveObject();

@@ -3,7 +3,7 @@
  * Plugin Name: ATO Customizer
  * Plugin URI: https://github.com/keyfive5/StephenWordPress
  * Description: Custom sticker & label customizer for All Take Out — product configuration (template, material, size, shape, quantity), drag-and-drop design editor with text/images/clipart/QR codes, VIP membership (50 complimentary stickers + free shipping), admin design review with edit history, and production-spec order emails. Requires WooCommerce.
- * Version: 1.1.0
+ * Version: 1.2.0
  * Author: Hasan Zafar
  * Requires at least: 6.0
  * Requires PHP: 7.4
@@ -13,7 +13,7 @@
 
 defined( 'ABSPATH' ) || exit;
 
-define( 'ATO_CUSTOMIZER_VERSION', '1.1.0' );
+define( 'ATO_CUSTOMIZER_VERSION', '1.2.0' );
 define( 'ATO_CUSTOMIZER_FILE', __FILE__ );
 define( 'ATO_CUSTOMIZER_PATH', plugin_dir_path( __FILE__ ) );
 define( 'ATO_CUSTOMIZER_URL', plugin_dir_url( __FILE__ ) );

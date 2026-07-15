@@ -50,9 +50,9 @@ class ATO_Product_Options {
 				woocommerce_wp_textarea_input( array(
 					'id'          => '_ato_templates',
 					'label'       => __( 'Templates', 'ato-customizer' ),
-					'description' => __( 'One per line: Name|Image URL. The image becomes the starting background of the design.', 'ato-customizer' ),
+					'description' => __( 'One per line: Name|Image URL|x,y,w,h. The optional x,y,w,h (fractions 0-1 of the image) defines the printable area — the only zone the customer can edit; the rest of the artwork stays locked. Without it the whole canvas is editable.', 'ato-customizer' ),
 					'desc_tip'    => true,
-					'placeholder' => "Classic Round|https://example.com/template-round.png\nBlank Canvas|",
+					'placeholder' => "Follow Us|https://example.com/template.png|0.41,0.60,0.55,0.23\nBlank Canvas|",
 					'style'       => 'height:90px',
 				) );
 				woocommerce_wp_textarea_input( array(
@@ -126,11 +126,19 @@ class ATO_Product_Options {
 
 		$templates = array();
 		foreach ( $parse_lines( '_ato_templates' ) as $line ) {
-			$parts       = array_map( 'trim', explode( '|', $line, 2 ) );
-			$templates[] = array(
+			$parts = array_map( 'trim', explode( '|', $line, 3 ) );
+			$tpl   = array(
 				'name'  => $parts[0],
 				'image' => isset( $parts[1] ) ? esc_url_raw( $parts[1] ) : '',
+				'area'  => null,
 			);
+			if ( isset( $parts[2] ) && '' !== $parts[2] ) {
+				$nums = array_map( 'floatval', array_map( 'trim', explode( ',', $parts[2] ) ) );
+				if ( 4 === count( $nums ) ) {
+					$tpl['area'] = array( 'x' => $nums[0], 'y' => $nums[1], 'w' => $nums[2], 'h' => $nums[3] );
+				}
+			}
+			$templates[] = $tpl;
 		}
 
 		$shapes = array();

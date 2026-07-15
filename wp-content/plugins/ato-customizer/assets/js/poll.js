@@ -44,7 +44,7 @@
 
 		if (typeof total === 'number') {
 			var totalEl = poll.querySelector('.ato-poll-total');
-			if (totalEl) totalEl.textContent = total + (total === 1 ? ' vote so far' : ' votes so far');
+			if (totalEl) totalEl.textContent = 'Based on ' + total + ' responses.';
 		}
 	}
 

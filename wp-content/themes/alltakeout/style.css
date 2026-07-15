@@ -4,7 +4,7 @@ Theme URI: https://github.com/keyfive5/StephenWordPress
 Author: Hasan Zafar
 Author URI: https://github.com/keyfive5
 Description: Custom WordPress theme for All Take Out — premium custom sticker & label printing for restaurants and cafés. Built for WooCommerce with the ATO Customizer plugin.
-Version: 1.0.0
+Version: 1.0.1
 Requires at least: 6.0
 Tested up to: 6.5
 Requires PHP: 7.4
@@ -290,8 +290,7 @@ a:hover { color: var(--color-primary-hover); }
   position: sticky;
   top: 0;
   z-index: var(--z-header);
-  background: rgba(251, 249, 244, 0.92);
-  backdrop-filter: blur(10px);
+  background: rgba(251, 249, 244, 0.97);
   border-bottom: 1px solid transparent;
   transition: border-color var(--dur) var(--ease-out), box-shadow var(--dur) var(--ease-out);
 }
@@ -405,6 +404,8 @@ a:hover { color: var(--color-primary-hover); }
     inset: 0;
     z-index: var(--z-drawer);
     background: var(--paper);
+    box-shadow: var(--shadow-lg);
+    overflow-y: auto;
     padding: calc(var(--header-h) + var(--sp-6)) var(--sp-6) var(--sp-6);
     transform: translateX(100%);
     transition: transform 280ms var(--ease-out);

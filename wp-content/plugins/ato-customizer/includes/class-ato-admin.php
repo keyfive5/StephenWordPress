@@ -26,6 +26,49 @@ class ATO_Admin {
 			'dashicons-art',
 			56
 		);
+		add_submenu_page(
+			'ato-designs',
+			__( 'One Question results', 'ato-customizer' ),
+			__( 'One Question', 'ato-customizer' ),
+			'edit_others_posts',
+			'ato-one-question',
+			array( __CLASS__, 'render_poll_page' )
+		);
+	}
+
+	/**
+	 * Results for the current One Question and every archived one.
+	 * When a new question replaces the old, the old key stays stored —
+	 * so past results remain readable here, per the client spec.
+	 */
+	public static function render_poll_page() {
+		global $wpdb;
+		$rows = $wpdb->get_results( "SELECT option_name, option_value FROM {$wpdb->options} WHERE option_name LIKE 'ato_poll_meta_%'" );
+		echo '<div class="wrap"><h1>' . esc_html__( 'One Question — results', 'ato-customizer' ) . '</h1>';
+		if ( empty( $rows ) ) {
+			echo '<p>' . esc_html__( 'No poll has collected responses yet. Add the [ato_poll] shortcode to a page to start.', 'ato-customizer' ) . '</p></div>';
+			return;
+		}
+		foreach ( $rows as $row ) {
+			$key   = str_replace( 'ato_poll_meta_', '', $row->option_name );
+			$meta  = maybe_unserialize( $row->option_value );
+			$votes = get_option( 'ato_poll_votes_' . $key, array() );
+			$counts = array();
+			foreach ( array_values( (array) $meta['options'] ) as $i => $label ) {
+				$counts[ $i ] = isset( $votes[ $i ] ) ? (int) $votes[ $i ] : 0;
+			}
+			$total = array_sum( $counts );
+			$pcts  = ATO_Poll::lr_percentages( $counts );
+			echo '<h2>' . esc_html( $meta['question'] ) . '</h2>';
+			echo '<table class="widefat striped" style="max-width:640px;"><thead><tr><th>' . esc_html__( 'Answer', 'ato-customizer' ) . '</th><th>' . esc_html__( 'Responses', 'ato-customizer' ) . '</th><th>' . esc_html__( 'Share', 'ato-customizer' ) . '</th></tr></thead><tbody>';
+			foreach ( (array) $meta['options'] as $i => $label ) {
+				echo '<tr><td>' . esc_html( $label ) . '</td><td>' . esc_html( $counts[ $i ] ) . '</td><td><strong>' . esc_html( $pcts[ $i ] ) . '%</strong></td></tr>';
+			}
+			echo '</tbody></table>';
+			/* translators: %s: number of responses. */
+			echo '<p><strong>' . sprintf( esc_html__( 'Based on %s responses.', 'ato-customizer' ), esc_html( number_format_i18n( $total ) ) ) . '</strong> <span class="description">' . esc_html__( 'since', 'ato-customizer' ) . ' ' . esc_html( isset( $meta['since'] ) ? $meta['since'] : '' ) . '</span></p>';
+		}
+		echo '</div>';
 	}
 
 	public static function enqueue( $hook ) {
@@ -33,6 +76,8 @@ class ATO_Admin {
 			return;
 		}
 		ATO_Frontend::enqueue_editor_assets();
+		wp_enqueue_script( 'ag-psd', ATO_CUSTOMIZER_URL . 'assets/vendor/ag-psd.js', array(), '25.0', true );
+		wp_enqueue_script( 'ato-psd-export', ATO_CUSTOMIZER_URL . 'assets/js/psd-export.js', array( 'fabric-js', 'ag-psd' ), ATO_CUSTOMIZER_VERSION, true );
 
 		$design_id = isset( $_GET['design'] ) ? absint( $_GET['design'] ) : 0; // phpcs:ignore WordPress.Security.NonceVerification.Recommended
 
@@ -171,8 +216,28 @@ class ATO_Admin {
 				<button type="button" class="button button-primary button-hero" id="ato-open-editor">
 					<?php esc_html_e( 'Open in editor', 'ato-customizer' ); ?>
 				</button>
-				<span class="description" style="margin-left:8px;"><?php esc_html_e( 'Adjust alignment, fix typos, refine colours — then save. The customer’s original stays in the history below.', 'ato-customizer' ); ?></span>
+				<button type="button" class="button button-hero" id="ato-psd-btn">
+					<?php esc_html_e( 'Download layered PSD (Illustrator)', 'ato-customizer' ); ?>
+				</button>
+				<span class="description" style="margin-left:8px;"><?php esc_html_e( 'Adjust alignment, fix typos, refine colours — then save. The customer’s original stays in the history below. The PSD keeps one layer per element for pre-print review.', 'ato-customizer' ); ?></span>
 			</p>
+			<script>
+			document.addEventListener('DOMContentLoaded', function () {
+				var btn = document.getElementById('ato-psd-btn');
+				if (!btn) return;
+				var cfg = <?php echo wp_json_encode( is_array( $summary['config'] ) ? $summary['config'] : array() ); ?>;
+				var designJson = <?php echo wp_json_encode( $summary['json'] ); ?>;
+				btn.addEventListener('click', function () {
+					btn.disabled = true;
+					window.atoExportPsd({
+						json: designJson,
+						width: parseInt(cfg.canvas_w, 10) || 500,
+						height: parseInt(cfg.canvas_h, 10) || 500,
+						name: <?php echo wp_json_encode( $summary['ref'] ); ?>
+					}).then(function () { btn.disabled = false; });
+				});
+			});
+			</script>
 
 			<?php if ( $summary['preview'] ) : ?>
 				<p><img src="<?php echo esc_url( $summary['preview'] ); ?>" alt="<?php esc_attr_e( 'Design preview', 'ato-customizer' ); ?>" style="max-width:320px;border:1px dashed #ccc;border-radius:8px;background:#fff;padding:8px;"></p>
