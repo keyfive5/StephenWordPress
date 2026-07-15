@@ -1,0 +1,69 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>VIP Members — All Take Out</title>
+<meta name="description" content="Join free: 50 complimentary stickers, free ground shipping on every order, priority support and exclusive discounts.">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Crect width='24' height='24' rx='7' fill='%231D5B33'/%3E%3Cpath d='M8 6h5a5 5 0 0 1 5 5v5a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2Z' fill='%23FBF9F4'/%3E%3C/svg%3E">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,600;9..144,700&family=DM+Sans:wght@400;500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/css/site.css">
+</head>
+<body data-page="vip">
+<div id="app-header"></div>
+
+<main id="primary" class="site-main">
+	<section class="hero">
+		<div class="container hero-grid">
+			<div>
+				<span class="eyebrow">VIP membership</span>
+				<h1>Perks that <span class="mark"><span>stick around</span></span></h1>
+				<p class="lede">VIP membership is completely free. Create an account — on its own or during checkout — and the benefits apply to every order you place with us.</p>
+				<div class="hero-ctas"><a class="btn btn--accent btn--lg" href="account.html">Join free today</a></div>
+			</div>
+			<div class="hero-visual" style="min-height: 320px;" aria-hidden="true">
+				<div class="sticker sticker--round sticker-1" style="top: 8%; left: 16%;"><div><div class="s-title" style="font-size: 2rem;">50</div><div class="s-sub">Free stickers</div></div></div>
+				<div class="sticker sticker--die sticker-5" style="bottom: 12%; right: 14%;"><div class="s-title">Free shipping</div><div class="s-sub">Every order</div></div>
+			</div>
+		</div>
+	</section>
+
+	<section class="section section--kraft">
+		<div class="container">
+			<div class="section-head section-head--center"><h2>Everything VIPs get</h2></div>
+			<div class="cat-grid" id="vip-cards"></div>
+		</div>
+	</section>
+
+	<section class="section">
+		<div class="container container--narrow">
+			<div class="section-head section-head--center">
+				<h2>How to join</h2>
+				<p class="lede">Two ways in — both take under a minute.</p>
+			</div>
+			<div class="steps" style="grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));">
+				<div class="step reveal"><h3>At checkout</h3><p>Pick “Create an account” while placing an order. Your VIP status and 50 stickers apply immediately.</p></div>
+				<div class="step reveal"><h3>Right now</h3><p>Register from the My Account page and your perks will be waiting on your first order.</p></div>
+			</div>
+			<p class="text-center" style="margin-top: var(--sp-6);"><a class="btn btn--primary btn--lg" href="account.html">Create my free account</a></p>
+		</div>
+	</section>
+</main>
+
+<div id="app-footer"></div>
+
+<script src="assets/js/data.js"></script>
+<script src="assets/js/store.js"></script>
+<script src="assets/js/main.js"></script>
+<script>
+document.getElementById('vip-cards').innerHTML = [
+	['gift', '50 complimentary stickers', 'Added to your account automatically the moment you join — they ship with your next order.'],
+	['truck', 'Free ground shipping', 'No minimums, no codes. VIP orders always ship free within our ground network.'],
+	['star', 'Priority support', 'Jump the queue. VIP tickets and design reviews are handled first.'],
+	['tag', 'Exclusive discounts', 'Member-only pricing events and early access to new materials and shapes.']
+].map(function (c) {
+	return '<div class="cat-card reveal"><span class="cat-icon">' + window.ATO_DATA.icon(c[0], 28) + '</span><h3>' + c[1] + '</h3><p>' + c[2] + '</p></div>';
+}).join('');
+</script>
+</body>
+</html>

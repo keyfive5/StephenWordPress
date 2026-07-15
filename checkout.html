@@ -1,0 +1,143 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Checkout — All Take Out</title>
+<meta name="robots" content="noindex">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Crect width='24' height='24' rx='7' fill='%231D5B33'/%3E%3Cpath d='M8 6h5a5 5 0 0 1 5 5v5a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2Z' fill='%23FBF9F4'/%3E%3C/svg%3E">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,600;9..144,700&family=DM+Sans:wght@400;500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/css/site.css">
+</head>
+<body data-page="checkout">
+<div id="app-header"></div>
+
+<main id="primary" class="site-main">
+	<div class="page-hero"><div class="container"><h1>Checkout</h1></div></div>
+	<div class="container" id="checkout-root" style="padding-bottom: var(--sp-9);"></div>
+</main>
+
+<div id="app-footer"></div>
+
+<script src="assets/js/data.js"></script>
+<script src="assets/js/store.js"></script>
+<script src="assets/js/main.js"></script>
+<script>
+(function () {
+	var A = window.ATO;
+	var D = window.ATO_DATA;
+	var root = document.getElementById('checkout-root');
+	var mode = 'guest'; // guest | signup | vip
+
+	function stateOptions() {
+		return Object.keys(D.taxRates).map(function (code) {
+			return '<option value="' + code + '">' + D.taxRates[code].name + '</option>';
+		}).join('');
+	}
+
+	function render() {
+		if (!A.getCart().length) {
+			root.innerHTML = '<div class="empty-state"><h2>Nothing to check out</h2><p class="lede">Your cart is empty.</p><a class="btn btn--primary" href="shop.html">Back to the shop</a></div>';
+			return;
+		}
+		var user = A.getUser();
+		if (user) mode = 'vip';
+
+		var accountBlock;
+		if (user) {
+			accountBlock = '<div class="notice"><strong>Welcome back, ' + A.esc(user.name) + '!</strong> ' +
+				(user.vip ? 'VIP benefits applied automatically: free ground shipping' + (user.credit > 0 ? ' and your <strong>' + user.credit + ' complimentary stickers</strong> ship with this order.' : '.') : '') +
+				'</div>';
+		} else {
+			accountBlock =
+				'<h3>How would you like to order?</h3>' +
+				'<div class="choice-cards">' +
+				'<button type="button" class="choice-card is-selected" id="choice-guest"><strong>Guest checkout</strong><span>Quick and simple — no account needed.</span></button>' +
+				'<button type="button" class="choice-card" id="choice-signup"><strong>Create an account</strong><span>Become a VIP while you order.</span><span class="perk">+50 free stickers · free ground shipping</span></button>' +
+				'</div>';
+		}
+
+		root.innerHTML =
+			'<div class="cart-layout" style="padding-block: 0;"><div>' +
+			accountBlock +
+			'<form id="checkout-form"><div class="form-grid" style="margin-top: var(--sp-5);">' +
+			'<div class="field"><label for="f-name">Full name *</label><input id="f-name" required autocomplete="name"></div>' +
+			'<div class="field"><label for="f-email">Email *</label><input id="f-email" type="email" required autocomplete="email"></div>' +
+			'<div class="field full"><label for="f-address">Street address *</label><input id="f-address" required autocomplete="street-address"></div>' +
+			'<div class="field"><label for="f-city">City *</label><input id="f-city" required autocomplete="address-level2"></div>' +
+			'<div class="field"><label for="f-state">State / region *</label><select id="f-state">' + stateOptions() + '</select><span class="hint">Sales tax is calculated per state — try New York vs. Florida.</span></div>' +
+			'<div class="field"><label for="f-zip">ZIP / postal code *</label><input id="f-zip" required autocomplete="postal-code"></div>' +
+			'</div>' +
+			'<div class="notice notice--demo" style="margin-top: var(--sp-5);"><strong>Demo payment.</strong> This preview completes orders without charging a card. At launch this step is Stripe — cards, Apple Pay and Google Pay — using the owner’s own Stripe account.</div>' +
+			'<button type="submit" class="btn btn--accent btn--lg" style="margin-top: var(--sp-4);">Place order</button>' +
+			'</form></div>' +
+			'<aside class="summary-card" id="summary-box"></aside></div>';
+
+		if (!user) {
+			document.getElementById('choice-guest').addEventListener('click', function () { setMode('guest', this); });
+			document.getElementById('choice-signup').addEventListener('click', function () { setMode('signup', this); });
+		}
+		document.getElementById('f-state').addEventListener('change', renderSummary);
+		document.getElementById('checkout-form').addEventListener('submit', submit);
+		renderSummary();
+	}
+
+	function setMode(m, card) {
+		mode = m;
+		document.querySelectorAll('.choice-card').forEach(function (c) { c.classList.remove('is-selected'); });
+		card.classList.add('is-selected');
+		renderSummary();
+	}
+
+	function renderSummary() {
+		var stateCode = (document.getElementById('f-state') || {}).value || 'OTHER';
+		// VIP shipping preview also applies when the shopper chose "create account".
+		var t = A.cartTotals(stateCode);
+		var vipPreview = (mode === 'signup') && !(A.getUser() && A.getUser().vip);
+		var shipping = vipPreview ? 0 : t.shipping;
+		var shippingCell = (t.shippingFree || vipPreview) ? '<span class="free">FREE — VIP</span>' : A.money(t.shipping);
+		var total = t.subtotal + shipping + t.tax;
+		document.getElementById('summary-box').innerHTML =
+			'<h3>Order summary</h3>' +
+			'<div class="summary-row"><span>Subtotal</span><span>' + A.money(t.subtotal) + '</span></div>' +
+			'<div class="summary-row"><span>Ground shipping</span><span>' + shippingCell + '</span></div>' +
+			'<div class="summary-row"><span>Sales tax — ' + t.taxName + ' (' + t.taxRate + '%)</span><span>' + A.money(t.tax) + '</span></div>' +
+			'<div class="summary-row total"><span>Total</span><span>' + A.money(total) + '</span></div>' +
+			(mode === 'signup' ? '<div class="credit-chip" style="width:100%;">' + D.icon('gift', 22) + ' 50 free stickers join this order</div>' : '');
+	}
+
+	function submit(e) {
+		e.preventDefault();
+		var name = document.getElementById('f-name').value.trim();
+		var email = document.getElementById('f-email').value.trim();
+		var stateCode = document.getElementById('f-state').value;
+		if (!name || !email) return;
+
+		if (mode === 'signup' && !A.getUser()) {
+			A.signup(name, email); // VIP role + 50-sticker credit, exactly per the flow document
+		}
+		var order = A.placeOrder({
+			name: name,
+			email: email,
+			address: document.getElementById('f-address').value.trim(),
+			city: document.getElementById('f-city').value.trim(),
+			zip: document.getElementById('f-zip').value.trim()
+		}, stateCode, mode);
+
+		var log = order.log.map(function (l) { return '<li>' + A.esc(l.note) + '</li>'; }).join('');
+		root.innerHTML =
+			'<div class="container--narrow" style="margin-inline:auto; text-align:center; padding-block: var(--sp-7);">' +
+			'<span class="eyebrow">Order confirmed</span>' +
+			'<h2>Thank you' + (mode !== 'guest' ? ', VIP' : '') + '! Order <span class="mark"><span>' + order.id + '</span></span> is in.</h2>' +
+			'<p class="lede">Total ' + A.money(order.totals.total + (order.vip || mode === 'signup' ? 0 : 0)) + ' · ' + order.items.length + ' item(s) · status: <span class="badge badge--paid">' + order.status + '</span></p>' +
+			'<div class="notice" style="text-align:left;"><strong>Order activity log</strong> (full traceability, per the spec):<ul class="log-list">' + log + '</ul></div>' +
+			'<p style="margin-top: var(--sp-5);"><a class="btn btn--primary" href="account.html">View my account</a> ' +
+			'<a class="btn btn--ghost" href="admin.html">See it in the admin panel</a></p></div>';
+		window.scrollTo(0, 0);
+	}
+
+	render();
+})();
+</script>
+</body>
+</html>

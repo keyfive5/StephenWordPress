@@ -1,0 +1,73 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Cart — All Take Out</title>
+<meta name="robots" content="noindex">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Crect width='24' height='24' rx='7' fill='%231D5B33'/%3E%3Cpath d='M8 6h5a5 5 0 0 1 5 5v5a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2Z' fill='%23FBF9F4'/%3E%3C/svg%3E">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,600;9..144,700&family=DM+Sans:wght@400;500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/css/site.css">
+</head>
+<body data-page="cart">
+<div id="app-header"></div>
+
+<main id="primary" class="site-main">
+	<div class="page-hero"><div class="container"><h1>Cart</h1></div></div>
+	<div class="container cart-layout" id="cart-root"></div>
+</main>
+
+<div id="app-footer"></div>
+
+<script src="assets/js/data.js"></script>
+<script src="assets/js/store.js"></script>
+<script src="assets/js/main.js"></script>
+<script>
+(function () {
+	var A = window.ATO;
+
+	function render() {
+		var cart = A.getCart();
+		var root = document.getElementById('cart-root');
+		if (!cart.length) {
+			root.innerHTML = '<div class="empty-state" style="grid-column: 1 / -1;"><div class="num">0</div>' +
+				'<h2>Your cart is empty</h2><p class="lede">Design a label and it will land here, preview and all.</p>' +
+				'<a class="btn btn--primary btn--lg" href="shop.html">Go to the shop</a></div>';
+			return;
+		}
+		var rows = cart.map(function (item, i) {
+			var cfg = item.config || {};
+			var conf = [cfg.template, cfg.material, cfg.size, cfg.shape].filter(Boolean).join(' · ');
+			return '<tr>' +
+				'<td>' + (item.preview ? '<img class="design-thumb" src="' + item.preview + '" alt="Design ' + A.esc(item.designRef) + '">' : '—') + '</td>' +
+				'<td><strong>' + A.esc(item.name) + '</strong>' +
+				'<span class="cart-config">' + A.esc(conf) + '</span>' +
+				'<span class="cart-config">Design ' + A.esc(item.designRef) + ' · ' + item.qty + ' labels/pack · ' + item.packs + ' pack(s)</span></td>' +
+				'<td style="text-align:right; font-weight:700;">' + A.money(item.price * item.packs) + '</td>' +
+				'<td><button class="remove-link" data-i="' + i + '">Remove</button></td>' +
+				'</tr>';
+		}).join('');
+		var t = A.cartTotals('OTHER');
+		root.innerHTML =
+			'<div><table class="ato-table"><thead><tr><th>Design</th><th>Item</th><th style="text-align:right;">Total</th><th></th></tr></thead>' +
+			'<tbody>' + rows + '</tbody></table></div>' +
+			'<aside class="summary-card"><h3>Order summary</h3>' +
+			'<div class="summary-row"><span>Subtotal</span><span>' + A.money(t.subtotal) + '</span></div>' +
+			'<div class="summary-row"><span>Ground shipping</span><span>' + (t.shippingFree ? '<span class="free">FREE — VIP</span>' : A.money(t.shipping)) + '</span></div>' +
+			'<div class="summary-row"><span>Taxes</span><span>calculated at checkout</span></div>' +
+			'<div class="summary-row total"><span>Estimated total</span><span>' + A.money(t.subtotal + t.shipping) + '</span></div>' +
+			'<a class="btn btn--accent btn--lg" href="checkout.html" style="width:100%; margin-top: var(--sp-4);">Proceed to checkout</a>' +
+			'</aside>';
+
+		root.querySelectorAll('.remove-link').forEach(function (btn) {
+			btn.addEventListener('click', function () {
+				A.removeFromCart(parseInt(btn.getAttribute('data-i'), 10));
+				render();
+			});
+		});
+	}
+	render();
+})();
+</script>
+</body>
+</html>

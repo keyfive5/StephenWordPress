@@ -1,0 +1,47 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Three QR codes every restaurant should be printing — All Take Out</title>
+<meta name="description" content="Menu, reviews, loyalty — where a two-centimetre square earns its keep on your takeout packaging.">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Crect width='24' height='24' rx='7' fill='%231D5B33'/%3E%3Cpath d='M8 6h5a5 5 0 0 1 5 5v5a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2Z' fill='%23FBF9F4'/%3E%3C/svg%3E">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,600;9..144,700&family=DM+Sans:wght@400;500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../assets/css/site.css">
+</head>
+<body data-page="blog">
+<div id="app-header"></div>
+
+<main id="primary" class="site-main">
+	<div class="page-hero">
+		<div class="container container--narrow">
+			<div class="post-meta" style="margin-bottom: var(--sp-3);"><span>July 2026</span><span>QR codes</span></div>
+			<h1>Three QR codes every restaurant should be printing</h1>
+		</div>
+	</div>
+	<article class="article-body container">
+		<p class="lede">A QR sticker costs cents and works around the clock. These are the three links that earn their keep.</p>
+		<h2>1. The menu</h2>
+		<p>On the bag, on the box, at the counter — customers reorder faster when the menu is one scan away, and you never reprint paper menus after a price change.</p>
+		<h2>2. The review page</h2>
+		<p>The best moment to ask for a review is right when the food arrives hot. A "loved it? tell Google" sticker on the lid catches customers at peak happiness.</p>
+		<h2>3. The loyalty signup</h2>
+		<p>Turn delivery-app customers into direct customers. A scan-to-join sticker moves them onto your own list, where the margin lives.</p>
+		<p>Our editor generates the QR code for you — paste the link, place it on the label, done.</p>
+		<p><a class="btn btn--primary" href="../product.html?p=qr-menu-label">Make a QR label now</a></p>
+	</article>
+</main>
+
+<div id="app-footer"></div>
+
+<script src="../assets/js/data.js"></script>
+<script src="../assets/js/store.js"></script>
+<script src="../assets/js/main.js"></script>
+<script>
+document.querySelectorAll('header a, footer a').forEach(function (a) {
+	var href = a.getAttribute('href');
+	if (href && !/^(https?:|#|\.\.\/)/.test(href)) a.setAttribute('href', '../' + href);
+});
+</script>
+</body>
+</html>

@@ -1,0 +1,7 @@
+User-agent: *
+Allow: /
+Disallow: /admin.html
+Disallow: /cart.html
+Disallow: /checkout.html
+Disallow: /account.html
+Sitemap: https://keyfive5.github.io/StephenWordPress/sitemap.xml

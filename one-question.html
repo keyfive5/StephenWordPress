@@ -1,0 +1,113 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>One Question — All Take Out</title>
+<meta name="description" content="One quick question — see live results the moment you answer.">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Crect width='24' height='24' rx='7' fill='%231D5B33'/%3E%3Cpath d='M8 6h5a5 5 0 0 1 5 5v5a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2Z' fill='%23FBF9F4'/%3E%3C/svg%3E">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,600;9..144,700&family=DM+Sans:wght@400;500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/css/site.css">
+<style>
+	/* Poll visual language matched to the design system */
+	.ato-poll { max-width: 620px; margin: 0 auto var(--sp-8); padding: var(--sp-6); background: var(--white); border: 1px solid var(--color-border); border-radius: var(--radius-lg); box-shadow: var(--shadow-md); }
+	.ato-poll-question { margin: 0 0 var(--sp-5); font-size: var(--text-xl); }
+	.ato-poll-options { display: grid; gap: var(--sp-3); }
+	.ato-poll-options[hidden], .ato-poll-results[hidden] { display: none; }
+	.ato-poll-option { min-height: 48px; padding: 0.7rem 1.25rem; border: 2px solid var(--color-border); border-radius: var(--radius-pill); background: var(--white); font: inherit; font-weight: 700; cursor: pointer; text-align: left; transition: border-color 180ms var(--ease-out), transform 180ms var(--ease-out); }
+	.ato-poll-option:hover { border-color: var(--green-700); transform: translateY(-1px); }
+	.ato-poll-results { display: grid; gap: var(--sp-4); }
+	.ato-poll-row-head { display: flex; justify-content: space-between; margin-bottom: 6px; gap: var(--sp-4); }
+	.ato-poll-label { font-weight: 700; }
+	.ato-poll-pct { font-weight: 700; color: var(--green-700); font-variant-numeric: tabular-nums; }
+	.ato-poll-row.is-choice .ato-poll-pct { color: var(--accent); }
+	.ato-poll-bar { height: 12px; border-radius: var(--radius-pill); background: var(--paper-2); overflow: hidden; }
+	.ato-poll-bar i { display: block; height: 100%; width: 0; border-radius: var(--radius-pill); background: var(--green-700); transition: width 900ms var(--ease-out); }
+	.ato-poll-row.is-choice .ato-poll-bar i { background: var(--accent); }
+	.ato-poll-total { margin: var(--sp-2) 0 0; font-size: var(--text-xs); color: var(--ink-faint); }
+</style>
+</head>
+<body data-page="poll">
+<div id="app-header"></div>
+
+<main id="primary" class="site-main">
+	<div class="page-hero">
+		<div class="container">
+			<span class="eyebrow">One question</span>
+			<h1>Thirty seconds, one answer</h1>
+			<p class="lede">Answer once and watch the live results count up — every response shapes what we print next.</p>
+		</div>
+	</div>
+
+	<div class="container">
+		<div class="ato-poll" data-poll="atoq1" data-voted="0" id="the-poll">
+			<h3 class="ato-poll-question">Would custom-branded labels make you order takeout from a restaurant again?</h3>
+			<div class="ato-poll-options">
+				<button type="button" class="ato-poll-option" data-choice="0">Yes, absolutely</button>
+				<button type="button" class="ato-poll-option" data-choice="1">Maybe</button>
+				<button type="button" class="ato-poll-option" data-choice="2">No difference to me</button>
+			</div>
+			<div class="ato-poll-results" hidden aria-live="polite">
+				<div class="ato-poll-row" data-choice="0"><div class="ato-poll-row-head"><span class="ato-poll-label">Yes, absolutely</span><span class="ato-poll-pct" data-pct="0">0%</span></div><div class="ato-poll-bar"><i style="width:0%"></i></div></div>
+				<div class="ato-poll-row" data-choice="1"><div class="ato-poll-row-head"><span class="ato-poll-label">Maybe</span><span class="ato-poll-pct" data-pct="0">0%</span></div><div class="ato-poll-bar"><i style="width:0%"></i></div></div>
+				<div class="ato-poll-row" data-choice="2"><div class="ato-poll-row-head"><span class="ato-poll-label">No difference to me</span><span class="ato-poll-pct" data-pct="0">0%</span></div><div class="ato-poll-bar"><i style="width:0%"></i></div></div>
+				<p class="ato-poll-total">0 votes so far</p>
+			</div>
+		</div>
+	</div>
+</main>
+
+<div id="app-footer"></div>
+
+<script src="assets/js/data.js"></script>
+<script src="assets/js/store.js"></script>
+<script src="assets/js/main.js"></script>
+<script>
+// Poll persistence: seeded baseline + local votes (a shared counter at
+// launch — same UI, the endpoint swaps in).
+(function () {
+	var KEY = 'ato_poll_atoq1';
+	var seed = { 0: 84, 1: 37, 2: 16 };
+	function counts() {
+		var extra;
+		try { extra = JSON.parse(window.localStorage.getItem(KEY) || '{}'); } catch (e) { extra = {}; }
+		var out = {}; var total = 0;
+		[0, 1, 2].forEach(function (i) { out[i] = seed[i] + (extra['c' + i] || 0); total += out[i]; });
+		return { counts: out, total: total, voted: !!extra.voted };
+	}
+	window.atoPollData = { ajaxUrl: '/ato-poll', nonce: 'custom' };
+	var realFetch = window.fetch.bind(window);
+	window.fetch = function (url, opts) {
+		if (typeof url === 'string' && url.indexOf('/ato-poll') === 0) {
+			var choice = 0;
+			try { choice = parseInt(opts.body.get('choice'), 10); } catch (e) {}
+			var extra;
+			try { extra = JSON.parse(window.localStorage.getItem(KEY) || '{}'); } catch (e) { extra = {}; }
+			extra['c' + choice] = (extra['c' + choice] || 0) + 1;
+			extra.voted = true;
+			window.localStorage.setItem(KEY, JSON.stringify(extra));
+			var c = counts();
+			var pcts = {};
+			[0, 1, 2].forEach(function (i) { pcts[i] = Math.round(c.counts[i] * 100 / c.total); });
+			return Promise.resolve({ json: function () { return Promise.resolve({ success: true, data: { percentages: pcts, total: c.total } }); } });
+		}
+		return realFetch(url, opts);
+	};
+	// If this visitor already voted, render results state before poll.js binds.
+	var c = counts();
+	if (c.voted) {
+		var poll = document.getElementById('the-poll');
+		poll.setAttribute('data-voted', '1');
+		poll.querySelector('.ato-poll-options').hidden = true;
+		poll.querySelector('.ato-poll-results').hidden = false;
+		poll.querySelectorAll('.ato-poll-row').forEach(function (row) {
+			var i = parseInt(row.getAttribute('data-choice'), 10);
+			row.querySelector('.ato-poll-pct').setAttribute('data-pct', String(Math.round(c.counts[i] * 100 / c.total)));
+		});
+		poll.querySelector('.ato-poll-total').textContent = c.total + ' votes so far';
+	}
+})();
+</script>
+<script src="assets/js/poll.js"></script>
+</body>
+</html>

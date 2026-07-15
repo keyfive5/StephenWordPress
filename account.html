@@ -1,0 +1,79 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>My Account — All Take Out</title>
+<meta name="robots" content="noindex">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Crect width='24' height='24' rx='7' fill='%231D5B33'/%3E%3Cpath d='M8 6h5a5 5 0 0 1 5 5v5a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2Z' fill='%23FBF9F4'/%3E%3C/svg%3E">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,600;9..144,700&family=DM+Sans:wght@400;500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/css/site.css">
+</head>
+<body data-page="account">
+<div id="app-header"></div>
+
+<main id="primary" class="site-main">
+	<div class="page-hero"><div class="container"><h1>My Account</h1></div></div>
+	<div class="container" id="account-root" style="padding-bottom: var(--sp-9);"></div>
+</main>
+
+<div id="app-footer"></div>
+
+<script src="assets/js/data.js"></script>
+<script src="assets/js/store.js"></script>
+<script src="assets/js/main.js"></script>
+<script>
+(function () {
+	var A = window.ATO;
+	var D = window.ATO_DATA;
+	var root = document.getElementById('account-root');
+
+	function render() {
+		var user = A.getUser();
+		if (!user) {
+			root.innerHTML =
+				'<div class="container--narrow" style="margin-inline:auto;">' +
+				'<h2>Join free — become a VIP</h2>' +
+				'<p class="lede">Create an account and 50 complimentary stickers plus free ground shipping are yours. You can also join in one step during checkout.</p>' +
+				'<form id="signup-form"><div class="form-grid">' +
+				'<div class="field"><label for="s-name">Full name *</label><input id="s-name" required autocomplete="name"></div>' +
+				'<div class="field"><label for="s-email">Email *</label><input id="s-email" type="email" required autocomplete="email"></div>' +
+				'</div><p class="hint" style="color:var(--ink-faint); font-size:var(--text-xs); margin-top:var(--sp-2);">Demo note: this preview keeps your account in this browser only — no password, nothing sent anywhere. Launch version uses real, secure accounts.</p>' +
+				'<button type="submit" class="btn btn--accent btn--lg" style="margin-top: var(--sp-3);">Create my free account</button></form></div>';
+			document.getElementById('signup-form').addEventListener('submit', function (e) {
+				e.preventDefault();
+				var n = document.getElementById('s-name').value.trim();
+				var m = document.getElementById('s-email').value.trim();
+				if (n && m) { A.signup(n, m); render(); window.scrollTo(0, 0); }
+			});
+			return;
+		}
+
+		var orders = A.listOrders();
+		var orderRows = orders.length ? orders.slice().reverse().map(function (o) {
+			return '<tr><td><strong>' + o.id + '</strong><span class="cart-config">' + o.created + '</span></td>' +
+				'<td>' + o.items.length + ' item(s)</td>' +
+				'<td>' + A.money(o.totals.total) + '</td>' +
+				'<td><span class="badge badge--paid">' + o.status + '</span>' + (o.vip ? ' <span class="badge badge--vip">VIP</span>' : '') + '</td></tr>';
+		}).join('') : '<tr><td colspan="4">No orders yet — <a href="shop.html">design your first label</a>.</td></tr>';
+
+		root.innerHTML =
+			'<div style="display:flex; align-items:center; gap: var(--sp-4); flex-wrap: wrap;">' +
+			'<h2 style="margin:0;">' + A.esc(user.name) + '</h2>' +
+			(user.vip ? '<span class="badge badge--vip">' + D.icon('star', 14) + ' VIP Member</span>' : '') +
+			'<button class="remove-link" id="logout" style="margin-left:auto;">Sign out (demo)</button></div>' +
+			'<div class="credit-chip">' + D.icon('gift', 24) + ' Complimentary sticker balance: <strong>&nbsp;' + user.credit + '</strong>' +
+			(user.creditUsedOn ? '&nbsp;<span style="font-weight:500;">(50 shipped with order ' + user.creditUsedOn + ')</span>' : '') + '</div>' +
+			'<ul class="feature-list" style="max-width: 560px;">' +
+			'<li>' + D.icon('truck', 22) + '<div><strong>Free ground shipping</strong><span> applied automatically at checkout.</span></div></li>' +
+			'<li>' + D.icon('star', 22) + '<div><strong>Priority support</strong><span> — VIP requests are handled first.</span></div></li></ul>' +
+			'<h3 style="margin-top: var(--sp-6);">Order history</h3>' +
+			'<table class="ato-table"><thead><tr><th>Order</th><th>Items</th><th>Total</th><th>Status</th></tr></thead><tbody>' + orderRows + '</tbody></table>';
+
+		document.getElementById('logout').addEventListener('click', function () { A.logout(); render(); });
+	}
+	render();
+})();
+</script>
+</body>
+</html>

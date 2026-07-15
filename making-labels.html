@@ -1,0 +1,79 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Making Labels — All Take Out</title>
+<meta name="description" content="From your browser to our press to your kitchen — how your custom takeout labels get made.">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Crect width='24' height='24' rx='7' fill='%231D5B33'/%3E%3Cpath d='M8 6h5a5 5 0 0 1 5 5v5a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2Z' fill='%23FBF9F4'/%3E%3C/svg%3E">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,600;9..144,700&family=DM+Sans:wght@400;500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/css/site.css">
+</head>
+<body data-page="making">
+<div id="app-header"></div>
+
+<main id="primary" class="site-main">
+	<div class="page-hero">
+		<div class="container">
+			<span class="eyebrow">Behind the press</span>
+			<h1>How your labels get made</h1>
+			<p class="lede">From your browser to our press to your kitchen — here's the whole journey.</p>
+		</div>
+	</div>
+
+	<section class="section" style="padding-top: 0;">
+		<div class="container">
+			<div class="steps" style="grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));">
+				<div class="step reveal"><h3>You design</h3><p>Choose template, material, size, shape and quantity — then make it yours in the drag-and-drop editor with text, images, clipart and QR codes.</p></div>
+				<div class="step reveal"><h3>We review</h3><p>A print specialist checks every design: alignment, bleed, resolution, spelling. If something needs a nudge, we fix it and note it in your order history.</p></div>
+				<div class="step reveal"><h3>We print &amp; cut</h3><p>Commercial presses, food-environment-safe inks and precision die-cutting for clean edges on every shape.</p></div>
+				<div class="step reveal"><h3>You peel &amp; stick</h3><p>Labels arrive on easy-peel liners, ready for bags, boxes, cups and containers.</p></div>
+			</div>
+		</div>
+	</section>
+
+	<section class="section section--kraft">
+		<div class="container split">
+			<div>
+				<span class="eyebrow">Materials</span>
+				<h2>Built for real kitchens</h2>
+				<ul class="feature-list" id="materials-list"></ul>
+			</div>
+			<div class="split-media">
+				<div class="editor-mock" aria-hidden="true">
+					<div class="editor-mock-bar"><i></i><i></i><i></i></div>
+					<div class="editor-mock-body">
+						<div class="editor-mock-tools"><i></i><i></i><i></i><i></i><i></i></div>
+						<div class="editor-mock-canvas"><div class="editor-mock-label">Sealed Fresh</div></div>
+					</div>
+				</div>
+			</div>
+		</div>
+	</section>
+
+	<section class="section text-center">
+		<div class="container container--narrow">
+			<h2>See it for yourself</h2>
+			<p class="lede">Open any product and take the editor for a spin — no account needed.</p>
+			<a class="btn btn--primary btn--lg" href="shop.html">Start a design</a>
+		</div>
+	</section>
+</main>
+
+<div id="app-footer"></div>
+
+<script src="assets/js/data.js"></script>
+<script src="assets/js/store.js"></script>
+<script src="assets/js/main.js"></script>
+<script>
+document.getElementById('materials-list').innerHTML = [
+	['Glossy & matte paper', 'Vivid colour for bags and boxes at everyday prices.'],
+	['Waterproof vinyl', 'Shrugs off condensation on cold drinks and fridge storage.'],
+	['Freezer-safe stock', 'Stays put and stays legible from prep line to freezer.'],
+	['Tamper-evident film', 'Splits cleanly when opened so customers know their order is untouched.']
+].map(function (m) {
+	return '<li>' + window.ATO_DATA.icon('check', 22) + '<div><strong>' + m[0] + '</strong><span>' + m[1] + '</span></div></li>';
+}).join('');
+</script>
+</body>
+</html>

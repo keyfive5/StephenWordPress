@@ -1,0 +1,47 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>FAQs — All Take Out</title>
+<meta name="description" content="Quick answers about ordering, materials, shipping and the label editor.">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Crect width='24' height='24' rx='7' fill='%231D5B33'/%3E%3Cpath d='M8 6h5a5 5 0 0 1 5 5v5a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2Z' fill='%23FBF9F4'/%3E%3C/svg%3E">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,600;9..144,700&family=DM+Sans:wght@400;500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/css/site.css">
+</head>
+<body data-page="faqs">
+<div id="app-header"></div>
+
+<main id="primary" class="site-main">
+	<div class="page-hero">
+		<div class="container">
+			<span class="eyebrow">Help centre</span>
+			<h1>Frequently asked questions</h1>
+			<p class="lede">Quick answers about ordering, materials, shipping and the label editor.</p>
+		</div>
+	</div>
+
+	<div class="container" style="padding-bottom: var(--sp-9);">
+		<div class="faq-list" id="faq-list"></div>
+	</div>
+</main>
+
+<div id="app-footer"></div>
+
+<script src="assets/js/data.js"></script>
+<script src="assets/js/store.js"></script>
+<script src="assets/js/main.js"></script>
+<script>
+document.getElementById('faq-list').innerHTML = [
+	['How long does printing and delivery take?', 'Most orders are printed within 2–3 business days after design approval, then shipped via ground. VIP members always ship free.'],
+	['Do I need design experience to use the editor?', 'Not at all. Pick a template, drop in your logo and text, and our print team gives every design a professional once-over before it prints.'],
+	['What materials can I choose from?', 'Each product lists its available materials — from glossy paper to waterproof vinyl and freezer-safe stock for food identification labels.'],
+	['Can you check my design before printing?', 'Yes — every single order is reviewed by a human. We fix alignment issues and flag anything that looks off before it goes to press.'],
+	['How do the 50 free VIP stickers work?', 'Create an account (even during checkout) and 50 complimentary stickers are credited to you automatically, shipped with your next order.'],
+	['What if my labels arrive damaged?', 'Contact us with a photo and your order number — we reprint and reship at no cost. VIP tickets are prioritized.']
+].map(function (f) {
+	return '<details class="faq-item"><summary>' + f[0] + '</summary><div class="faq-a"><p>' + f[1] + '</p></div></details>';
+}).join('');
+</script>
+</body>
+</html>

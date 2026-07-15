@@ -1,0 +1,65 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Shop — All Take Out</title>
+<meta name="description" content="Custom sticker and label products for restaurants: social media, QR code, promotional, branded, tamper-evident, appreciation and food ID labels.">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Crect width='24' height='24' rx='7' fill='%231D5B33'/%3E%3Cpath d='M8 6h5a5 5 0 0 1 5 5v5a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2Z' fill='%23FBF9F4'/%3E%3C/svg%3E">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,600;9..144,700&family=DM+Sans:wght@400;500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/css/site.css">
+</head>
+<body data-page="shop">
+<div id="app-header"></div>
+
+<main id="primary" class="site-main">
+	<div class="page-hero">
+		<div class="container">
+			<span class="eyebrow">The shop</span>
+			<h1>Every label, made yours</h1>
+			<p class="lede">Pick a product, configure it, then design it live in the editor. Every design is reviewed by our print team before it prints.</p>
+		</div>
+	</div>
+
+	<div class="container" id="shop-sections" style="padding-bottom: var(--sp-9);"></div>
+</main>
+
+<div id="app-footer"></div>
+
+<script src="assets/js/data.js"></script>
+<script src="assets/js/store.js"></script>
+<script src="assets/js/main.js"></script>
+<script>
+(function () {
+	var D = window.ATO_DATA;
+
+	function swatch(p, sizePx) {
+		var square = p.shapeHint !== 'circle' ? ' p-swatch--square' : '';
+		return '<span class="p-swatch' + square + '" style="background:' + p.swatch + '">' + D.icon(p.icon, 48) + '</span>';
+	}
+
+	document.getElementById('shop-sections').innerHTML = D.categories.map(function (cat) {
+		var prods = D.products.filter(function (p) { return p.cat === cat.slug; });
+		if (!prods.length) return '';
+		var subs = cat.subs.length
+			? '<ul class="option-pills">' + cat.subs.map(function (s) { return '<li>' + s + '</li>'; }).join('') + '</ul>'
+			: '';
+		var cards = prods.map(function (p) {
+			var from = p.tiers[0];
+			return '<a class="product-card reveal" href="product.html?p=' + p.slug + '">' +
+				'<span class="product-card-art">' + swatch(p) + '</span>' +
+				'<span class="product-card-body">' +
+				'<span class="p-cat">' + (p.sub || cat.name) + '</span>' +
+				'<h3>' + p.name + '</h3>' +
+				'<span class="p-price">From $' + from.price + ' <span>/ ' + from.qty + ' labels</span></span>' +
+				'</span></a>';
+		}).join('');
+		return '<section class="section--tight" id="' + cat.slug + '" style="padding-top: var(--sp-7);">' +
+			'<div class="section-head"><span class="eyebrow">' + cat.name + '</span>' +
+			'<p class="lede" style="font-size: var(--text-base);">' + cat.desc + '</p>' + subs + '</div>' +
+			'<div class="product-grid">' + cards + '</div></section>';
+	}).join('');
+})();
+</script>
+</body>
+</html>
