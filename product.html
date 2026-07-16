@@ -159,6 +159,19 @@
 	var product = D.productBySlug(new URLSearchParams(location.search).get('p')) || D.products[0];
 	var cat = D.categoryBySlug(product.cat);
 
+	// --- Bundle funnel: 20% off both labels, guided two-step design ---
+	var bundleCtx = null;
+	if (new URLSearchParams(location.search).get('bundle') === '1') {
+		try { bundleCtx = JSON.parse(window.localStorage.getItem('ato_bundle') || 'null'); } catch (e) {}
+	}
+	if (bundleCtx) {
+		var stepLabel = bundleCtx.step === 1 ? 'Step 1 of 2 — Branded Label' : 'Step 2 of 2 — QR Code Label';
+		var banner = document.createElement('div');
+		banner.className = 'notice notice--demo';
+		banner.innerHTML = '<strong>Bundle mode · ' + stepLabel + '.</strong> 20% bundle discount is applied to this label in your cart.';
+		document.querySelector('.product-info').insertBefore(banner, document.querySelector('.product-info').firstChild);
+	}
+
 	document.title = product.name + ' — All Take Out';
 	document.getElementById('p-cat').textContent = product.sub || (cat ? cat.name : '');
 	document.getElementById('p-name').textContent = product.name;
@@ -242,6 +255,9 @@
 		if (!d) return;
 		var qty = parseInt((d.config && d.config.quantity) || product.tiers[0].qty, 10);
 		var packs = Math.max(1, parseInt(document.getElementById('ato-packs').value, 10) || 1);
+		var price = window.ATO.tierPrice(product, qty);
+		var isBundle = !!bundleCtx;
+		if (isBundle) price = Math.round(price * 0.8 * 100) / 100;
 		window.ATO.addToCart({
 			product: product.slug,
 			name: product.name,
@@ -251,9 +267,17 @@
 			preview: d.preview,
 			qty: qty,
 			packs: packs,
-			price: window.ATO.tierPrice(product, qty)
+			price: price,
+			bundle: isBundle
 		});
-		window.location.href = 'cart.html';
+		if (isBundle && bundleCtx.step === 1) {
+			bundleCtx.step = 2;
+			window.localStorage.setItem('ato_bundle', JSON.stringify(bundleCtx));
+			window.location.href = 'product.html?p=' + (bundleCtx.items[1] ? bundleCtx.items[1].slug : 'qr-code-label') + '&bundle=1';
+		} else {
+			if (isBundle) window.localStorage.removeItem('ato_bundle');
+			window.location.href = 'cart.html';
+		}
 	});
 })();
 </script>

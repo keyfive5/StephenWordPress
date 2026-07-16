@@ -1,0 +1,137 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Build My Bundle — Save 20% — All Take Out</title>
+<meta name="description" content="Bundle custom Branded Labels with QR Code Labels and save 20%. Mix and match quantities, sizes, materials and designs.">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Crect width='24' height='24' rx='7' fill='%23E8590C'/%3E%3Cpath d='M8 6h5a5 5 0 0 1 5 5v5a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2Z' fill='%23FBF9F4'/%3E%3C/svg%3E">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,600;9..144,700&family=DM+Sans:wght@400;500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/css/site.css">
+<style>
+	.bundle-grid { display: grid; grid-template-columns: minmax(0, 1.5fr) minmax(0, 1fr); gap: var(--sp-6); align-items: start; padding-block: var(--sp-7); }
+	@media (max-width: 900px) { .bundle-grid { grid-template-columns: 1fr; } }
+	.bundle-step { background: var(--white); border: 1px solid var(--color-border); border-radius: var(--radius-lg); padding: var(--sp-6); margin-bottom: var(--sp-5); }
+	.bundle-step h3 { display: flex; align-items: center; gap: var(--sp-3); margin-top: 0; }
+	.bundle-step h3 .step-num { width: 36px; height: 36px; border-radius: 50%; background: var(--green-700); color: var(--white); display: inline-grid; place-items: center; font-family: var(--font-body); font-size: var(--text-base); flex: none; }
+	.tier-pills { display: flex; flex-wrap: wrap; gap: var(--sp-2); }
+	.tier-pill { min-height: 48px; padding: 0.5rem 1.1rem; border: 2px solid var(--color-border); border-radius: var(--radius-pill); background: var(--white); font: inherit; font-weight: 700; cursor: pointer; }
+	.tier-pill.is-selected { border-color: var(--accent); box-shadow: 0 0 0 3px rgba(232, 89, 12, 0.18); }
+	.tier-pill s { color: var(--ink-faint); font-weight: 500; margin-right: 6px; }
+	.tier-pill .now { color: var(--accent); }
+	.bundle-tpl-preview { display: flex; gap: var(--sp-3); margin-top: var(--sp-4); flex-wrap: wrap; }
+	.bundle-tpl-preview img { height: 74px; border: 1px solid var(--color-border); border-radius: var(--radius-sm); background: var(--white); padding: 4px; }
+</style>
+</head>
+<body data-page="bundle">
+<div id="app-header"></div>
+
+<main id="primary" class="site-main">
+	<div class="page-hero">
+		<div class="container">
+			<span class="eyebrow">Bundle &amp; save 20%</span>
+			<h1>Build your bundle, your way</h1>
+			<p class="lede">Every restaurant is different, which is why every bundle is fully customizable. Pair Branded Labels with QR Code Labels — mix and match quantities — and save 20% on both.</p>
+		</div>
+	</div>
+
+	<div class="container bundle-grid">
+		<div>
+			<div class="bundle-step">
+				<h3><span class="step-num">1</span> Choose your Branded Label quantity</h3>
+				<p class="lede" style="font-size: var(--text-sm);">Your logo and colours on every order that leaves the kitchen. You'll design it in the editor next.</p>
+				<div class="tier-pills" id="branded-tiers"></div>
+				<div class="bundle-tpl-preview" id="branded-preview"></div>
+			</div>
+
+			<div class="bundle-step">
+				<h3><span class="step-num">2</span> Choose your QR Code Label quantity</h3>
+				<p class="lede" style="font-size: var(--text-sm);">Menus, Google reviews, loyalty, social — the editor generates the QR code for you.</p>
+				<div class="tier-pills" id="qr-tiers"></div>
+				<div class="bundle-tpl-preview" id="qr-preview"></div>
+			</div>
+
+			<div class="bundle-step">
+				<h3><span class="step-num">3</span> Design both labels</h3>
+				<p class="lede" style="font-size: var(--text-sm);">Hit the button and we'll walk you through the editor twice — once per label. Sizes, materials, shapes and templates are chosen there. Then check out once, with 20% off the whole bundle.</p>
+				<button class="btn btn--accent btn--lg" id="start-bundle">Start designing my bundle</button>
+			</div>
+		</div>
+
+		<aside class="summary-card">
+			<h3>Bundle summary</h3>
+			<div class="summary-row"><span id="sum-branded-label">Branded Labels</span><span id="sum-branded"></span></div>
+			<div class="summary-row"><span id="sum-qr-label">QR Code Labels</span><span id="sum-qr"></span></div>
+			<div class="summary-row"><span>Bundle discount</span><span class="free">−20%</span></div>
+			<div class="summary-row total"><span>Bundle total <span style="font-weight:500;font-size:var(--text-xs);">(USD)</span></span><span id="sum-total"></span></div>
+			<p style="font-size: var(--text-xs); color: var(--ink-faint); margin-top: var(--sp-3);">You save <strong id="sum-savings"></strong> vs. buying separately. VIP members also get 50 extra labels with every regular-priced roll or bundle.</p>
+		</aside>
+	</div>
+</main>
+
+<div id="app-footer"></div>
+
+<script src="assets/js/data.js"></script>
+<script src="assets/js/store.js"></script>
+<script src="assets/js/main.js"></script>
+<script>
+(function () {
+	var D = window.ATO_DATA;
+	var A = window.ATO;
+	var branded = D.productBySlug('branded-label');
+	var qr = D.productBySlug('qr-code-label');
+	var sel = { branded: branded.tiers[1], qr: qr.tiers[1] }; // default 250s
+
+	function pills(el, product, key) {
+		el.innerHTML = product.tiers.map(function (t, i) {
+			var disc = Math.round(t.price * 0.8 * 100) / 100;
+			return '<button type="button" class="tier-pill' + (sel[key].qty === t.qty ? ' is-selected' : '') + '" data-i="' + i + '">' +
+				t.qty + ' labels — <s>$' + t.price + '</s> <span class="now">$' + disc.toFixed(2) + '</span></button>';
+		}).join('');
+		el.querySelectorAll('.tier-pill').forEach(function (btn) {
+			btn.addEventListener('click', function () {
+				sel[key] = product.tiers[parseInt(btn.getAttribute('data-i'), 10)];
+				render();
+			});
+		});
+	}
+
+	function previews(el, product) {
+		el.innerHTML = product.templates.filter(function (t) { return t.image; }).slice(0, 4).map(function (t) {
+			return '<img src="' + t.image + '" alt="' + A.esc(t.name) + '" title="' + A.esc(t.name) + '" loading="lazy">';
+		}).join('');
+	}
+
+	function render() {
+		pills(document.getElementById('branded-tiers'), branded, 'branded');
+		pills(document.getElementById('qr-tiers'), qr, 'qr');
+		var full = sel.branded.price + sel.qr.price;
+		var total = Math.round(full * 0.8 * 100) / 100;
+		document.getElementById('sum-branded-label').textContent = 'Branded Labels × ' + sel.branded.qty;
+		document.getElementById('sum-qr-label').textContent = 'QR Code Labels × ' + sel.qr.qty;
+		document.getElementById('sum-branded').textContent = A.money(sel.branded.price);
+		document.getElementById('sum-qr').textContent = A.money(sel.qr.price);
+		document.getElementById('sum-total').textContent = A.money(total);
+		document.getElementById('sum-savings').textContent = A.money(full - total);
+	}
+
+	previews(document.getElementById('branded-preview'), branded);
+	previews(document.getElementById('qr-preview'), qr);
+	render();
+
+	document.getElementById('start-bundle').addEventListener('click', function () {
+		var ctx = {
+			step: 1,
+			items: [
+				{ slug: 'branded-label', qty: sel.branded.qty },
+				{ slug: 'qr-code-label', qty: sel.qr.qty }
+			],
+			started: Date.now()
+		};
+		window.localStorage.setItem('ato_bundle', JSON.stringify(ctx));
+		window.location.href = 'product.html?p=branded-label&bundle=1';
+	});
+})();
+</script>
+</body>
+</html>

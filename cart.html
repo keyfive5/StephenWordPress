@@ -40,7 +40,7 @@
 			var conf = [cfg.template, cfg.material, cfg.size, cfg.shape].filter(Boolean).join(' · ');
 			return '<tr>' +
 				'<td>' + (item.preview ? '<img class="design-thumb" src="' + item.preview + '" alt="Design ' + A.esc(item.designRef) + '">' : '—') + '</td>' +
-				'<td><strong>' + A.esc(item.name) + '</strong>' +
+				'<td><strong>' + A.esc(item.name) + '</strong>' + (item.bundle ? ' <span class="badge badge--vip">Bundle −20%</span>' : '') +
 				'<span class="cart-config">' + A.esc(conf) + '</span>' +
 				'<span class="cart-config">Design ' + A.esc(item.designRef) + ' · ' + item.qty + ' labels/pack · ' + item.packs + ' pack(s)</span></td>' +
 				'<td style="text-align:right; font-weight:700;">' + A.money(item.price * item.packs) + '</td>' +
@@ -55,7 +55,7 @@
 			'<div class="summary-row"><span>Subtotal</span><span>' + A.money(t.subtotal) + '</span></div>' +
 			'<div class="summary-row"><span>Ground shipping</span><span>' + (t.shippingFree ? '<span class="free">FREE — VIP</span>' : A.money(t.shipping)) + '</span></div>' +
 			'<div class="summary-row"><span>Taxes</span><span>calculated at checkout</span></div>' +
-			'<div class="summary-row total"><span>Estimated total</span><span>' + A.money(t.subtotal + t.shipping) + '</span></div>' +
+			'<div class="summary-row total"><span>Estimated total <span style="font-weight:500;font-size:var(--text-xs);">(USD)</span></span><span>' + A.money(t.subtotal + t.shipping) + '</span></div>' +
 			'<a class="btn btn--accent btn--lg" href="checkout.html" style="width:100%; margin-top: var(--sp-4);">Proceed to checkout</a>' +
 			'</aside>';
 

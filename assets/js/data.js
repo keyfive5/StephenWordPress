@@ -103,7 +103,7 @@
 		product('qr-code-label', 'QR Code Label', 'qr-code-labels', '', 'qr', 'square', '#1D5B33',
 			'Paste a link — the editor generates the QR code. Four layouts: from a blank QR canvas to menu and thank-you designs.',
 			[
-				tpl('Generate your QR', 'qr-generate.png', { x: 0.06, y: 0.06, w: 0.88, h: 0.88 }),
+				tpl('Generate your QR', 'qr-generate.png', { x: 0.01, y: 0.01, w: 0.98, h: 0.98 }),
 				tpl('Our Menu — scan here', 'qr-menu.png', { x: 0.06, y: 0.29, w: 0.88, h: 0.57 }),
 				tpl('Thank You + QR', 'qr-thankyou.png', { x: 0.03, y: 0.07, w: 0.27, h: 0.86 }),
 				tpl('Social Media + QR', 'qr-social.png', { x: 0.03, y: 0.07, w: 0.27, h: 0.86 })
@@ -111,14 +111,14 @@
 		product('promo-label', 'Promotional Label', 'promotional-labels', '', 'tag', 'rectangle', '#E8590C',
 			'Create your own promotion: sales, launches and limited offers on a full-canvas template.',
 			[
-				tpl('Portrait', 'promo-rect.png', { x: 0.08, y: 0.06, w: 0.84, h: 0.88 }),
-				tpl('Square', 'promo-square.png', { x: 0.06, y: 0.06, w: 0.88, h: 0.88 })
+				tpl('Portrait', 'promo-rect.png', { x: 0.01, y: 0.01, w: 0.98, h: 0.98 }),
+				tpl('Square', 'promo-square.png', { x: 0.01, y: 0.01, w: 0.98, h: 0.98 })
 			]),
 		product('branded-label', 'Branded Label', 'branded-labels', '', 'badge', 'rectangle', '#1D5B33',
 			'Your logo, your colours — a full printable canvas in two formats.',
 			[
-				tpl('Portrait', 'brand-rect.png', { x: 0.08, y: 0.06, w: 0.84, h: 0.88 }),
-				tpl('Square', 'brand-square.png', { x: 0.06, y: 0.06, w: 0.88, h: 0.88 })
+				tpl('Portrait', 'brand-rect.png', { x: 0.01, y: 0.01, w: 0.98, h: 0.98 }),
+				tpl('Square', 'brand-square.png', { x: 0.01, y: 0.01, w: 0.98, h: 0.98 })
 			]),
 		product('tamper-seal', 'Tamper-Evident Seal', 'tamper-evident-labels', '', 'shield', 'rectangle', '#1B2A20',
 			'Splits cleanly when opened — customers see their food arrives untouched.', null),
@@ -164,7 +164,20 @@
 		{ file: 'heart.svg', label: 'Heart' },
 		{ file: 'leaf.svg', label: 'Leaf' },
 		{ file: 'chef-hat.svg', label: 'Chef hat' },
-		{ file: 'sparkle.svg', label: 'Sparkle' }
+		{ file: 'sparkle.svg', label: 'Sparkle' },
+		{ file: 'taco.svg', label: 'Taco' },
+		{ file: 'sushi.svg', label: 'Sushi' },
+		{ file: 'cupcake.svg', label: 'Cupcake' },
+		{ file: 'icecream.svg', label: 'Ice cream' },
+		{ file: 'drink.svg', label: 'Drink cup' },
+		{ file: 'bowl.svg', label: 'Noodle bowl' },
+		{ file: 'bread.svg', label: 'Bread' },
+		{ file: 'apple.svg', label: 'Apple' },
+		{ file: 'chili.svg', label: 'Chili — spicy' },
+		{ file: 'snowflake.svg', label: 'Snowflake — frozen' },
+		{ file: 'crown.svg', label: 'Crown' },
+		{ file: 'thumbsup.svg', label: 'Thumbs up' },
+		{ file: 'badge100.svg', label: '100% badge' }
 	];
 
 	// The One Question poll (per client spec): changing the id replaces the

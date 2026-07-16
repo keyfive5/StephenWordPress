@@ -23,6 +23,41 @@
 		try { window.localStorage.setItem(key, JSON.stringify(value)); } catch (e) { /* storage full */ }
 	}
 
+	// Products added/edited in the admin dashboard live in localStorage and
+	// merge over the base catalog (API-backed at launch, same shape).
+	(function mergeProducts() {
+		read('ato_products', []).forEach(function (p) { D.products.push(p); });
+		var overrides = read('ato_product_overrides', {});
+		D.products.forEach(function (prod) {
+			var o = overrides[prod.slug];
+			if (o) {
+				Object.keys(o).forEach(function (k) { prod[k] = o[k]; });
+			}
+		});
+	})();
+
+	function addProduct(prod) {
+		var list = read('ato_products', []);
+		list.push(prod);
+		write('ato_products', list);
+		D.products.push(prod);
+	}
+	function updateProduct(slug, partial) {
+		var overrides = read('ato_product_overrides', {});
+		overrides[slug] = Object.assign(overrides[slug] || {}, partial);
+		write('ato_product_overrides', overrides);
+		D.products.forEach(function (prod) {
+			if (prod.slug === slug) {
+				Object.keys(partial).forEach(function (k) { prod[k] = partial[k]; });
+			}
+		});
+	}
+	function removeCustomProduct(slug) {
+		write('ato_products', read('ato_products', []).filter(function (p) { return p.slug !== slug; }));
+		var i = D.products.findIndex(function (p) { return p.slug === slug && p.custom; });
+		if (i > -1) D.products.splice(i, 1);
+	}
+
 	function uid(prefix) {
 		return prefix + '-' + Math.random().toString(36).slice(2, 8).toUpperCase();
 	}
@@ -130,10 +165,9 @@
 	function getUser() { return read('ato_user', null); }
 
 	function signup(name, email) {
-		var user = {
-			name: name, email: email, vip: true,
-			credit: 50, since: now()
-		};
+		// VIP (per the client's BP #7): 50 extra labels ship with EVERY
+		// regular-priced order + free ground shipping. No fees, no balance.
+		var user = { name: name, email: email, vip: true, since: now() };
 		write('ato_user', user);
 		updateBadge();
 		return user;
@@ -150,8 +184,8 @@
 		var user = getUser();
 		var log = [{ time: now(), note: 'Order created (' + mode + ').' }];
 		log.push({ time: now(), note: 'Payment confirmed — demo gateway (Stripe connects at launch).' });
-		if (user && user.vip && user.credit > 0) {
-			log.push({ time: now(), note: 'VIP: ' + user.credit + ' complimentary stickers included with this shipment.' });
+		if (user && user.vip) {
+			log.push({ time: now(), note: 'VIP: 50 extra labels included with this order — every order, every time.' });
 		}
 		var cart = getCart();
 		cart.forEach(function (item) {
@@ -172,11 +206,6 @@
 		var orders = listOrders();
 		orders.push(order);
 		write('ato_orders', orders);
-		if (user && user.vip && user.credit > 0) {
-			user.credit = 0; // credit rides along with this order
-			user.creditUsedOn = order.id;
-			write('ato_user', user);
-		}
 		clearCart();
 		return order;
 	}
@@ -260,6 +289,7 @@
 	// Header / footer
 	// ------------------------------------------------------------------
 	var NAV = [
+		{ href: 'bundle.html', label: 'Bundle & Save', page: 'bundle' },
 		{ href: 'shop.html', label: 'Shop', page: 'shop' },
 		{ href: 'vip.html', label: 'VIP Members', page: 'vip' },
 		{ href: 'making-labels.html', label: 'Making Labels', page: 'making' },
@@ -286,7 +316,7 @@
 			'<div class="header-actions">' +
 			'<a class="cart-link" href="account.html" aria-label="Account" title="' + (user ? esc(user.name) : 'Account') + '">' + D.icon('user', 20) + '</a>' +
 			'<a class="cart-link" href="cart.html" aria-label="View cart">' + D.icon('cart', 20) + '<span class="cart-count" id="ato-cart-count">0</span></a>' +
-			'<a class="btn btn--primary btn--sm header-cta" href="shop.html">Design your labels</a>' +
+			'<a class="btn btn--accent btn--sm header-cta" href="bundle.html">Build my bundle</a>' +
 			'<button class="nav-toggle" id="nav-toggle" aria-expanded="false" aria-controls="main-nav" aria-label="Open menu">' + D.icon('menu', 22) + '</button>' +
 			'</div></div></header>';
 	}
@@ -370,6 +400,9 @@
 		listOrders: listOrders,
 		placeOrder: placeOrder,
 		updateBadge: updateBadge,
+		addProduct: addProduct,
+		updateProduct: updateProduct,
+		removeCustomProduct: removeCustomProduct,
 		pollState: pollState,
 		pollVote: pollVote,
 		pollArchives: pollArchives,

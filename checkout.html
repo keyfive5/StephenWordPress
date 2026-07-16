@@ -46,14 +46,14 @@
 		var accountBlock;
 		if (user) {
 			accountBlock = '<div class="notice"><strong>Welcome back, ' + A.esc(user.name) + '!</strong> ' +
-				(user.vip ? 'VIP benefits applied automatically: free ground shipping' + (user.credit > 0 ? ' and your <strong>' + user.credit + ' complimentary stickers</strong> ship with this order.' : '.') : '') +
+				(user.vip ? 'VIP benefits applied automatically: free ground shipping and <strong>50 extra labels</strong> ship with this order.' : '') +
 				'</div>';
 		} else {
 			accountBlock =
 				'<h3>How would you like to order?</h3>' +
 				'<div class="choice-cards">' +
 				'<button type="button" class="choice-card is-selected" id="choice-guest"><strong>Guest checkout</strong><span>Quick and simple — no account needed.</span></button>' +
-				'<button type="button" class="choice-card" id="choice-signup"><strong>Create an account</strong><span>Become a VIP while you order.</span><span class="perk">+50 free stickers · free ground shipping</span></button>' +
+				'<button type="button" class="choice-card" id="choice-signup"><strong>Create an account</strong><span>Become a VIP while you order.</span><span class="perk">+50 extra labels on every order · free ground shipping</span></button>' +
 				'</div>';
 		}
 
@@ -102,8 +102,8 @@
 			'<div class="summary-row"><span>Subtotal</span><span>' + A.money(t.subtotal) + '</span></div>' +
 			'<div class="summary-row"><span>Ground shipping</span><span>' + shippingCell + '</span></div>' +
 			'<div class="summary-row"><span>Sales tax — ' + t.taxName + ' (' + t.taxRate + '%)</span><span>' + A.money(t.tax) + '</span></div>' +
-			'<div class="summary-row total"><span>Total</span><span>' + A.money(total) + '</span></div>' +
-			(mode === 'signup' ? '<div class="credit-chip" style="width:100%;">' + D.icon('gift', 22) + ' 50 free stickers join this order</div>' : '');
+			'<div class="summary-row total"><span>Total <span style="font-weight:500;font-size:var(--text-xs);">(USD)</span></span><span>' + A.money(total) + '</span></div>' +
+			(mode === 'signup' ? '<div class="credit-chip" style="width:100%;">' + D.icon('gift', 22) + ' +50 extra labels ship with this order (VIP)</div>' : '');
 	}
 
 	function submit(e) {

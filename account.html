@@ -34,7 +34,7 @@
 			root.innerHTML =
 				'<div class="container--narrow" style="margin-inline:auto;">' +
 				'<h2>Join free — become a VIP</h2>' +
-				'<p class="lede">Create an account and 50 complimentary stickers plus free ground shipping are yours. You can also join in one step during checkout.</p>' +
+				'<p class="lede">VIP Members receive 50 extra labels with every regular-priced roll or bundle order, plus free ground shipping. No membership fees. Join here or in one step during checkout.</p>' +
 				'<form id="signup-form"><div class="form-grid">' +
 				'<div class="field"><label for="s-name">Full name *</label><input id="s-name" required autocomplete="name"></div>' +
 				'<div class="field"><label for="s-email">Email *</label><input id="s-email" type="email" required autocomplete="email"></div>' +
@@ -62,10 +62,10 @@
 			'<h2 style="margin:0;">' + A.esc(user.name) + '</h2>' +
 			(user.vip ? '<span class="badge badge--vip">' + D.icon('star', 14) + ' VIP Member</span>' : '') +
 			'<button class="remove-link" id="logout" style="margin-left:auto;">Sign out (demo)</button></div>' +
-			'<div class="credit-chip">' + D.icon('gift', 24) + ' Complimentary sticker balance: <strong>&nbsp;' + user.credit + '</strong>' +
-			(user.creditUsedOn ? '&nbsp;<span style="font-weight:500;">(50 shipped with order ' + user.creditUsedOn + ')</span>' : '') + '</div>' +
+			'<div class="credit-chip">' + D.icon('gift', 24) + ' VIP perk: <strong>&nbsp;50 extra labels ship with every regular-priced order</strong></div>' +
 			'<ul class="feature-list" style="max-width: 560px;">' +
 			'<li>' + D.icon('truck', 22) + '<div><strong>Free ground shipping</strong><span> applied automatically at checkout.</span></div></li>' +
+			'<li>' + D.icon('gift', 22) + '<div><strong>50 extra labels, every order</strong><span> — no fees, no obligation, just more labels every time.</span></div></li>' +
 			'<li>' + D.icon('star', 22) + '<div><strong>Priority support</strong><span> — VIP requests are handled first.</span></div></li></ul>' +
 			'<h3 style="margin-top: var(--sp-6);">Order history</h3>' +
 			'<table class="ato-table"><thead><tr><th>Order</th><th>Items</th><th>Total</th><th>Status</th></tr></thead><tbody>' + orderRows + '</tbody></table>';

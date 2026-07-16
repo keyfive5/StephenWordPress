@@ -28,10 +28,12 @@
 			<button class="admin-tab is-active" data-tab="designs">Customer designs</button>
 			<button class="admin-tab" data-tab="orders">Orders &amp; production</button>
 			<button class="admin-tab" data-tab="poll">One Question results</button>
+			<button class="admin-tab" data-tab="products">Products</button>
 		</div>
 		<div id="tab-designs"></div>
 		<div id="tab-orders" hidden></div>
 		<div id="tab-poll" hidden></div>
+		<div id="tab-products" hidden></div>
 	</div>
 </main>
 
@@ -176,7 +178,8 @@
 				'<td>' + A.esc((D.productBySlug(d.product) || {}).name || d.product) + '<span class="cart-config">' + A.esc(conf) + '</span>' +
 				'<ul class="log-list">' + log + '</ul></td>' +
 				'<td><a class="btn btn--primary btn--sm" href="admin.html?design=' + n + '">Review / edit</a><br>' +
-				'<button class="btn btn--ghost btn--sm" data-psd="' + d.id + '" style="margin-top:6px;">PSD for Illustrator</button></td>' +
+				'<button class="btn btn--ghost btn--sm" data-psd="' + d.id + '" style="margin-top:6px;">PSD</button> ' +
+				'<button class="btn btn--ghost btn--sm" data-svg="' + d.id + '" style="margin-top:6px;">SVG (Illustrator)</button></td>' +
 				'</tr>';
 		}).join('');
 		return '<table class="ato-table"><thead><tr><th>Preview</th><th>Reference</th><th>Product / configuration / edit history</th><th></th></tr></thead><tbody>' + rows + '</tbody></table>';
@@ -251,9 +254,99 @@
 			'<h3 style="margin-top: var(--sp-6);">Archived questions</h3>' + archiveHtml;
 	}
 
+	// --- Products manager: the "own dashboard" — add and edit products
+	// without touching code. Stored locally in the demo; same shape as
+	// the launch API. ---
+	function productsPanel() {
+		var rows = D.products.map(function (p) {
+			var tiers = p.tiers.map(function (t) { return t.qty + '|' + t.price; }).join('  ');
+			return '<tr><td><strong>' + A.esc(p.name) + '</strong>' + (p.custom ? ' <span class="badge badge--vip">added here</span>' : '') +
+				'<span class="cart-config">' + A.esc(p.slug) + '</span></td>' +
+				'<td>' + A.esc((D.categoryBySlug(p.cat) || {}).name || p.cat) + '</td>' +
+				'<td><span class="cart-config">' + tiers + '</span></td>' +
+				'<td>' + p.templates.filter(function (t) { return t.image; }).length + '</td>' +
+				'<td><button class="btn btn--ghost btn--sm" data-edit="' + p.slug + '">Edit</button>' +
+				(p.custom ? ' <button class="remove-link" data-del="' + p.slug + '">Delete</button>' : '') + '</td></tr>';
+		}).join('');
+		var catOptions = D.categories.map(function (c) { return '<option value="' + c.slug + '">' + A.esc(c.name) + '</option>'; }).join('');
+		return '<div class="notice">Add a product or edit prices below — it appears in the shop immediately. Templates use a URL plus a printable area (x, y, w, h as fractions of the image, e.g. 0.4, 0.6, 0.55, 0.23).</div>' +
+			'<form id="prod-form" class="form-grid" style="max-width:860px; margin-bottom: var(--sp-6);">' +
+			'<input type="hidden" id="pf-slug">' +
+			'<div class="field"><label for="pf-name">Product name *</label><input id="pf-name" required></div>' +
+			'<div class="field"><label for="pf-cat">Category</label><select id="pf-cat">' + catOptions + '</select></div>' +
+			'<div class="field full"><label for="pf-desc">Description</label><input id="pf-desc"></div>' +
+			'<div class="field full"><label for="pf-tiers">Quantity tiers (one per line: qty|price)</label><textarea id="pf-tiers" rows="3" style="font-family:inherit; padding:0.6rem 1rem; border:1px solid var(--color-border); border-radius: var(--radius-sm);">100|19\n250|39\n500|69\n1000|119</textarea></div>' +
+			'<div class="field"><label for="pf-tpl-url">Template image URL (optional)</label><input id="pf-tpl-url" placeholder="assets/templates/..."></div>' +
+			'<div class="field"><label for="pf-tpl-area">Printable area x,y,w,h</label><input id="pf-tpl-area" placeholder="0.05, 0.05, 0.9, 0.9"></div>' +
+			'<div class="full"><button type="submit" class="btn btn--primary" id="pf-submit">Add product</button> <button type="button" class="remove-link" id="pf-reset">Clear form</button></div>' +
+			'</form>' +
+			'<table class="ato-table"><thead><tr><th>Product</th><th>Category</th><th>Tiers (qty|$)</th><th>Templates</th><th></th></tr></thead><tbody>' + rows + '</tbody></table>';
+	}
+
+	function parseTiers(text) {
+		return text.split(/\n+/).map(function (line) {
+			var m = line.split('|');
+			return { qty: parseInt(m[0], 10) || 0, price: parseFloat(m[1]) || 0 };
+		}).filter(function (t) { return t.qty > 0; });
+	}
+
+	function bindProductsPanel() {
+		var panel = document.getElementById('tab-products');
+		panel.innerHTML = productsPanel();
+		var form = document.getElementById('prod-form');
+		form.addEventListener('submit', function (e) {
+			e.preventDefault();
+			var slug = document.getElementById('pf-slug').value;
+			var name = document.getElementById('pf-name').value.trim();
+			var tiers = parseTiers(document.getElementById('pf-tiers').value);
+			if (!name || !tiers.length) return;
+			var partial = { name: name, desc: document.getElementById('pf-desc').value.trim(), cat: document.getElementById('pf-cat').value, tiers: tiers };
+			var tplUrl = document.getElementById('pf-tpl-url').value.trim();
+			if (tplUrl) {
+				var nums = document.getElementById('pf-tpl-area').value.split(',').map(function (n) { return parseFloat(n); });
+				var area = nums.length === 4 && nums.every(function (n) { return !isNaN(n); }) ? { x: nums[0], y: nums[1], w: nums[2], h: nums[3] } : { x: 0.05, y: 0.05, w: 0.9, h: 0.9 };
+				partial.templates = [{ name: 'Template', image: tplUrl, area: area }];
+			}
+			if (slug) {
+				A.updateProduct(slug, partial);
+			} else {
+				var base = D.products[0];
+				A.addProduct(Object.assign({
+					slug: name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '') + '-' + Math.random().toString(36).slice(2, 5),
+					sub: '', icon: 'sticker', shapeHint: 'rectangle', swatch: '#1D5B33',
+					materials: base.materials, sizes: base.sizes, shapes: base.shapes,
+					templates: [{ name: 'Blank canvas', image: '' }],
+					custom: true
+				}, partial));
+			}
+			bindProductsPanel();
+		});
+		document.getElementById('pf-reset').addEventListener('click', function () { bindProductsPanel(); });
+		panel.querySelectorAll('[data-edit]').forEach(function (btn) {
+			btn.addEventListener('click', function () {
+				var p = D.productBySlug(btn.getAttribute('data-edit'));
+				if (!p) return;
+				document.getElementById('pf-slug').value = p.slug;
+				document.getElementById('pf-name').value = p.name;
+				document.getElementById('pf-desc').value = p.desc || '';
+				document.getElementById('pf-cat').value = p.cat;
+				document.getElementById('pf-tiers').value = p.tiers.map(function (t) { return t.qty + '|' + t.price; }).join('\n');
+				document.getElementById('pf-submit').textContent = 'Save changes';
+				window.scrollTo({ top: 0, behavior: 'smooth' });
+			});
+		});
+		panel.querySelectorAll('[data-del]').forEach(function (btn) {
+			btn.addEventListener('click', function () {
+				A.removeCustomProduct(btn.getAttribute('data-del'));
+				bindProductsPanel();
+			});
+		});
+	}
+
 	document.getElementById('tab-designs').innerHTML = designsTable();
 	document.getElementById('tab-orders').innerHTML = ordersTable();
 	document.getElementById('tab-poll').innerHTML = pollPanel();
+	bindProductsPanel();
 
 	document.querySelectorAll('.admin-tab').forEach(function (tab) {
 		tab.addEventListener('click', function () {
@@ -262,6 +355,7 @@
 			document.getElementById('tab-designs').hidden = tab.getAttribute('data-tab') !== 'designs';
 			document.getElementById('tab-orders').hidden = tab.getAttribute('data-tab') !== 'orders';
 			document.getElementById('tab-poll').hidden = tab.getAttribute('data-tab') !== 'poll';
+			document.getElementById('tab-products').hidden = tab.getAttribute('data-tab') !== 'products';
 		});
 	});
 
@@ -280,23 +374,27 @@
 		if (e.target === this) this.hidden = true;
 	});
 
-	// PSD export: one layer per element, ready for Illustrator review.
+	// Production exports: layered PSD or layered SVG (Illustrator-native).
 	document.getElementById('tab-designs').addEventListener('click', function (e) {
-		var btn = e.target.closest('[data-psd]');
+		var psdBtn = e.target.closest('[data-psd]');
+		var svgBtn = e.target.closest('[data-svg]');
+		var btn = psdBtn || svgBtn;
 		if (!btn) return;
-		var d = A.getDesign(btn.getAttribute('data-psd'));
+		var d = A.getDesign(btn.getAttribute(psdBtn ? 'data-psd' : 'data-svg'));
 		if (!d) return;
 		var cfg = d.config || {};
-		btn.disabled = true;
-		btn.textContent = 'Building PSD…';
-		window.atoExportPsd({
+		var args = {
 			json: d.json,
 			width: parseInt(cfg.canvas_w, 10) || 500,
 			height: parseInt(cfg.canvas_h, 10) || 500,
 			name: d.ref
-		}).then(function () {
+		};
+		var label = btn.textContent;
+		btn.disabled = true;
+		btn.textContent = 'Building…';
+		(psdBtn ? window.atoExportPsd(args) : window.atoExportSvg(args)).then(function () {
 			btn.disabled = false;
-			btn.textContent = 'PSD for Illustrator';
+			btn.textContent = label;
 		});
 	});
 
