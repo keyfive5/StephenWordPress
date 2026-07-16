@@ -380,24 +380,46 @@
 .ato-ed-toast.is-error { background: #c22f2f; }
 
 /* ---------- Responsive ---------- */
+/* Phones/tablets: single column — canvas first, tools as a horizontal
+   strip, panels stacked below. Nothing collapses or disappears. */
 @media (max-width: 960px) {
-  .ato-ed-main { grid-template-columns: 72px minmax(0, 1fr); grid-template-rows: minmax(0, 1fr) auto; }
-  .ato-ed-side {
-    grid-column: 1 / -1;
-    border-left: none;
-    border-top: 1px solid var(--atoe-border);
-    flex-direction: row;
-    flex-wrap: wrap;
-    max-height: 220px;
+  .ato-ed-main {
+    display: flex;
+    flex-direction: column;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
   }
-  .ato-ed-panel { min-width: 200px; flex: 1; }
-  .ato-ed-tool span { font-size: 0.62rem; }
+  .ato-ed-canvas-col { order: 1; padding: 0.75rem; overflow: visible; }
+  .ato-ed-tools {
+    order: 2;
+    flex-direction: row;
+    justify-content: space-around;
+    border-right: none;
+    border-top: 1px solid var(--atoe-border);
+    border-bottom: 1px solid var(--atoe-border);
+    padding: 0.4rem 0.5rem;
+    overflow-x: auto;
+    overflow-y: visible;
+    flex: none;
+    position: sticky;
+    bottom: 0;
+    background: #fff;
+    z-index: 5;
+  }
+  .ato-ed-tool { min-width: 64px; padding: 0.5rem 0.4rem; }
+  .ato-ed-side {
+    order: 3;
+    border-left: none;
+    flex: none;
+    max-height: none;
+    flex-direction: column;
+  }
+  .ato-ed-top { flex-wrap: wrap; gap: 0.5rem; }
   .ato-ed-config-summary { display: none; }
-}
-@media (max-width: 560px) {
-  .ato-ed-top { flex-wrap: wrap; }
+  .ato-ed-btn { min-height: 44px; padding: 0.4rem 1rem; font-size: 0.9rem; }
+  .ato-ed-wizard { padding: 0.75rem; align-items: flex-start; }
   .ato-ed-wizard-card { padding: 1.25rem; }
-  .ato-ed-btn { padding: 0.5rem 1rem; font-size: 0.85rem; }
+  .ato-ed-option-grid { grid-template-columns: repeat(auto-fill, minmax(120px, 1fr)); }
 }
 
 @media (prefers-reduced-motion: reduce) {

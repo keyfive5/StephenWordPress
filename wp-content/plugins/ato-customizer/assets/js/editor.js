@@ -328,6 +328,41 @@
 		canvas.bringToFront(cut);
 	}
 
+	/** In template mode the canvas background sits behind the locked
+	 * artwork, so "background colour" means filling the printable area
+	 * itself — a locked rect kept just above the template layer. */
+	function setAreaBackground(color) {
+		if (!printArea || !canvas) return;
+		var existing = null;
+		canvas.getObjects().forEach(function (o) { if (o.atoType === 'areabg') existing = o; });
+		if (existing) {
+			existing.set('fill', color);
+		} else {
+			var bg = new fabric.Rect({
+				left: printArea.left,
+				top: printArea.top,
+				width: printArea.width,
+				height: printArea.height,
+				fill: color,
+				selectable: false,
+				evented: false,
+				atoType: 'areabg',
+				atoName: 'Area background'
+			});
+			canvas.add(bg);
+			// keep it right above the template artwork
+			canvas.getObjects().forEach(function (o) {
+				if (o.atoType === 'template') canvas.sendToBack(o);
+			});
+			canvas.sendToBack(bg);
+			canvas.getObjects().forEach(function (o) {
+				if (o.atoType === 'template') canvas.sendToBack(o);
+			});
+		}
+		canvas.requestRenderAll();
+		dirty = true;
+	}
+
 	/** Clip a user object to the printable area (template mode only). */
 	function clipToArea(obj) {
 		if (!printArea || !obj || obj.atoType === 'cutline' || obj.atoType === 'template' || obj.clipPath) return;
@@ -453,8 +488,11 @@
 		canvas.loadFromJSON(state, function () {
 			canvas.getObjects().forEach(function (o) {
 				if (o.atoType === 'template') { o.set({ selectable: false, evented: false }); canvas.sendToBack(o); }
+				else if (o.atoType === 'areabg') { o.set({ selectable: false, evented: false }); }
 				else if (o.atoType !== 'cutline') { o.set({ selectable: true, evented: true }); }
 			});
+			canvas.getObjects().forEach(function (o) { if (o.atoType === 'areabg') canvas.sendToBack(o); });
+			canvas.getObjects().forEach(function (o) { if (o.atoType === 'template') canvas.sendToBack(o); });
 			// Cut line is excluded from export/serialization — put it back.
 			var hasCut = canvas.getObjects().some(function (o) { return o.atoType === 'cutline'; });
 			if (!hasCut) { if (printArea) { addAreaCutline(); } else { applyShapeMask(); } }
@@ -500,6 +538,26 @@
 			fill: '#1b2a20',
 			atoName: 'Text'
 		});
+		text.atoPlaceholder = true;
+		text.on('editing:entered', function () {
+			if (text.atoPlaceholder) {
+				text.atoPlaceholder = false;
+				text.text = '';
+				text.hiddenTextarea && (text.hiddenTextarea.value = '');
+				text.setSelectionStart(0);
+				text.setSelectionEnd(0);
+				canvas.requestRenderAll();
+			}
+		});
+		// Nothing typed? Remove the empty text object instead of leaving
+		// an invisible layer behind.
+		text.on('editing:exited', function () {
+			if (!text.text || !text.text.trim()) {
+				canvas.remove(text);
+				canvas.requestRenderAll();
+				refreshLayers();
+			}
+		});
 		canvas.add(text);
 		canvas.setActiveObject(text);
 		text.enterEditing();
@@ -539,18 +597,31 @@
 		panel.hidden = !panel.hidden;
 		if (!panel.hidden && !panel.dataset.built) {
 			var grid = $('ato-ed-clipart-grid');
-			(DATA.clipart || []).forEach(function (item) {
-				var btn = document.createElement('button');
-				btn.type = 'button';
-				btn.title = item.label;
-				btn.setAttribute('aria-label', item.label);
-				var img = document.createElement('img');
-				img.src = DATA.clipartUrl + item.file;
-				img.alt = item.label;
-				btn.appendChild(img);
-				btn.addEventListener('click', function () { addClipart(DATA.clipartUrl + item.file, item.label); });
-				grid.appendChild(btn);
-			});
+			var search = document.createElement('input');
+			search.type = 'search';
+			search.placeholder = I18N.searchClipart || 'Search clipart…';
+			search.setAttribute('aria-label', 'Search clipart');
+			search.style.cssText = 'width:100%;min-height:38px;margin-bottom:8px;padding:6px 10px;border:1px solid #e4decf;border-radius:8px;font:inherit;';
+			panel.insertBefore(search, grid);
+			function build(filter) {
+				grid.innerHTML = '';
+				(DATA.clipart || []).forEach(function (item) {
+					if (filter && item.label.toLowerCase().indexOf(filter) === -1) return;
+					var btn = document.createElement('button');
+					btn.type = 'button';
+					btn.title = item.label;
+					btn.setAttribute('aria-label', item.label);
+					var img = document.createElement('img');
+					img.src = DATA.clipartUrl + item.file;
+					img.alt = item.label;
+					img.loading = 'lazy';
+					btn.appendChild(img);
+					btn.addEventListener('click', function () { addClipart(DATA.clipartUrl + item.file, item.label); });
+					grid.appendChild(btn);
+				});
+			}
+			search.addEventListener('input', function () { build(search.value.trim().toLowerCase()); });
+			build('');
 			panel.dataset.built = '1';
 		}
 	}
@@ -668,7 +739,7 @@
 		var list = $('ato-ed-layer-list');
 		if (!list || !canvas) return;
 		list.innerHTML = '';
-		var objs = canvas.getObjects().filter(function (o) { return o.atoType !== 'cutline'; });
+		var objs = canvas.getObjects().filter(function (o) { return o.atoType !== 'cutline' && o.atoType !== 'areabg'; });
 		var active = activeObj();
 		// Topmost first.
 		objs.slice().reverse().forEach(function (obj) {
@@ -833,6 +904,7 @@
 				canvas.loadFromJSON(json.data.design_json, function () {
 					canvas.getObjects().forEach(function (o) {
 						if (o.atoType === 'template') { o.set({ selectable: false, evented: false }); canvas.sendToBack(o); }
+						else if (o.atoType === 'areabg') { o.set({ selectable: false, evented: false }); }
 						else if (o.atoType !== 'cutline') { o.set({ selectable: true, evented: true }); }
 					});
 					var hasCut = canvas.getObjects().some(function (o) { return o.atoType === 'cutline'; });
@@ -874,8 +946,12 @@
 		$('ato-tool-qr').addEventListener('click', addQRCode);
 		$('ato-tool-bg-input').addEventListener('input', function (e) {
 			if (!canvas) return;
-			canvas.setBackgroundColor(e.target.value, canvas.renderAll.bind(canvas));
-			dirty = true;
+			if (printArea) {
+				setAreaBackground(e.target.value);
+			} else {
+				canvas.setBackgroundColor(e.target.value, canvas.renderAll.bind(canvas));
+				dirty = true;
+			}
 		});
 
 		$('ato-ed-undo').addEventListener('click', undo);
@@ -936,7 +1012,7 @@
 		});
 		$('ato-prop-delete').addEventListener('click', function () {
 			var obj = activeObj();
-			if (obj && obj.atoType !== 'cutline' && obj.atoType !== 'template') {
+			if (obj && obj.atoType !== 'cutline' && obj.atoType !== 'template' && obj.atoType !== 'areabg') {
 				canvas.remove(obj);
 				canvas.discardActiveObject();
 				canvas.requestRenderAll();
@@ -951,7 +1027,7 @@
 			var tag = (document.activeElement && document.activeElement.tagName) || '';
 			if (tag === 'INPUT' || tag === 'TEXTAREA' || tag === 'SELECT') return;
 			var obj = activeObj();
-			if (obj && !obj.isEditing && obj.atoType !== 'cutline' && obj.atoType !== 'template') {
+			if (obj && !obj.isEditing && obj.atoType !== 'cutline' && obj.atoType !== 'template' && obj.atoType !== 'areabg') {
 				e.preventDefault();
 				canvas.remove(obj);
 				canvas.discardActiveObject();

@@ -217,7 +217,10 @@ class ATO_Admin {
 					<?php esc_html_e( 'Open in editor', 'ato-customizer' ); ?>
 				</button>
 				<button type="button" class="button button-hero" id="ato-psd-btn">
-					<?php esc_html_e( 'Download layered PSD (Illustrator)', 'ato-customizer' ); ?>
+					<?php esc_html_e( 'Layered PSD', 'ato-customizer' ); ?>
+				</button>
+				<button type="button" class="button button-hero" id="ato-svg-btn">
+					<?php esc_html_e( 'Layered SVG (Illustrator)', 'ato-customizer' ); ?>
 				</button>
 				<span class="description" style="margin-left:8px;"><?php esc_html_e( 'Adjust alignment, fix typos, refine colours — then save. The customer’s original stays in the history below. The PSD keeps one layer per element for pre-print review.', 'ato-customizer' ); ?></span>
 			</p>
@@ -227,14 +230,20 @@ class ATO_Admin {
 				if (!btn) return;
 				var cfg = <?php echo wp_json_encode( is_array( $summary['config'] ) ? $summary['config'] : array() ); ?>;
 				var designJson = <?php echo wp_json_encode( $summary['json'] ); ?>;
+				var args = {
+					json: designJson,
+					width: parseInt(cfg.canvas_w, 10) || 500,
+					height: parseInt(cfg.canvas_h, 10) || 500,
+					name: <?php echo wp_json_encode( $summary['ref'] ); ?>
+				};
 				btn.addEventListener('click', function () {
 					btn.disabled = true;
-					window.atoExportPsd({
-						json: designJson,
-						width: parseInt(cfg.canvas_w, 10) || 500,
-						height: parseInt(cfg.canvas_h, 10) || 500,
-						name: <?php echo wp_json_encode( $summary['ref'] ); ?>
-					}).then(function () { btn.disabled = false; });
+					window.atoExportPsd(args).then(function () { btn.disabled = false; });
+				});
+				var svgBtn = document.getElementById('ato-svg-btn');
+				svgBtn.addEventListener('click', function () {
+					svgBtn.disabled = true;
+					window.atoExportSvg(args).then(function () { svgBtn.disabled = false; });
 				});
 			});
 			</script>

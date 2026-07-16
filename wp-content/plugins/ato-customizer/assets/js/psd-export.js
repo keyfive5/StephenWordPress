@@ -83,4 +83,60 @@
 			return true;
 		});
 	};
+
+	// ------------------------------------------------------------------
+	// Layered SVG export — Illustrator opens SVG natively, one <g> per
+	// element becomes a layer/sublayer. Vector text stays editable when
+	// the font is installed; images are embedded as data URIs.
+	// ------------------------------------------------------------------
+	function toDataURL(src) {
+		if (!src || src.indexOf('data:') === 0) return Promise.resolve(src);
+		return fetch(src).then(function (r) { return r.blob(); }).then(function (blob) {
+			return new Promise(function (resolve) {
+				var fr = new FileReader();
+				fr.onload = function () { resolve(fr.result); };
+				fr.readAsDataURL(blob);
+			});
+		}).catch(function () { return src; });
+	}
+
+	window.atoExportSvg = function (opts) {
+		if (!window.fabric) return Promise.resolve(false);
+		var json = typeof opts.json === 'string' ? JSON.parse(opts.json) : JSON.parse(JSON.stringify(opts.json));
+		var width = Math.round(opts.width || 500);
+		var height = Math.round(opts.height || 500);
+		var objs = (json.objects || []).filter(function (o) { return o.atoType !== 'cutline'; });
+
+		// Embed remote images so the file is portable.
+		var prep = Promise.all(objs.map(function (o) {
+			if (o.type === 'image' && o.src) {
+				return toDataURL(o.src).then(function (d) { o.src = d; });
+			}
+			return null;
+		}));
+
+		return prep.then(function () {
+			return new Promise(function (resolve) {
+				window.fabric.util.enlivenObjects(objs, function (enlivened) {
+					var groups = enlivened.map(function (obj, i) {
+						var name = layerName(objs[i], i).replace(/[^ -~]+/g, ' ').replace(/[<>&"]/g, '');
+						return '<g id="' + name.replace(/\s+/g, '_') + '" data-name="' + name + '">' + obj.toSVG() + '</g>';
+					});
+					var bg = (json.background && typeof json.background === 'string') ? json.background : '#ffffff';
+					var svg = '<?xml version="1.0" encoding="UTF-8"?>\n' +
+						'<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="' + width + '" height="' + height + '" viewBox="0 0 ' + width + ' ' + height + '">\n' +
+						'<g id="Background"><rect width="' + width + '" height="' + height + '" fill="' + bg + '"/></g>\n' +
+						groups.join('\n') + '\n</svg>';
+					var blob = new Blob([svg], { type: 'image/svg+xml' });
+					var a = document.createElement('a');
+					a.href = URL.createObjectURL(blob);
+					a.download = (opts.name || 'ato-design') + '.svg';
+					document.body.appendChild(a);
+					a.click();
+					setTimeout(function () { URL.revokeObjectURL(a.href); a.remove(); }, 2000);
+					resolve(true);
+				}, 'fabric');
+			});
+		});
+	};
 })();
