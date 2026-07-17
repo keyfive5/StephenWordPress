@@ -19,7 +19,7 @@
 		<div class="container">
 			<span class="eyebrow">Back office</span>
 			<h1>Admin panel</h1>
-			<p class="lede">Review every customer design before production, adjust it in the same editor the customer used, and trace each order end to end. (Login-protected at launch — open here so Joseph and Stephen can explore.)</p>
+			<p class="lede">Review every customer design before production, adjust it in the same editor the customer used, add products, and trace each order end to end.</p>
 		</div>
 	</div>
 
@@ -113,6 +113,36 @@
 (function () {
 	var A = window.ATO;
 	var D = window.ATO_DATA;
+
+	// ------------------------------------------------------------------
+	// Admin login gate — required before anything renders. Session-scoped:
+	// closing the tab asks again. (Demo credentials; at launch this is
+	// real server-side authentication.)
+	// ------------------------------------------------------------------
+	if (window.sessionStorage.getItem('ato_admin_auth') !== '1') {
+		var main = document.querySelector('main');
+		main.innerHTML =
+			'<div class="page-hero"><div class="container"><span class="eyebrow">Restricted area</span><h1>Admin login</h1>' +
+			'<p class="lede">Sign in to manage designs, orders, products and poll results.</p></div></div>' +
+			'<div class="container" style="max-width: 460px; padding-bottom: var(--sp-9);">' +
+			'<form id="admin-login"><div class="field" style="margin-bottom: var(--sp-4);"><label for="al-email">Email</label><input id="al-email" type="email" autocomplete="username" required></div>' +
+			'<div class="field" style="margin-bottom: var(--sp-4);"><label for="al-pass">Password</label><input id="al-pass" type="password" autocomplete="current-password" required></div>' +
+			'<p id="al-error" class="hint" style="color: var(--danger); font-weight: 700;" hidden>Wrong email or password.</p>' +
+			'<button type="submit" class="btn btn--primary btn--lg" style="width: 100%;">Sign in</button></form></div>';
+		document.getElementById('admin-login').addEventListener('submit', function (e) {
+			e.preventDefault();
+			var ok = document.getElementById('al-email').value.trim().toLowerCase() === 'admin@gmail.com' &&
+				document.getElementById('al-pass').value === '12345';
+			if (ok) {
+				window.sessionStorage.setItem('ato_admin_auth', '1');
+				window.location.reload();
+			} else {
+				document.getElementById('al-error').hidden = false;
+			}
+		});
+		return; // nothing below runs until authenticated
+	}
+
 	var designs = A.listDesigns();
 	var openIdx = parseInt(new URLSearchParams(location.search).get('design') || '0', 10); // 1-based
 

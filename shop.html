@@ -35,7 +35,7 @@
 
 	function swatch(p) {
 		if (p.templates && p.templates[0] && p.templates[0].image) {
-			return '<img src="' + p.templates[0].image + '" alt="" loading="lazy" style="max-width:86%;max-height:86%;object-fit:contain;">';
+			return '<img class="tpl-thumb" src="' + p.templates[0].image + '" alt="" loading="lazy">';
 		}
 		var square = p.shapeHint !== 'circle' ? ' p-swatch--square' : '';
 		return '<span class="p-swatch' + square + '" style="background:' + p.swatch + '">' + D.icon(p.icon, 48) + '</span>';
