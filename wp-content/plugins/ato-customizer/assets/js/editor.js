@@ -286,6 +286,10 @@
 			img.set({ left: 0, top: 0, selectable: false, evented: false, atoType: 'template', atoName: 'Template (locked)' });
 			canvas.add(img);
 			canvas.sendToBack(img);
+			// Blank out the printable zone: the template's baked-in
+			// placeholder text ("Your Address Here" etc.) must not show
+			// under the customer's design. The colour tool recolors this.
+			setAreaBackground('#ffffff');
 			addAreaCutline();
 
 			canvas.on('selection:created', refreshProps);
