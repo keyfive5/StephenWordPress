@@ -76,49 +76,49 @@
 		product('tiktok-label', 'TikTok Label', 'social-media-labels', 'TikTok', 'megaphone', 'rectangle', '#1B2A20',
 			'Your TikTok where hungry people already look — right on the bag. Pick a layout, then customize the editable zone.',
 			[
-				tpl('Address zone', 'tt-address.png', { x: 0.42, y: 0.58, w: 0.54, h: 0.24 }),
-				tpl('Bottom strip', 'tt-bottom.png', { x: 0.04, y: 0.76, w: 0.92, h: 0.20 }),
-				tpl('Message panel', 'tt-message.png', { x: 0.43, y: 0.10, w: 0.53, h: 0.80 })
+				tpl('Address zone', 'tt-address.png', { x: 0.43, y: 0.5817, w: 0.5253, h: 0.19 }),
+				tpl('Bottom strip', 'tt-bottom.png', { x: 0.022, y: 0.8553, w: 0.9582, h: 0.1203 }),
+				tpl('Message panel', 'tt-message.png', { x: 0.393, y: 0.0333, w: 0.595, h: 0.94 })
 			]),
 		product('instagram-label', 'Instagram Label', 'social-media-labels', 'Instagram', 'megaphone', 'rectangle', '#E8590C',
 			'A follow-us sticker your customers will actually photograph. Fixed Instagram artwork, your details in the printable area.',
 			[
-				tpl('Address zone', 'ig-address.png', { x: 0.36, y: 0.60, w: 0.60, h: 0.24 }),
-				tpl('Message panel', 'ig-message.png', { x: 0.40, y: 0.10, w: 0.56, h: 0.80 })
+				tpl('Address zone', 'ig-address.png', { x: 0.3221, y: 0.6289, w: 0.6298, h: 0.2186 }),
+				tpl('Message panel', 'ig-message.png', { x: 0.3343, y: 0.0309, w: 0.6549, h: 0.932 })
 			]),
 		product('facebook-label', 'Facebook Label', 'social-media-labels', 'Facebook', 'megaphone', 'rectangle', '#1D5B33',
 			'Point customers to your page for reviews, events and specials — three layouts, one editable zone each.',
 			[
-				tpl('Address zone', 'fb-address.png', { x: 0.41, y: 0.60, w: 0.55, h: 0.23 }),
-				tpl('Bottom strip', 'fb-bottom.png', { x: 0.04, y: 0.76, w: 0.92, h: 0.20 }),
-				tpl('Message panel', 'fb-message.png', { x: 0.43, y: 0.10, w: 0.53, h: 0.80 })
+				tpl('Address zone', 'fb-address.png', { x: 0.362, y: 0.6167, w: 0.6073, h: 0.1967 }),
+				tpl('Bottom strip', 'fb-bottom.png', { x: 0.022, y: 0.8553, w: 0.9582, h: 0.1203 }),
+				tpl('Message panel', 'fb-message.png', { x: 0.397, y: 0.0333, w: 0.592, h: 0.94 })
 			]),
 		product('x-twitter-label', 'X (Twitter) Label', 'social-media-labels', 'X (Twitter)', 'megaphone', 'rectangle', '#1B2A20',
 			'Short, sharp and scannable — your X handle on every order.',
 			[
-				tpl('Address zone', 'x-address.png', { x: 0.40, y: 0.61, w: 0.56, h: 0.22 }),
-				tpl('Bottom strip', 'x-bottom.png', { x: 0.04, y: 0.76, w: 0.92, h: 0.20 }),
-				tpl('Message panel', 'x-message.png', { x: 0.43, y: 0.10, w: 0.53, h: 0.80 })
+				tpl('Address zone', 'x-address.png', { x: 0.362, y: 0.6167, w: 0.6073, h: 0.1967 }),
+				tpl('Bottom strip', 'x-bottom.png', { x: 0.022, y: 0.8553, w: 0.9582, h: 0.1203 }),
+				tpl('Message panel', 'x-message.png', { x: 0.402, y: 0.0333, w: 0.586, h: 0.94 })
 			]),
 		product('qr-code-label', 'QR Code Label', 'qr-code-labels', '', 'qr', 'square', '#1D5B33',
 			'Paste a link — the editor generates the QR code. Four layouts: from a blank QR canvas to menu and thank-you designs.',
 			[
-				tpl('Generate your QR', 'qr-generate.png', { x: 0.01, y: 0.01, w: 0.98, h: 0.98 }),
-				tpl('Our Menu — scan here', 'qr-menu.png', { x: 0.06, y: 0.29, w: 0.88, h: 0.57 }),
-				tpl('Thank You + QR', 'qr-thankyou.png', { x: 0.03, y: 0.07, w: 0.27, h: 0.86 }),
-				tpl('Social Media + QR', 'qr-social.png', { x: 0.03, y: 0.07, w: 0.27, h: 0.86 })
+				tpl('Generate your QR', 'qr-generate.png', { x: 0.0122, y: 0.0122, w: 0.9744, h: 0.9744 }),
+				tpl('Our Menu — scan here', 'qr-menu.png', { x: 0.06, y: 0.3, w: 0.88, h: 0.545 }),
+				tpl('Thank You + QR', 'qr-thankyou.png', { x: 0.0108, y: 0.0309, w: 0.297, h: 0.9402 }),
+				tpl('Social Media + QR', 'qr-social.png', { x: 0.0108, y: 0.0309, w: 0.297, h: 0.9402 })
 			]),
 		product('promo-label', 'Promotional Label', 'promotional-labels', '', 'tag', 'rectangle', '#E8590C',
 			'Create your own promotion: sales, launches and limited offers on a full-canvas template.',
 			[
-				tpl('Portrait', 'promo-rect.png', { x: 0.01, y: 0.01, w: 0.98, h: 0.98 }),
-				tpl('Square', 'promo-square.png', { x: 0.01, y: 0.01, w: 0.98, h: 0.98 })
+				tpl('Portrait', 'promo-rect.png', { x: 0.0233, y: 0.0156, w: 0.9517, h: 0.9678 }),
+				tpl('Square', 'promo-square.png', { x: 0.0122, y: 0.0122, w: 0.9744, h: 0.9744 })
 			]),
 		product('branded-label', 'Branded Label', 'branded-labels', '', 'badge', 'rectangle', '#1D5B33',
 			'Your logo, your colours — a full printable canvas in two formats.',
 			[
-				tpl('Portrait', 'brand-rect.png', { x: 0.01, y: 0.01, w: 0.98, h: 0.98 }),
-				tpl('Square', 'brand-square.png', { x: 0.01, y: 0.01, w: 0.98, h: 0.98 })
+				tpl('Portrait', 'brand-rect.png', { x: 0.0233, y: 0.0156, w: 0.9517, h: 0.9678 }),
+				tpl('Square', 'brand-square.png', { x: 0.0122, y: 0.0122, w: 0.9744, h: 0.9744 })
 			]),
 		product('tamper-seal', 'Tamper-Evident Seal', 'tamper-evident-labels', '', 'shield', 'rectangle', '#1B2A20',
 			'Splits cleanly when opened — customers see their food arrives untouched.', null),
@@ -134,9 +134,9 @@
 		product('food-certification-label', 'Food Certification Label', 'food-identification-labels', '', 'utensils', 'rectangle', '#1D5B33',
 			'Allergy, Halal and Kosher certification labels — your brand in the top zone, the certification mark stays fixed.',
 			[
-				tpl('Allergy', 'food-allergy.png', { x: 0.05, y: 0.03, w: 0.90, h: 0.28 }),
-				tpl('Halal Certified', 'food-halal.png', { x: 0.05, y: 0.03, w: 0.90, h: 0.28 }),
-				tpl('Kosher Certified', 'food-kosher.png', { x: 0.05, y: 0.03, w: 0.90, h: 0.28 })
+				tpl('Allergy', 'food-allergy.png', { x: 0.0183, y: 0.0122, w: 0.955, h: 0.3244 }),
+				tpl('Halal Certified', 'food-halal.png', { x: 0.0183, y: 0.0122, w: 0.955, h: 0.3944 }),
+				tpl('Kosher Certified', 'food-kosher.png', { x: 0.0183, y: 0.0122, w: 0.955, h: 0.4267 })
 			])
 	];
 
