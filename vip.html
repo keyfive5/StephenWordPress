@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>VIP Members — All Take Out</title>
 <meta name="description" content="Join free: 50 complimentary stickers, free ground shipping on every order, priority support and exclusive discounts.">
-<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Crect width='24' height='24' rx='7' fill='%231D5B33'/%3E%3Cpath d='M8 6h5a5 5 0 0 1 5 5v5a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2Z' fill='%23FBF9F4'/%3E%3C/svg%3E">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Crect width='24' height='24' rx='7' fill='%232E639E'/%3E%3Cpath d='M8 6h5a5 5 0 0 1 5 5v5a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2Z' fill='%23F8FAFC'/%3E%3C/svg%3E">
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,600;9..144,700&family=DM+Sans:wght@400;500;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="assets/css/site.css">
 </head>
@@ -16,13 +16,14 @@
 	<section class="hero">
 		<div class="container hero-grid">
 			<div>
-				<span class="eyebrow">VIP membership</span>
-				<h1>Get <span class="mark"><span>50 extra labels</span></span> on every order</h1>
-				<p class="lede">VIP Members receive 50 extra labels with every regular-priced roll or bundle order. No membership fees. No obligation. Just more labels — every time.</p>
+				<span class="eyebrow">The All Takeout VIP Circle</span>
+				<h1>Pro branding, <span class="mark"><span>zero cost</span></span></h1>
+				<p class="lede">We created this membership specifically for the "regulars"—the kitchen warriors, café owners, and managers who keep the neighborhood fed.</p>
+				<p class="lede">If you're looking to scale your branding without adding another line item to your overhead, you're in the right place. No monthly fees, no hidden strings—just a partnership that helps you grow.</p>
 				<div class="hero-ctas"><a class="btn btn--accent btn--lg" href="account.html">Join free today</a></div>
 			</div>
 			<div class="hero-visual" style="min-height: 320px;" aria-hidden="true">
-				<div class="sticker sticker--round sticker-1" style="top: 8%; left: 16%;"><div><div class="s-title" style="font-size: 2rem;">50</div><div class="s-sub">Free stickers</div></div></div>
+				<div class="sticker sticker--round sticker-1" style="top: 8%; left: 16%;"><div><div class="s-title" style="font-size: 2rem;">50</div><div class="s-sub">Free labels, every order</div></div></div>
 				<div class="sticker sticker--die sticker-5" style="bottom: 12%; right: 14%;"><div class="s-title">Free shipping</div><div class="s-sub">Every order</div></div>
 			</div>
 		</div>
@@ -30,8 +31,16 @@
 
 	<section class="section section--kraft">
 		<div class="container">
-			<div class="section-head section-head--center"><h2>Everything VIPs get</h2></div>
+			<div class="section-head section-head--center"><h2>Membership perks designed for busy pros</h2></div>
 			<div class="cat-grid" id="vip-cards"></div>
+		</div>
+	</section>
+
+	<section class="section section--ink">
+		<div class="container container--narrow text-center">
+			<h2>Built for restaurants that move fast</h2>
+			<p class="lede">The VIP Circle is designed for operators who don't have time for friction—just reliable supply, consistent branding, and fewer things to think about.</p>
+			<p class="lede">It's not just a membership. It's operational simplicity with better branding built in.</p>
 		</div>
 	</section>
 
@@ -57,10 +66,11 @@
 <script src="assets/js/main.js"></script>
 <script>
 document.getElementById('vip-cards').innerHTML = [
-	['gift', '50 extra labels — every order', 'Every regular-priced roll or bundle ships with 50 extra labels on top. Not once: every time.'],
-	['truck', 'Free ground shipping', 'No minimums, no codes. VIP orders always ship free within our ground network.'],
-	['star', 'Priority support', 'Jump the queue. VIP tickets and design reviews are handled first.'],
-	['tag', 'Exclusive discounts', 'Member-only pricing events and early access to new materials and shapes.']
+	['gift', 'The VIP 50', 'Every regular-priced roll or bundle comes with 50 extra labels free. Not once. Not just your first order. Every time you order as a VIP member. It’s your built-in buffer for rushes, mistakes, last-minute promos, and busy weeks.'],
+	['truck', 'Shipping is on the house', 'Shipping costs shouldn’t slow you down. Whether it’s a single roll or a full production run, ground shipping is always free for VIP members.'],
+	['layers', 'Your order history, on speed-dial', 'No more “what did we order last time?” Your dashboard stores your custom designs, materials, and quantities—so reordering is one click.'],
+	['shield', 'The “Zero-Stress” promise', 'We’re obsessed with quality. If your custom stickers don’t meet expectations, you get your money back—no hoops, no long forms, no back-and-forth.'],
+	['star', 'Inside access only', 'Get early access to seasonal templates, holiday designs, and new product drops. VIP members see it first—before general release and flash promotions.']
 ].map(function (c) {
 	return '<div class="cat-card reveal"><span class="cat-icon">' + window.ATO_DATA.icon(c[0], 28) + '</span><h3>' + c[1] + '</h3><p>' + c[2] + '</p></div>';
 }).join('');

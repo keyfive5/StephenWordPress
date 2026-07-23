@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Shop — All Take Out</title>
 <meta name="description" content="Custom sticker and label products for restaurants: social media, QR code, promotional, branded, tamper-evident, appreciation and food ID labels.">
-<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Crect width='24' height='24' rx='7' fill='%231D5B33'/%3E%3Cpath d='M8 6h5a5 5 0 0 1 5 5v5a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2Z' fill='%23FBF9F4'/%3E%3C/svg%3E">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Crect width='24' height='24' rx='7' fill='%232E639E'/%3E%3Cpath d='M8 6h5a5 5 0 0 1 5 5v5a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2Z' fill='%23F8FAFC'/%3E%3C/svg%3E">
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,600;9..144,700&family=DM+Sans:wght@400;500;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="assets/css/site.css">
 </head>
@@ -57,10 +57,24 @@
 				'<span class="p-price">From $' + from.price + ' <span>/ ' + from.qty + ' labels</span></span>' +
 				'</span></a>';
 		}).join('');
-		var tplCount = prods.reduce(function (n, p) { return n + (p.templates && p.templates[0].image ? p.templates.length : 0); }, 0);
+		var intro = '';
+		if (cat.long && cat.long.length) {
+			var photo = cat.photo
+				? '<div class="cat-intro-photo reveal"><img src="' + cat.photo + '" alt="' + cat.name + ' — example on real takeout packaging" loading="lazy"></div>'
+				: '';
+			var why = cat.bullets && cat.bullets.length
+				? '<details class="cat-why"><summary>Why restaurants choose ' + cat.name + '</summary><ul class="feature-list">' +
+					cat.bullets.map(function (b) { return '<li>' + D.icon('check', 20) + '<div><strong>' + b + '</strong></div></li>'; }).join('') +
+					'</ul></details>'
+				: '';
+			intro = '<div class="cat-intro">' +
+				'<div>' + cat.long.map(function (p) { return '<p>' + p + '</p>'; }).join('') + why + '</div>' +
+				photo + '</div>';
+		}
 		return '<section class="section--tight" id="' + cat.slug + '" style="padding-top: var(--sp-7);">' +
 			'<div class="section-head"><span class="eyebrow">' + cat.name + '</span>' +
-			'<p class="lede" style="font-size: var(--text-base);">' + cat.desc + '</p>' + subs + '</div>' +
+			'<p class="lede" style="font-size: var(--text-lg); font-weight: 700;">' + cat.desc + '</p>' + subs + '</div>' +
+			intro +
 			'<div class="product-grid">' + cards + '</div></section>';
 	}).join('');
 	if (window.atoRevealScan) window.atoRevealScan();

@@ -293,6 +293,7 @@
 		{ href: 'shop.html', label: 'Shop', page: 'shop' },
 		{ href: 'vip.html', label: 'VIP Members', page: 'vip' },
 		{ href: 'making-labels.html', label: 'Making Labels', page: 'making' },
+		{ href: 'about.html', label: 'About Us', page: 'about' },
 		{ href: 'faqs.html', label: 'FAQs', page: 'faqs' },
 		{ href: 'blog.html', label: 'Blog', page: 'blog' },
 		{ href: 'one-question.html', label: 'One Question', page: 'poll' }
@@ -309,7 +310,7 @@
 		mount.outerHTML =
 			'<a class="skip-link" href="#primary">Skip to content</a>' +
 			'<header class="site-header" id="site-header"><div class="container header-bar">' +
-			'<a class="site-brand" href="index.html"><span class="brand-dot">' + D.icon('sticker', 22) + '</span><span>All Take Out</span></a>' +
+			'<a class="site-brand" href="index.html"><img class="site-logo" src="assets/img/logo.png" alt="All Takeout — home"></a>' +
 			'<nav class="main-nav" id="main-nav" aria-label="Primary navigation">' +
 			'<button class="nav-close" id="nav-close" aria-label="Close menu">' + D.icon('close', 22) + '</button>' +
 			'<ul>' + links + '</ul></nav>' +
@@ -333,7 +334,7 @@
 			'<div><a class="footer-brand" href="index.html"><span class="brand-dot">' + D.icon('sticker', 22) + '</span><span>All Take Out</span></a>' +
 			'<p class="footer-tag">Custom labels and stickers that turn every takeout order into a marketing opportunity. Designed by you, reviewed by our print team, delivered to your door.</p></div>' +
 			'<div class="footer-col"><h4>Shop</h4><ul>' + cats + '</ul></div>' +
-			'<div class="footer-col"><h4>Company</h4><ul><li><a href="vip.html">VIP Members</a></li><li><a href="making-labels.html">Making Labels</a></li><li><a href="faqs.html">FAQs</a></li><li><a href="blog.html">Blog</a></li></ul></div>' +
+			'<div class="footer-col"><h4>Company</h4><ul><li><a href="about.html">About Us</a></li><li><a href="vip.html">VIP Members</a></li><li><a href="making-labels.html">Making Labels</a></li><li><a href="faqs.html">FAQs</a></li><li><a href="blog.html">Blog</a></li></ul></div>' +
 			'<div class="footer-col"><h4>Account</h4><ul><li><a href="account.html">My Account</a></li><li><a href="cart.html">Cart</a></li><li><a href="admin.html">Admin panel</a></li></ul></div>' +
 			'</div>' +
 			'<div class="footer-bottom"><span>&copy; 2026 All Take Out &middot; Kew Stick Inc.</span><span>Custom platform — no CMS required</span></div>' +

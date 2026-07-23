@@ -320,7 +320,7 @@
 			width: printArea.width,
 			height: printArea.height,
 			fill: 'transparent',
-			stroke: '#E8590C',
+			stroke: '#2E6DB4',
 			strokeDashArray: [7, 6],
 			strokeWidth: 2,
 			selectable: false,
@@ -416,7 +416,7 @@
 		}
 		cut.set({
 			fill: 'transparent',
-			stroke: '#E8590C',
+			stroke: '#2E6DB4',
 			strokeDashArray: [7, 6],
 			strokeWidth: 1.5,
 			selectable: false,
@@ -539,7 +539,7 @@
 			originY: 'center',
 			fontFamily: (DATA.fonts && DATA.fonts[0]) || 'DM Sans',
 			fontSize: Math.max(20, Math.round(Math.min(box.w, box.h) * 0.2)),
-			fill: '#1b2a20',
+			fill: '#182a3d',
 			atoName: 'Text'
 		});
 		text.atoPlaceholder = true;
@@ -605,7 +605,7 @@
 			search.type = 'search';
 			search.placeholder = I18N.searchClipart || 'Search clipart…';
 			search.setAttribute('aria-label', 'Search clipart');
-			search.style.cssText = 'width:100%;min-height:38px;margin-bottom:8px;padding:6px 10px;border:1px solid #e4decf;border-radius:8px;font:inherit;';
+			search.style.cssText = 'width:100%;min-height:38px;margin-bottom:8px;padding:6px 10px;border:1px solid #dbe4ef;border-radius:8px;font:inherit;';
 			panel.insertBefore(search, grid);
 			function build(filter) {
 				grid.innerHTML = '';
@@ -721,8 +721,8 @@
 			}
 			fontSel.value = obj.fontFamily || '';
 			$('ato-prop-size').value = Math.round(obj.fontSize || 36);
-			var fill = typeof obj.fill === 'string' ? obj.fill : '#1b2a20';
-			$('ato-prop-color').value = /^#([0-9a-f]{6})$/i.test(fill) ? fill : '#1b2a20';
+			var fill = typeof obj.fill === 'string' ? obj.fill : '#182a3d';
+			$('ato-prop-color').value = /^#([0-9a-f]{6})$/i.test(fill) ? fill : '#182a3d';
 			$('ato-prop-bold').classList.toggle('is-active', obj.fontWeight === 'bold' || obj.fontWeight >= 600);
 		}
 		refreshLayers();
@@ -868,7 +868,7 @@
 		if (cartBtn) {
 			cartBtn.scrollIntoView({ behavior: 'smooth', block: 'center' });
 			cartBtn.style.transition = 'box-shadow 300ms ease';
-			cartBtn.style.boxShadow = '0 0 0 4px rgba(232, 89, 12, 0.4)';
+			cartBtn.style.boxShadow = '0 0 0 4px rgba(46, 109, 180, 0.4)';
 			window.setTimeout(function () { cartBtn.style.boxShadow = ''; }, 2400);
 		}
 	}
@@ -928,10 +928,68 @@
 	// ---------------------------------------------------------------------
 	// Wire up
 	// ---------------------------------------------------------------------
+	// ------------------------------------------------------------------
+	// Background colour: every customizable product gets a visible
+	// "Background" control — preset swatches plus a custom picker.
+	// In template mode this recolours the printable area; in classic
+	// mode it recolours the whole label canvas.
+	// ------------------------------------------------------------------
+	var BG_SWATCHES = [
+		'#FFFFFF', '#FFF7E0', '#FFD84D', '#F59B23', '#E5484D', '#F2A7C3',
+		'#3FA45B', '#8FCBA0', '#5688C5', '#14304C', '#D8B98A', '#182A3D'
+	];
+
+	function applyBackground(color) {
+		if (!canvas) return;
+		if (printArea) {
+			setAreaBackground(color);
+		} else {
+			canvas.setBackgroundColor(color, canvas.renderAll.bind(canvas));
+			dirty = true;
+		}
+		var toolInput = $('ato-tool-bg-input');
+		if (toolInput) toolInput.value = /^#([0-9a-f]{6})$/i.test(color) ? color : '#ffffff';
+		var custom = $('ato-bg-custom');
+		if (custom) custom.value = toolInput ? toolInput.value : '#ffffff';
+		var grid = $('ato-ed-bg-swatches');
+		if (grid) {
+			grid.querySelectorAll('.ato-ed-swatch').forEach(function (b) {
+				b.classList.toggle('is-selected', b.getAttribute('data-color').toLowerCase() === color.toLowerCase());
+			});
+		}
+	}
+
+	/** Build the side-panel "Background colour" section (all editor hosts). */
+	function ensureBgPanel() {
+		var side = document.querySelector('#ato-editor .ato-ed-side');
+		if (!side || $('ato-ed-bg-panel')) return;
+		var panel = document.createElement('div');
+		panel.className = 'ato-ed-panel';
+		panel.id = 'ato-ed-bg-panel';
+		panel.innerHTML =
+			'<h4>Background colour</h4>' +
+			'<div class="ato-ed-swatches" id="ato-ed-bg-swatches">' +
+			BG_SWATCHES.map(function (c) {
+				return '<button type="button" class="ato-ed-swatch" data-color="' + c + '" style="background:' + c + '" title="' + c + '" aria-label="Background ' + c + '"></button>';
+			}).join('') +
+			'</div>' +
+			'<div class="ato-ed-field" style="margin-top:8px;"><label for="ato-bg-custom">Custom colour</label>' +
+			'<input type="color" id="ato-bg-custom" value="#ffffff"></div>';
+		side.insertBefore(panel, side.firstChild);
+		panel.addEventListener('click', function (e) {
+			var b = e.target.closest('.ato-ed-swatch');
+			if (b) applyBackground(b.getAttribute('data-color'));
+		});
+		$('ato-bg-custom').addEventListener('input', function (e) {
+			applyBackground(e.target.value);
+		});
+	}
+
 	function bind() {
 		var openBtn = $('ato-open-editor');
 		if (!openBtn || !$('ato-editor')) return;
 
+		ensureBgPanel();
 		openBtn.addEventListener('click', openOverlay);
 		$('ato-ed-close').addEventListener('click', function () { closeOverlay(false); });
 		document.addEventListener('keydown', function (e) {
@@ -949,13 +1007,7 @@
 		$('ato-tool-clipart').addEventListener('click', toggleClipartPanel);
 		$('ato-tool-qr').addEventListener('click', addQRCode);
 		$('ato-tool-bg-input').addEventListener('input', function (e) {
-			if (!canvas) return;
-			if (printArea) {
-				setAreaBackground(e.target.value);
-			} else {
-				canvas.setBackgroundColor(e.target.value, canvas.renderAll.bind(canvas));
-				dirty = true;
-			}
+			applyBackground(e.target.value);
 		});
 
 		$('ato-ed-undo').addEventListener('click', undo);

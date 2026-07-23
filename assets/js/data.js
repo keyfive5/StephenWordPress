@@ -53,14 +53,79 @@
 		return { name: name, image: 'assets/templates/' + file, area: area };
 	}
 
+	// Category marketing copy comes from Stephen's REVISED page PDFs
+	// (July 2026 drive folder, preserved in repo client-assets/).
 	var CATEGORIES = [
-		{ slug: 'social-media-labels', name: 'Social Media Labels', icon: 'megaphone', desc: 'Turn every bag into a follow — Instagram, TikTok and Facebook handles your customers can scan.', subs: ['TikTok', 'Facebook', 'Instagram', 'X (Twitter)'] },
-		{ slug: 'qr-code-labels', name: 'QR Code Labels', icon: 'qr', desc: 'Link menus, review pages or loyalty programs with crisp, scannable QR stickers.', subs: [] },
-		{ slug: 'promotional-labels', name: 'Promotional Labels', icon: 'tag', desc: 'Sales, launches and limited offers — labels that move the needle.', subs: [] },
-		{ slug: 'branded-labels', name: 'Branded Labels', icon: 'badge', desc: 'Your logo, your colours, on every order that leaves the kitchen.', subs: [] },
-		{ slug: 'tamper-evident-labels', name: 'Tamper-Evident Labels', icon: 'shield', desc: 'Seal orders with confidence — customers see their food arrives untouched.', subs: [] },
-		{ slug: 'customer-appreciation-stickers', name: 'Customer Appreciation', icon: 'heart', desc: 'Thank-you stickers that turn first orders into regulars.', subs: [] },
-		{ slug: 'food-identification-labels', name: 'Food Identification', icon: 'utensils', desc: 'Allergens, spice levels, prep dates — clear info, zero mix-ups.', subs: [] }
+		{
+			slug: 'social-media-labels', name: 'Social Media Labels', icon: 'megaphone',
+			desc: 'Turn every takeout order into a follower.', subs: ['TikTok', 'Facebook', 'Instagram', 'X (Twitter)'],
+			photo: 'assets/img/social-chefalex.jpg',
+			long: [
+				'Custom social media labels make it easy for customers to find and follow your restaurant online. Add them to takeout bags, boxes, cups, and containers to grow your audience, promote offers, and keep your brand active long after the order is delivered.',
+				'Customize your labels with your social media handles or links, brand colors and logo, calls-to-action (Follow us, Tag us, Share your meal), and restaurant-themed design elements. Choose a template, add your details, and get high-quality printed labels ready for your packaging.'
+			],
+			bullets: ['Increase followers and online engagement', 'Turn customers into long-term social media audiences', 'Promote specials, events, and new menu items', 'Strengthen brand visibility across platforms', 'Low-cost marketing on every order', 'Works perfectly on takeout packaging and delivery orders']
+		},
+		{
+			slug: 'qr-code-labels', name: 'QR Code Labels', icon: 'qr',
+			desc: 'Turn every takeout order into a direct marketing channel.', subs: [],
+			photo: 'assets/img/qr-menu.jpg',
+			long: [
+				'Create custom QR code labels in minutes using our built-in QR Code Generator—no design experience needed. Link customers straight to your menu, website, Google reviews, ordering platforms, or social media.',
+				'Designed for takeout bags, cups, boxes, and food containers, these QR code stickers help you turn offline customers into online traffic, reviews, and repeat orders. Every order includes free professional design support from real designers who check your artwork for clarity, accuracy, and print quality.'
+			],
+			bullets: ['Turn packaging into a 24/7 marketing tool', 'Drive more Google reviews and online visibility', 'Increase direct orders and reduce third-party fees', 'Send customers directly to menus and ordering pages', 'Promote social media and special offers instantly', 'Build repeat business from every order']
+		},
+		{
+			slug: 'promotional-labels', name: 'Promotional Labels', icon: 'tag',
+			desc: 'Turn every takeout order into advertising.', subs: [],
+			photo: 'assets/img/promo-roll.jpg',
+			long: [
+				'Custom promotional labels help restaurants promote special offers, limited-time deals, new menu items, events, and loyalty programs directly on their packaging. Every order becomes a way to keep your brand and message in front of customers long after they leave.',
+				'More than just labels, they are a low-cost marketing tool that helps increase brand awareness, boost sales during promotions, drive repeat orders, and keep customers engaged with your offers.'
+			],
+			bullets: ['Promote special offers, deals, and new menu items', 'Turn packaging into ongoing advertising', 'Increase repeat orders and customer engagement', 'Strengthen brand awareness with every order', 'Flexible materials, sizes, and quantities available', 'Easy updates for seasonal or limited-time campaigns', 'Professional design review included on every order']
+		},
+		{
+			slug: 'branded-labels', name: 'Branded Labels', icon: 'badge',
+			desc: 'Turn every order into a branding opportunity.', subs: [],
+			photo: 'assets/img/branded-foodtruck.jpg',
+			long: [
+				'Create custom branded labels in minutes using our simple online design tool—no design experience needed. Upload your logo, add your artwork, and design professional labels that make your packaging instantly recognizable.',
+				'Perfect for takeout bags, food containers, cups, pizza boxes, and delivery packaging, these custom restaurant labels help your business look more professional and memorable with every order you send out. Strong branding increases customer trust, improves recognition, and encourages repeat orders—turning one-time buyers into loyal customers.'
+			],
+			bullets: ['Build strong, consistent brand recognition', 'Make takeout packaging look professional and premium', 'Increase customer trust and perceived value', 'Encourage repeat orders and customer loyalty', 'Stand out from competitors in a crowded market', 'Easy reordering with saved artwork on file']
+		},
+		{
+			slug: 'tamper-evident-labels', name: 'Tamper-Evident Labels', icon: 'shield',
+			desc: 'Seal It, Brand It, Protect It.', subs: [],
+			photo: 'assets/img/tamper-roll.jpg',
+			long: [
+				'Create tamper-evident labels that match your restaurant’s brand while making food protection visible. You can place your logo, brand name, or artwork directly on the template for a clean, professional look that reinforces trust with every order.',
+				'Our Tamper Evident Labels are designed for restaurants that want to show customers their order was sealed with care before pickup or delivery. They add visible reassurance to takeout and delivery orders, helping customers feel more comfortable from handoff to first bite.'
+			],
+			bullets: ['Make sealed packaging clearly visible to customers', 'Show customers their order was closed with care', 'Add trust and reassurance at pickup or delivery', 'Build professionalism into every handoff', 'Strengthen brand recognition', 'Ideal for paper takeout bags, delivery orders, and catering packaging']
+		},
+		{
+			slug: 'customer-appreciation-stickers', name: 'Customer Appreciation', icon: 'heart',
+			desc: 'Show some love to the backbone of your business—your repeat customers.', subs: [],
+			photo: 'assets/img/appreciation-erik.jpg',
+			long: [
+				'Custom customer appreciation stickers help restaurants turn every order into a personal experience. Add a simple “thank you” that makes customers feel valued, recognized, and more likely to return.',
+				'Make your regular customers feel special with personalized name-based stickers designed for repeat business. Simply provide 5, 10, or 15 customer names, and our design team will create a set of custom appreciation stickers using professionally designed templates. No design experience needed. We handle the layout, styling, and print-ready setup for you.'
+			],
+			bullets: ['Strengthen loyalty with repeat customers', 'Add a personal touch to every order', 'Increase customer retention and repeat visits', 'Turn packaging into a positive brand experience', 'Encourage word-of-mouth and social sharing', 'Easy personalized design process—no effort required', 'Professionally designed, print-ready sticker sets']
+		},
+		{
+			slug: 'food-identification-labels', name: 'Food Identification', icon: 'utensils',
+			desc: 'Stay fast, organized, and on-brand.', subs: [],
+			photo: 'assets/img/food-halal.jpg',
+			long: [
+				'Custom food identification labels help busy restaurants clearly mark orders, dietary needs, and packaging details without slowing down service. Designed for fast-paced kitchens, these labels improve accuracy while keeping your branding visible on every order.',
+				'Clearly mark menu items, dietary requirements, and special instructions so customers receive exactly what they ordered. This reduces mistakes, speeds up service, and improves overall kitchen efficiency. At the same time, every label reinforces your brand identity on every box, bag, and container leaving your kitchen.'
+			],
+			bullets: ['Improve order accuracy and reduce mistakes', 'Speed up kitchen workflow and service times', 'Clearly mark dietary and allergy requirements', 'Strengthen customer trust and confidence', 'Keep packaging organized in busy environments', 'Add professional branding to every order', 'Works for takeout, delivery, and dine-in packaging']
+		}
 	];
 
 	function product(slug, name, cat, sub, iconName, shapeHint, swatchColor, desc, templates) {
@@ -73,34 +138,34 @@
 	}
 
 	var PRODUCTS = [
-		product('tiktok-label', 'TikTok Label', 'social-media-labels', 'TikTok', 'megaphone', 'rectangle', '#1B2A20',
+		product('tiktok-label', 'TikTok Label', 'social-media-labels', 'TikTok', 'megaphone', 'rectangle', '#182A3D',
 			'Your TikTok where hungry people already look — right on the bag. Pick a layout, then customize the editable zone.',
 			[
 				tpl('Address zone', 'tt-address.png', { x: 0.43, y: 0.5817, w: 0.5253, h: 0.19 }),
 				tpl('Bottom strip', 'tt-bottom.png', { x: 0.022, y: 0.8553, w: 0.9582, h: 0.1203 }),
 				tpl('Message panel', 'tt-message.png', { x: 0.393, y: 0.0333, w: 0.595, h: 0.94 })
 			]),
-		product('instagram-label', 'Instagram Label', 'social-media-labels', 'Instagram', 'megaphone', 'rectangle', '#E8590C',
+		product('instagram-label', 'Instagram Label', 'social-media-labels', 'Instagram', 'megaphone', 'rectangle', '#2E6DB4',
 			'A follow-us sticker your customers will actually photograph. Fixed Instagram artwork, your details in the printable area.',
 			[
 				tpl('Address zone', 'ig-address.png', { x: 0.3221, y: 0.6289, w: 0.6298, h: 0.2186 }),
 				tpl('Message panel', 'ig-message.png', { x: 0.3343, y: 0.0309, w: 0.6549, h: 0.932 })
 			]),
-		product('facebook-label', 'Facebook Label', 'social-media-labels', 'Facebook', 'megaphone', 'rectangle', '#1D5B33',
+		product('facebook-label', 'Facebook Label', 'social-media-labels', 'Facebook', 'megaphone', 'rectangle', '#2E639E',
 			'Point customers to your page for reviews, events and specials — three layouts, one editable zone each.',
 			[
 				tpl('Address zone', 'fb-address.png', { x: 0.362, y: 0.6167, w: 0.6073, h: 0.1967 }),
 				tpl('Bottom strip', 'fb-bottom.png', { x: 0.022, y: 0.8553, w: 0.9582, h: 0.1203 }),
 				tpl('Message panel', 'fb-message.png', { x: 0.397, y: 0.0333, w: 0.592, h: 0.94 })
 			]),
-		product('x-twitter-label', 'X (Twitter) Label', 'social-media-labels', 'X (Twitter)', 'megaphone', 'rectangle', '#1B2A20',
+		product('x-twitter-label', 'X (Twitter) Label', 'social-media-labels', 'X (Twitter)', 'megaphone', 'rectangle', '#182A3D',
 			'Short, sharp and scannable — your X handle on every order.',
 			[
 				tpl('Address zone', 'x-address.png', { x: 0.362, y: 0.6167, w: 0.6073, h: 0.1967 }),
 				tpl('Bottom strip', 'x-bottom.png', { x: 0.022, y: 0.8553, w: 0.9582, h: 0.1203 }),
 				tpl('Message panel', 'x-message.png', { x: 0.402, y: 0.0333, w: 0.586, h: 0.94 })
 			]),
-		product('qr-code-label', 'QR Code Label', 'qr-code-labels', '', 'qr', 'square', '#1D5B33',
+		product('qr-code-label', 'QR Code Label', 'qr-code-labels', '', 'qr', 'square', '#2E639E',
 			'Paste a link — the editor generates the QR code. Four layouts: from a blank QR canvas to menu and thank-you designs.',
 			[
 				tpl('Generate your QR', 'qr-generate.png', { x: 0.0122, y: 0.0122, w: 0.9744, h: 0.9744 }),
@@ -108,21 +173,21 @@
 				tpl('Thank You + QR', 'qr-thankyou.png', { x: 0.0108, y: 0.0309, w: 0.297, h: 0.9402 }),
 				tpl('Social Media + QR', 'qr-social.png', { x: 0.0108, y: 0.0309, w: 0.297, h: 0.9402 })
 			]),
-		product('promo-label', 'Promotional Label', 'promotional-labels', '', 'tag', 'rectangle', '#E8590C',
+		product('promo-label', 'Promotional Label', 'promotional-labels', '', 'tag', 'rectangle', '#2E6DB4',
 			'Create your own promotion: sales, launches and limited offers on a full-canvas template.',
 			[
 				tpl('Portrait', 'promo-rect.png', { x: 0.0233, y: 0.0156, w: 0.9517, h: 0.9678 }),
 				tpl('Square', 'promo-square.png', { x: 0.0122, y: 0.0122, w: 0.9744, h: 0.9744 })
 			]),
-		product('branded-label', 'Branded Label', 'branded-labels', '', 'badge', 'rectangle', '#1D5B33',
+		product('branded-label', 'Branded Label', 'branded-labels', '', 'badge', 'rectangle', '#2E639E',
 			'Your logo, your colours — a full printable canvas in two formats.',
 			[
 				tpl('Portrait', 'brand-rect.png', { x: 0.0233, y: 0.0156, w: 0.9517, h: 0.9678 }),
 				tpl('Square', 'brand-square.png', { x: 0.0122, y: 0.0122, w: 0.9744, h: 0.9744 })
 			]),
-		product('tamper-seal', 'Tamper-Evident Seal', 'tamper-evident-labels', '', 'shield', 'rectangle', '#1B2A20',
+		product('tamper-seal', 'Tamper-Evident Seal', 'tamper-evident-labels', '', 'shield', 'rectangle', '#182A3D',
 			'Splits cleanly when opened — customers see their food arrives untouched.', null),
-		product('thank-you-stickers', 'Thank You Stickers', 'customer-appreciation-stickers', '', 'heart', 'square', '#E8590C',
+		product('thank-you-stickers', 'Thank You Stickers', 'customer-appreciation-stickers', '', 'heart', 'square', '#2E6DB4',
 			'Five designer thank-you layouts — drop your restaurant name into the printable zone and go.',
 			[
 				tpl('Thanks — blue', 'thanks-blue.png', { x: 0.18, y: 0.25, w: 0.64, h: 0.19 }),
@@ -131,7 +196,7 @@
 				tpl('Your Support', 'thanks-support.png', { x: 0.13, y: 0.05, w: 0.74, h: 0.15 }),
 				tpl('Gratitude Grows', 'thanks-gratitude.png', { x: 0.03, y: 0.09, w: 0.55, h: 0.21 })
 			]),
-		product('food-certification-label', 'Food Certification Label', 'food-identification-labels', '', 'utensils', 'rectangle', '#1D5B33',
+		product('food-certification-label', 'Food Certification Label', 'food-identification-labels', '', 'utensils', 'rectangle', '#2E639E',
 			'Allergy, Halal and Kosher certification labels — your brand in the top zone, the certification mark stays fixed.',
 			[
 				tpl('Allergy', 'food-allergy.png', { x: 0.0183, y: 0.0122, w: 0.955, h: 0.3244 }),
@@ -183,11 +248,13 @@
 	// The One Question poll (per client spec): changing the id replaces the
 	// question — the new one starts at zero and old results stay archived
 	// in the admin area.
+	// One Question REVISED (July 2026): new question — the old one is
+	// auto-archived by the id change and stays visible in the admin area.
 	var POLL = {
-		id: 'q1',
-		question: 'What matters most to your business on takeout packaging?',
-		options: ['Getting more social media followers', 'Reviews and repeat orders', 'Food safety and certification info'],
-		seed: [61, 48, 28]
+		id: 'q2',
+		question: 'What is the greatest challenge for your takeout business?',
+		options: ['Eco-friendly packaging costs', 'Food tampering/security', 'High delivery commission fees', 'Shifting from dine-in to takeout', 'Unreliable delivery pickups/cancellations'],
+		seed: [17, 24, 31, 12, 21]
 	};
 
 	window.ATO_DATA = {

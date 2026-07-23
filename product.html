@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Product — All Take Out</title>
 <meta name="description" content="Configure and design your custom label live in the browser.">
-<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Crect width='24' height='24' rx='7' fill='%231D5B33'/%3E%3Cpath d='M8 6h5a5 5 0 0 1 5 5v5a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2Z' fill='%23FBF9F4'/%3E%3C/svg%3E">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Crect width='24' height='24' rx='7' fill='%232E639E'/%3E%3Cpath d='M8 6h5a5 5 0 0 1 5 5v5a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2Z' fill='%23F8FAFC'/%3E%3C/svg%3E">
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,600;9..144,700&family=DM+Sans:wght@400;500;700&display=swap" rel="stylesheet">
 <link href="https://fonts.googleapis.com/css2?family=Oswald:wght@500&family=Playfair+Display:wght@600&family=Pacifico&family=Bebas+Neue&family=Caveat:wght@600&family=Montserrat:wght@500;700&family=Lobster&family=Abril+Fatface&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="assets/css/site.css">
@@ -17,7 +17,7 @@
 <main id="primary" class="site-main">
 	<div class="container product-layout">
 		<div class="product-stage" id="product-stage"></div>
-		<div class="product-info">
+		<div class="product-info" id="product-info-col">
 			<span class="eyebrow" id="p-cat"></span>
 			<h1 id="p-name"></h1>
 			<div class="product-price" id="p-price"></div>
@@ -100,7 +100,7 @@
 			</button>
 			<label class="ato-ed-tool" for="ato-tool-bg-input">
 				<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 22a10 10 0 1 1 10-10c0 2.2-1.8 3-3.5 3H16a2 2 0 0 0-1.5 3.3c.6.7.2 1.7-.7 1.7H12Z"/><circle cx="7.5" cy="11.5" r="1"/><circle cx="11" cy="7.5" r="1"/><circle cx="16" cy="9" r="1"/></svg>
-				<span>Colour</span>
+				<span>Background</span>
 				<input type="color" id="ato-tool-bg-input" value="#ffffff" hidden>
 			</label>
 		</div>
@@ -187,6 +187,23 @@
 		var square = product.shapeHint !== 'circle' ? ' p-swatch--square' : '';
 		document.getElementById('product-stage').innerHTML =
 			'<span class="p-swatch' + square + '" id="stage-swatch" style="background:' + product.swatch + '">' + product.name + '</span>';
+	}
+
+	// Category marketing copy (client REVISED page content) below the configurator.
+	if (cat && cat.long && cat.long.length) {
+		var copyEl = document.createElement('div');
+		copyEl.className = 'cat-intro';
+		copyEl.style.marginTop = 'var(--sp-6)';
+		copyEl.innerHTML =
+			'<div>' + cat.long.map(function (p) { return '<p>' + p + '</p>'; }).join('') +
+			(cat.bullets && cat.bullets.length
+				? '<details class="cat-why"><summary>Why restaurants choose ' + cat.name + '</summary><ul class="feature-list">' +
+					cat.bullets.map(function (b) { return '<li>' + D.icon('check', 20) + '<div><strong>' + b + '</strong></div></li>'; }).join('') +
+					'</ul></details>'
+				: '') +
+			'</div>' +
+			(cat.photo ? '<div class="cat-intro-photo"><img src="' + cat.photo + '" alt="' + cat.name + ' on real takeout packaging" loading="lazy"></div>' : '');
+		document.getElementById('product-info-col').appendChild(copyEl);
 	}
 
 	// --- Editor wiring: same engine as the WordPress plugin; the page

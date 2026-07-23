@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Admin — Customer Designs & Orders — All Take Out</title>
 <meta name="robots" content="noindex">
-<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Crect width='24' height='24' rx='7' fill='%23E8590C'/%3E%3Cpath d='M8 6h5a5 5 0 0 1 5 5v5a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2Z' fill='%23FBF9F4'/%3E%3C/svg%3E">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Crect width='24' height='24' rx='7' fill='%232E6DB4'/%3E%3Cpath d='M8 6h5a5 5 0 0 1 5 5v5a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2Z' fill='%23F8FAFC'/%3E%3C/svg%3E">
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,600;9..144,700&family=DM+Sans:wght@400;500;700&display=swap" rel="stylesheet">
 <link href="https://fonts.googleapis.com/css2?family=Oswald:wght@500&family=Playfair+Display:wght@600&family=Pacifico&family=Bebas+Neue&family=Caveat:wght@600&family=Montserrat:wght@500;700&family=Lobster&family=Abril+Fatface&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="assets/css/site.css">
@@ -75,7 +75,7 @@
 			<label class="ato-ed-tool" for="ato-tool-upload-input"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 16V4m0 0L7 9m5-5 5 5"/><path d="M4 16v3a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-3"/></svg><span>Image</span><input type="file" id="ato-tool-upload-input" accept="image/png,image/jpeg,image/svg+xml,image/webp" hidden></label>
 			<button type="button" class="ato-ed-tool" id="ato-tool-clipart"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m12 2 3.1 6.3 6.9 1-5 4.9 1.2 6.8L12 17.8 5.8 21l1.2-6.8-5-4.9 6.9-1L12 2Z"/></svg><span>Clipart</span></button>
 			<button type="button" class="ato-ed-tool" id="ato-tool-qr"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><path d="M14 14h3v3h-3zM21 14v.01M14 21v.01M21 21v.01M17.5 17.5H21M17.5 17.5V21"/></svg><span>QR code</span></button>
-			<label class="ato-ed-tool" for="ato-tool-bg-input"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 22a10 10 0 1 1 10-10c0 2.2-1.8 3-3.5 3H16a2 2 0 0 0-1.5 3.3c.6.7.2 1.7-.7 1.7H12Z"/><circle cx="7.5" cy="11.5" r="1"/><circle cx="11" cy="7.5" r="1"/><circle cx="16" cy="9" r="1"/></svg><span>Colour</span><input type="color" id="ato-tool-bg-input" value="#ffffff" hidden></label>
+			<label class="ato-ed-tool" for="ato-tool-bg-input"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 22a10 10 0 1 1 10-10c0 2.2-1.8 3-3.5 3H16a2 2 0 0 0-1.5 3.3c.6.7.2 1.7-.7 1.7H12Z"/><circle cx="7.5" cy="11.5" r="1"/><circle cx="11" cy="7.5" r="1"/><circle cx="16" cy="9" r="1"/></svg><span>Background</span><input type="color" id="ato-tool-bg-input" value="#ffffff" hidden></label>
 		</div>
 		<div class="ato-ed-canvas-col">
 			<div class="ato-ed-canvas-wrap" id="ato-ed-canvas-wrap"><canvas id="ato-canvas"></canvas></div>
@@ -343,7 +343,7 @@
 				var base = D.products[0];
 				A.addProduct(Object.assign({
 					slug: name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '') + '-' + Math.random().toString(36).slice(2, 5),
-					sub: '', icon: 'sticker', shapeHint: 'rectangle', swatch: '#1D5B33',
+					sub: '', icon: 'sticker', shapeHint: 'rectangle', swatch: '#2E639E',
 					materials: base.materials, sizes: base.sizes, shapes: base.shapes,
 					templates: [{ name: 'Blank canvas', image: '' }],
 					custom: true

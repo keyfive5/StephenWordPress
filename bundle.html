@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Build My Bundle — Save 20% — All Take Out</title>
 <meta name="description" content="Bundle custom Branded Labels with QR Code Labels and save 20%. Mix and match quantities, sizes, materials and designs.">
-<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Crect width='24' height='24' rx='7' fill='%23E8590C'/%3E%3Cpath d='M8 6h5a5 5 0 0 1 5 5v5a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2Z' fill='%23FBF9F4'/%3E%3C/svg%3E">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Crect width='24' height='24' rx='7' fill='%232E6DB4'/%3E%3Cpath d='M8 6h5a5 5 0 0 1 5 5v5a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2Z' fill='%23F8FAFC'/%3E%3C/svg%3E">
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,600;9..144,700&family=DM+Sans:wght@400;500;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="assets/css/site.css">
 <style>
@@ -13,14 +13,16 @@
 	@media (max-width: 900px) { .bundle-grid { grid-template-columns: 1fr; } }
 	.bundle-step { background: var(--white); border: 1px solid var(--color-border); border-radius: var(--radius-lg); padding: var(--sp-6); margin-bottom: var(--sp-5); }
 	.bundle-step h3 { display: flex; align-items: center; gap: var(--sp-3); margin-top: 0; }
-	.bundle-step h3 .step-num { width: 36px; height: 36px; border-radius: 50%; background: var(--green-700); color: var(--white); display: inline-grid; place-items: center; font-family: var(--font-body); font-size: var(--text-base); flex: none; }
+	.bundle-step h3 .step-num { width: 36px; height: 36px; border-radius: 50%; background: var(--blue-700); color: var(--white); display: inline-grid; place-items: center; font-family: var(--font-body); font-size: var(--text-base); flex: none; }
 	.tier-pills { display: flex; flex-wrap: wrap; gap: var(--sp-2); }
 	.tier-pill { min-height: 48px; padding: 0.5rem 1.1rem; border: 2px solid var(--color-border); border-radius: var(--radius-pill); background: var(--white); font: inherit; font-weight: 700; cursor: pointer; }
-	.tier-pill.is-selected { border-color: var(--accent); box-shadow: 0 0 0 3px rgba(232, 89, 12, 0.18); }
+	.tier-pill.is-selected { border-color: var(--accent); box-shadow: 0 0 0 3px rgba(46, 109, 180, 0.18); }
 	.tier-pill s { color: var(--ink-faint); font-weight: 500; margin-right: 6px; }
 	.tier-pill .now { color: var(--accent); }
 	.bundle-tpl-preview { display: flex; gap: var(--sp-3); margin-top: var(--sp-4); flex-wrap: wrap; }
 	.bundle-tpl-preview img { height: 74px; border: 1px solid var(--color-border); border-radius: var(--radius-sm); background: var(--white); padding: 4px; }
+	.bundle-gallery { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: var(--sp-5); align-items: start; }
+	.bundle-gallery img { width: 100%; height: auto; border-radius: var(--radius-lg); box-shadow: var(--shadow-md); }
 </style>
 </head>
 <body data-page="bundle">
@@ -29,9 +31,17 @@
 <main id="primary" class="site-main">
 	<div class="page-hero">
 		<div class="container">
-			<span class="eyebrow">Bundle &amp; save 20%</span>
-			<h1>Build your bundle, your way</h1>
-			<p class="lede">Every restaurant is different, which is why every bundle is fully customizable. Pair Branded Labels with QR Code Labels — mix and match quantities — and save 20% on both.</p>
+			<span class="eyebrow">Custom Branded &amp; QR Code Label Bundle for Restaurants</span>
+			<h1>Save 20% + receive a FREE 50 label VIP reward</h1>
+			<p class="lede">Transform your takeout packaging into a powerful branding and marketing tool with our most popular restaurant label bundle.</p>
+			<ul class="option-pills" style="margin-top: var(--sp-4);">
+				<li>✓ Save 20% vs. buying separately</li>
+				<li>✓ Branded + QR Code Labels in one order</li>
+				<li>✓ Flexible quantities, sizes &amp; materials</li>
+				<li>✓ Built-in QR Code Generator</li>
+				<li>✓ FREE VIP reward: 50 extra labels</li>
+				<li>✓ Free professional design support</li>
+			</ul>
 		</div>
 	</div>
 
@@ -58,15 +68,36 @@
 			</div>
 		</div>
 
-		<aside class="summary-card">
-			<h3>Bundle summary</h3>
-			<div class="summary-row"><span id="sum-branded-label">Branded Labels</span><span id="sum-branded"></span></div>
-			<div class="summary-row"><span id="sum-qr-label">QR Code Labels</span><span id="sum-qr"></span></div>
-			<div class="summary-row"><span>Bundle discount</span><span class="free">−20%</span></div>
-			<div class="summary-row total"><span>Bundle total <span style="font-weight:500;font-size:var(--text-xs);">(USD)</span></span><span id="sum-total"></span></div>
-			<p style="font-size: var(--text-xs); color: var(--ink-faint); margin-top: var(--sp-3);">You save <strong id="sum-savings"></strong> vs. buying separately. VIP members also get 50 extra labels with every regular-priced roll or bundle.</p>
+		<aside>
+			<div class="summary-card">
+				<h3>Bundle summary</h3>
+				<div class="summary-row"><span id="sum-branded-label">Branded Labels</span><span id="sum-branded"></span></div>
+				<div class="summary-row"><span id="sum-qr-label">QR Code Labels</span><span id="sum-qr"></span></div>
+				<div class="summary-row"><span>Bundle discount</span><span class="free">−20%</span></div>
+				<div class="summary-row total"><span>Bundle total <span style="font-weight:500;font-size:var(--text-xs);">(USD)</span></span><span id="sum-total"></span></div>
+				<p style="font-size: var(--text-xs); color: var(--ink-faint); margin-top: var(--sp-3);">You save <strong id="sum-savings"></strong> vs. buying separately. VIP members also get 50 extra labels with every regular-priced roll or bundle.</p>
+			</div>
+			<img src="assets/img/bundle-hero.jpg" alt="Branded takeout bag with QR code review label" style="border-radius: var(--radius-lg); box-shadow: var(--shadow-md); margin-top: var(--sp-5);" loading="lazy">
 		</aside>
 	</div>
+
+	<section class="section section--kraft">
+		<div class="container">
+			<div class="section-head section-head--center">
+				<span class="eyebrow">Branding meets customer engagement</span>
+				<h2>Why choose between branded labels and QR code labels when you can have both?</h2>
+				<p class="lede">Use branded labels to strengthen recognition of your restaurant and QR code labels to direct customers to your menu, online ordering page, Google reviews, loyalty programs, website, or social media channels. Every order becomes another opportunity to promote your business, stay connected with customers, and encourage repeat business.</p>
+			</div>
+			<div class="bundle-gallery">
+				<img src="assets/img/bundle-1.jpg" alt="Plain takeout bag next to a branded bag with custom labels" loading="lazy">
+				<img src="assets/img/bundle-2.jpg" alt="Customer receiving a branded takeout bag with appreciation sticker" loading="lazy">
+				<img src="assets/img/bundle-3.jpg" alt="Roll of branded and QR code labels" loading="lazy">
+				<img src="assets/img/bundle-4.jpg" alt="Branded takeout box with QR code label" loading="lazy">
+			</div>
+			<p class="text-center lede" style="margin-top: var(--sp-6);">Most printers simply sell labels. We help restaurants use labels as a practical marketing tool.</p>
+			<p class="text-center"><a class="btn btn--accent btn--lg" href="#primary" onclick="window.scrollTo({top:0,behavior:'smooth'});return false;">Build Your Bundle &amp; Save 20%</a></p>
+		</div>
+	</section>
 </main>
 
 <div id="app-footer"></div>
