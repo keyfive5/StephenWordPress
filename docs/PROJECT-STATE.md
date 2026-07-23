@@ -1,6 +1,15 @@
 # PROJECT STATE — All Take Out (single source of truth)
 
-> Read this first in any new working session. Everything below is current as of **July 17, 2026**.
+> Read this first in any new working session. Everything below is current as of **July 23, 2026**.
+
+## July 23, 2026 session (Stephen's bug list + content drop)
+
+- **Blue rebrand (Stephen's requirement)**: whole palette switched from green/orange to blue matching the logo. Logo blue sampled = `#5688C5`; tokens now `--blue-900 #14304C · --blue-700 #2E639E · --blue-600 #3F76B4 · --accent #2E6DB4 · paper #F8FAFC`. Header uses the **real logo** (`assets/img/logo.png`, transparent PNG made from `legacy/frontend-user-nextjs/public/images/logos/logo.jpg` — the old site's exact logo). Same mapping applied to WP theme (1.1.0) + plugin (1.4.0); dist zips rebuilt.
+- **Nav**: About Us added (all pages via store.js NAV); items forced one-line (`white-space: nowrap`, tighter gaps); mobile-drawer breakpoint 900→1080px.
+- **about.html**: new page, Stephen's About Us copy **verbatim** (chat message July 23). In footer Company column + sitemap.
+- **Content drop integrated** (`client-assets/content-2026-07/` = full July drive folder, ~86 MB, preserved in repo): homepage rewritten to *New Home Page REVISED*; per-category copy + photo on shop.html and product.html (data.js `CATEGORIES[].long/bullets/photo`); vip.html = *VIP Circle REVISED* (5 named perks); making-labels.html = *Making Labels REVISED* (file types, designer review, RGB→CMYK, water-resistant, food-safe, rolls); faqs.html = full 25-question *FAQ REVISED* + BOPP; bundle.html hero = "Save 20% + FREE 50 Label VIP Reward" + photo gallery; poll → **q2** "greatest challenge" (5 options, old q1 auto-archives). Client photos compressed to `ato-custom/assets/img/` (~3.6 MB total, max 1100px wide).
+- **Editor: Background colour option** (Stephen's request — every customizable product): side panel "Background colour" with 12 preset swatches + custom picker, injected by shared editor.js (`ensureBgPanel`), so product page, admin and the WP plugin all get it; toolbar tool renamed Colour→**Background**. Template mode recolours the printable area (`areabg`), classic mode recolours the canvas. Synced verbatim to plugin.
+- **Note**: `Stack for Website.docx` in the content drop = Stephen's approved WP plugin stack for launch (Wordfence, UpdraftPlus, GTM+GA4, CookieYes, Clarity, Rank Math…) — implementation notes for the Hostinger deploy, not site copy.
 
 ## What this is
 

@@ -102,12 +102,12 @@ class ATO_Emails {
 
 		$body = sprintf(
 			'<div style="font-family:Arial,Helvetica,sans-serif;color:#222;max-width:720px;">
-				<h2 style="color:#1D5B33;">%1$s</h2>
+				<h2 style="color:#2E639E;">%1$s</h2>
 				<p><strong>%2$s:</strong> #%3$s<br>
 				<strong>%4$s:</strong> %5$s<br>
 				<strong>%6$s:</strong> %7$s</p>
 				<table style="border-collapse:collapse;width:100%%;font-size:13px;">
-					<tr style="background:#1D5B33;color:#fff;">
+					<tr style="background:#2E639E;color:#fff;">
 						<th style="padding:10px;text-align:left;">%8$s</th>
 						<th style="padding:10px;text-align:left;">%9$s</th>
 						<th style="padding:10px;text-align:left;">%10$s</th>

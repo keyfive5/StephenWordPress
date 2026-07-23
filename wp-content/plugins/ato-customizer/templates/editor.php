@@ -66,7 +66,7 @@ defined( 'ABSPATH' ) || exit;
 			</button>
 			<label class="ato-ed-tool" for="ato-tool-bg-input">
 				<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 22a10 10 0 1 1 10-10c0 2.2-1.8 3-3.5 3H16a2 2 0 0 0-1.5 3.3c.6.7.2 1.7-.7 1.7H12Z"/><circle cx="7.5" cy="11.5" r="1"/><circle cx="11" cy="7.5" r="1"/><circle cx="16" cy="9" r="1"/></svg>
-				<span><?php esc_html_e( 'Colour', 'ato-customizer' ); ?></span>
+				<span><?php esc_html_e( 'Background', 'ato-customizer' ); ?></span>
 				<input type="color" id="ato-tool-bg-input" value="#ffffff" hidden>
 			</label>
 		</div>

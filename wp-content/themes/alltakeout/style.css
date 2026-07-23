@@ -4,7 +4,7 @@ Theme URI: https://github.com/keyfive5/StephenWordPress
 Author: Hasan Zafar
 Author URI: https://github.com/keyfive5
 Description: Custom WordPress theme for All Take Out — premium custom sticker & label printing for restaurants and cafés. Built for WooCommerce with the ATO Customizer plugin.
-Version: 1.0.1
+Version: 1.1.0
 Requires at least: 6.0
 Tested up to: 6.5
 Requires PHP: 7.4
@@ -18,34 +18,34 @@ Tags: e-commerce, custom-theme, woocommerce
    1. DESIGN TOKENS
    ===================================================== */
 :root {
-  /* Color — warm paper + deep green ink + tangerine accent */
-  --paper: #FBF9F4;
-  --paper-2: #F4EFE4;
-  --kraft: #EADDC5;
-  --kraft-2: #DCCBAA;
-  --ink: #1B2A20;
-  --ink-soft: #43544A;
-  --ink-faint: #6B7A70;
-  --green-900: #12351F;
-  --green-700: #1D5B33;
-  --green-600: #24713F;
-  --green-100: #E2EFE4;
-  --accent: #E8590C;
-  --accent-soft: #FCEADF;
+  /* Color — cool paper + navy ink + All Takeout logo blue */
+  --paper: #F8FAFC;
+  --paper-2: #EDF2F8;
+  --kraft: #DFE9F4;
+  --kraft-2: #C9DAEC;
+  --ink: #182A3D;
+  --ink-soft: #40566E;
+  --ink-faint: #68809A;
+  --blue-900: #14304C;
+  --blue-700: #2E639E;
+  --blue-600: #3F76B4;
+  --blue-100: #E1ECF8;
+  --accent: #2E6DB4;
+  --accent-soft: #E1EDF9;
   --white: #FFFFFF;
   --danger: #C22F2F;
-  --success: #24713F;
+  --success: #3F76B4;
 
   /* Semantic */
   --color-bg: var(--paper);
   --color-surface: var(--white);
   --color-text: var(--ink);
   --color-text-soft: var(--ink-soft);
-  --color-primary: var(--green-700);
-  --color-primary-hover: var(--green-900);
+  --color-primary: var(--blue-700);
+  --color-primary-hover: var(--blue-900);
   --color-accent: var(--accent);
-  --color-border: #E4DECF;
-  --color-ring: var(--green-600);
+  --color-border: #DBE4EF;
+  --color-ring: var(--blue-600);
 
   /* Type */
   --font-display: "Fraunces", Georgia, serif;
@@ -76,9 +76,9 @@ Tags: e-commerce, custom-theme, woocommerce
   --radius: 14px;
   --radius-lg: 22px;
   --radius-pill: 999px;
-  --shadow-sm: 0 1px 2px rgba(27, 42, 32, 0.06), 0 2px 8px rgba(27, 42, 32, 0.05);
-  --shadow-md: 0 2px 6px rgba(27, 42, 32, 0.06), 0 10px 28px rgba(27, 42, 32, 0.10);
-  --shadow-lg: 0 6px 16px rgba(27, 42, 32, 0.08), 0 24px 56px rgba(27, 42, 32, 0.14);
+  --shadow-sm: 0 1px 2px rgba(20, 42, 66, 0.06), 0 2px 8px rgba(20, 42, 66, 0.05);
+  --shadow-md: 0 2px 6px rgba(20, 42, 66, 0.06), 0 10px 28px rgba(20, 42, 66, 0.10);
+  --shadow-lg: 0 6px 16px rgba(20, 42, 66, 0.08), 0 24px 56px rgba(20, 42, 66, 0.14);
 
   /* Motion */
   --ease-out: cubic-bezier(0.22, 1, 0.36, 1);
@@ -147,7 +147,7 @@ a:hover { color: var(--color-primary-hover); }
   border-radius: 4px;
 }
 
-::selection { background: var(--green-100); color: var(--green-900); }
+::selection { background: var(--blue-100); color: var(--blue-900); }
 
 .screen-reader-text {
   position: absolute !important;
@@ -181,7 +181,7 @@ a:hover { color: var(--color-primary-hover); }
 .section { padding-block: var(--sp-9); }
 .section--tight { padding-block: var(--sp-8); }
 .section--kraft { background: var(--paper-2); }
-.section--ink { background: var(--green-900); color: #E9F1EA; }
+.section--ink { background: var(--blue-900); color: #E3EDF8; }
 .section--ink h2, .section--ink h3 { color: var(--white); }
 
 .section-head { max-width: 640px; margin-bottom: var(--sp-7); }
@@ -223,7 +223,7 @@ a:hover { color: var(--color-primary-hover); }
   z-index: 0;
   transform: skewX(-6deg);
 }
-.section--ink .mark::after { background: rgba(232, 89, 12, 0.35); }
+.section--ink .mark::after { background: rgba(86, 136, 197, 0.5); }
 
 /* =====================================================
    4. BUTTONS
@@ -269,7 +269,7 @@ a:hover { color: var(--color-primary-hover); }
   color: var(--white);
   box-shadow: var(--shadow-sm);
 }
-.btn--accent:hover { background: #C94A08; color: var(--white); transform: translateY(-1px); box-shadow: var(--shadow-md); }
+.btn--accent:hover { background: #245691; color: var(--white); transform: translateY(-1px); box-shadow: var(--shadow-md); }
 
 .btn--ghost {
   background: transparent;
@@ -290,13 +290,13 @@ a:hover { color: var(--color-primary-hover); }
   position: sticky;
   top: 0;
   z-index: var(--z-header);
-  background: rgba(251, 249, 244, 0.97);
+  background: rgba(248, 250, 252, 0.97);
   border-bottom: 1px solid transparent;
   transition: border-color var(--dur) var(--ease-out), box-shadow var(--dur) var(--ease-out);
 }
 .site-header.is-scrolled {
   border-bottom-color: var(--color-border);
-  box-shadow: 0 4px 20px rgba(27, 42, 32, 0.06);
+  box-shadow: 0 4px 20px rgba(20, 42, 66, 0.06);
 }
 
 .header-bar {
@@ -322,7 +322,7 @@ a:hover { color: var(--color-primary-hover); }
 .brand-dot {
   width: 40px; height: 40px;
   border-radius: 12px;
-  background: var(--green-700);
+  background: var(--blue-700);
   color: var(--white);
   display: inline-flex;
   align-items: center;
@@ -351,7 +351,7 @@ a:hover { color: var(--color-primary-hover); }
 }
 .main-nav a:hover { color: var(--ink); background: var(--paper-2); }
 .main-nav .current-menu-item > a,
-.main-nav .current_page_item > a { color: var(--green-700); font-weight: 700; }
+.main-nav .current_page_item > a { color: var(--blue-700); font-weight: 700; }
 
 .header-actions { display: flex; align-items: center; gap: var(--sp-3); }
 
@@ -447,7 +447,7 @@ a:hover { color: var(--color-primary-hover); }
   position: absolute;
   top: -220px; right: -180px;
   width: 640px; height: 640px;
-  background: radial-gradient(closest-side, var(--green-100), transparent 72%);
+  background: radial-gradient(closest-side, var(--blue-100), transparent 72%);
   border-radius: 50%;
   pointer-events: none;
 }
@@ -471,7 +471,7 @@ a:hover { color: var(--color-primary-hover); }
   border-top: 1px dashed var(--kraft-2);
 }
 .proof-item { display: flex; align-items: center; gap: var(--sp-3); }
-.proof-item svg { width: 22px; height: 22px; color: var(--green-700); flex: none; }
+.proof-item svg { width: 22px; height: 22px; color: var(--blue-700); flex: none; }
 .proof-item span { font-size: var(--text-sm); font-weight: 500; color: var(--ink-soft); }
 
 /* Hero sticker collage — pure CSS, no image dependencies */
@@ -494,7 +494,7 @@ a:hover { color: var(--color-primary-hover); }
 .sticker .s-sub { font-size: var(--text-xs); color: var(--ink-faint); letter-spacing: 0.08em; text-transform: uppercase; }
 .sticker svg { margin-inline: auto; }
 
-.sticker-1 { top: 4%; left: 6%; width: 200px; transform: rotate(-6deg); background: var(--green-700); color: var(--white); }
+.sticker-1 { top: 4%; left: 6%; width: 200px; transform: rotate(-6deg); background: var(--blue-700); color: var(--white); }
 .sticker-1 .s-title { color: var(--white); }
 .sticker-1 .s-sub { color: rgba(255,255,255,0.75); }
 .sticker-2 { top: 2%; right: 4%; width: 170px; transform: rotate(5deg); }
@@ -540,15 +540,15 @@ a:hover { color: var(--color-primary-hover); }
 .cat-card:hover {
   transform: translateY(-4px);
   box-shadow: var(--shadow-md);
-  border-color: var(--green-600);
+  border-color: var(--blue-600);
   color: var(--ink);
 }
-.cat-card:hover .cat-arrow { transform: translateX(4px); color: var(--green-700); }
+.cat-card:hover .cat-arrow { transform: translateX(4px); color: var(--blue-700); }
 .cat-icon {
   width: 56px; height: 56px;
   border-radius: 16px;
-  background: var(--green-100);
-  color: var(--green-700);
+  background: var(--blue-100);
+  color: var(--blue-700);
   display: grid;
   place-items: center;
 }
@@ -562,7 +562,7 @@ a:hover { color: var(--color-primary-hover); }
   margin-top: var(--sp-2);
   font-size: var(--text-sm);
   font-weight: 700;
-  color: var(--green-700);
+  color: var(--blue-700);
 }
 .cat-arrow { transition: transform var(--dur) var(--ease-out); display: inline-flex; }
 .cat-arrow svg { width: 20px; height: 20px; }
@@ -631,7 +631,7 @@ a:hover { color: var(--color-primary-hover); }
 }
 .feature-list { list-style: none; margin: var(--sp-5) 0 0; padding: 0; display: grid; gap: var(--sp-4); }
 .feature-list li { display: flex; gap: var(--sp-3); align-items: flex-start; }
-.feature-list svg { width: 22px; height: 22px; color: var(--green-700); flex: none; margin-top: 3px; }
+.feature-list svg { width: 22px; height: 22px; color: var(--blue-700); flex: none; margin-top: 3px; }
 .feature-list strong { display: block; font-weight: 700; }
 .feature-list span { font-size: var(--text-sm); color: var(--color-text-soft); }
 
@@ -654,12 +654,12 @@ a:hover { color: var(--color-primary-hover); }
 .editor-mock-body { display: grid; grid-template-columns: 44px 1fr; min-height: 240px; }
 .editor-mock-tools { border-right: 1px solid var(--color-border); display: flex; flex-direction: column; align-items: center; gap: 10px; padding-top: 12px; }
 .editor-mock-tools i { width: 22px; height: 22px; border-radius: 6px; background: var(--paper-2); }
-.editor-mock-tools i:nth-child(2) { background: var(--green-100); }
+.editor-mock-tools i:nth-child(2) { background: var(--blue-100); }
 .editor-mock-canvas { display: grid; place-items: center; padding: var(--sp-5); }
 .editor-mock-label {
   width: 170px; height: 170px;
   border-radius: 50%;
-  background: var(--green-700);
+  background: var(--blue-700);
   color: var(--white);
   display: grid; place-items: center;
   text-align: center;
@@ -678,7 +678,7 @@ a:hover { color: var(--color-primary-hover); }
   position: absolute;
   left: -140px; bottom: -220px;
   width: 480px; height: 480px;
-  background: radial-gradient(closest-side, rgba(232, 89, 12, 0.22), transparent 70%);
+  background: radial-gradient(closest-side, rgba(86, 136, 197, 0.3), transparent 70%);
   border-radius: 50%;
 }
 .vip-inner {
@@ -733,8 +733,8 @@ a:hover { color: var(--color-primary-hover); }
 .quote-avatar {
   width: 44px; height: 44px;
   border-radius: 50%;
-  background: var(--green-100);
-  color: var(--green-700);
+  background: var(--blue-100);
+  color: var(--blue-700);
   display: grid; place-items: center;
   font-weight: 700;
   font-family: var(--font-display);
@@ -765,7 +765,7 @@ a:hover { color: var(--color-primary-hover); }
 .post-card-body { padding: var(--sp-5); display: flex; flex-direction: column; gap: var(--sp-3); flex: 1; }
 .post-card h3 { font-size: var(--text-xl); margin: 0; }
 .post-card h3 a { color: var(--ink); text-decoration: none; }
-.post-card h3 a:hover { color: var(--green-700); }
+.post-card h3 a:hover { color: var(--blue-700); }
 .post-card p { font-size: var(--text-sm); color: var(--color-text-soft); margin: 0; flex: 1; }
 .post-meta { font-size: var(--text-xs); color: var(--ink-faint); display: flex; gap: var(--sp-3); }
 
@@ -800,7 +800,7 @@ a:hover { color: var(--color-primary-hover); }
   color: var(--ink);
   font-weight: 500;
 }
-.pagination .page-numbers.current { background: var(--green-700); border-color: var(--green-700); color: var(--white); }
+.pagination .page-numbers.current { background: var(--blue-700); border-color: var(--blue-700); color: var(--white); }
 .pagination .page-numbers:hover:not(.current) { border-color: var(--ink); }
 
 /* =====================================================
@@ -813,7 +813,7 @@ a:hover { color: var(--color-primary-hover); }
   border-radius: var(--radius);
   overflow: hidden;
 }
-.faq-item[open] { border-color: var(--green-600); box-shadow: var(--shadow-sm); }
+.faq-item[open] { border-color: var(--blue-600); box-shadow: var(--shadow-sm); }
 .faq-item summary {
   display: flex;
   align-items: center;
@@ -830,8 +830,8 @@ a:hover { color: var(--color-primary-hover); }
   content: "";
   flex: none;
   width: 12px; height: 12px;
-  border-right: 2.5px solid var(--green-700);
-  border-bottom: 2.5px solid var(--green-700);
+  border-right: 2.5px solid var(--blue-700);
+  border-bottom: 2.5px solid var(--blue-700);
   transform: rotate(45deg);
   transition: transform var(--dur) var(--ease-out);
   margin-right: 4px;
@@ -843,7 +843,7 @@ a:hover { color: var(--color-primary-hover); }
    14. FOOTER
    ===================================================== */
 .site-footer {
-  background: var(--green-900);
+  background: var(--blue-900);
   color: #B9CBBC;
   margin-top: var(--sp-9);
   padding: var(--sp-8) 0 var(--sp-6);
@@ -913,20 +913,20 @@ a:hover { color: var(--color-primary-hover); }
 }
 .woocommerce ul.products li.product .price {
   padding: 0 var(--sp-5);
-  color: var(--green-700) !important;
+  color: var(--blue-700) !important;
   font-weight: 700;
   font-size: var(--text-base) !important;
 }
 .woocommerce ul.products li.product .button {
   margin: var(--sp-4) var(--sp-5) var(--sp-5) !important;
-  background: var(--green-700);
+  background: var(--blue-700);
   color: var(--white);
   border-radius: var(--radius-pill);
   font-weight: 700;
   padding: 0.65rem 1.4rem;
   text-align: center;
 }
-.woocommerce ul.products li.product .button:hover { background: var(--green-900); }
+.woocommerce ul.products li.product .button:hover { background: var(--blue-900); }
 .woocommerce .woocommerce-result-count { color: var(--ink-faint); }
 .woocommerce .woocommerce-ordering select {
   border: 1px solid var(--color-border);
@@ -938,11 +938,11 @@ a:hover { color: var(--color-primary-hover); }
 
 /* Single product */
 .woocommerce div.product .product_title { font-size: var(--text-3xl); }
-.woocommerce div.product p.price { color: var(--green-700); font-size: var(--text-xl); font-weight: 700; }
+.woocommerce div.product p.price { color: var(--blue-700); font-size: var(--text-xl); font-weight: 700; }
 .woocommerce div.product div.images img { border-radius: var(--radius-lg); }
 .woocommerce div.product form.cart .button,
 .woocommerce #respond input#submit, .woocommerce a.button, .woocommerce button.button, .woocommerce input.button {
-  background: var(--green-700);
+  background: var(--blue-700);
   color: var(--white);
   border-radius: var(--radius-pill);
   font-weight: 700;
@@ -952,7 +952,7 @@ a:hover { color: var(--color-primary-hover); }
 }
 .woocommerce div.product form.cart .button:hover,
 .woocommerce a.button:hover, .woocommerce button.button:hover, .woocommerce input.button:hover {
-  background: var(--green-900);
+  background: var(--blue-900);
   color: var(--white);
 }
 .woocommerce a.button.alt, .woocommerce button.button.alt, .woocommerce input.button.alt,
@@ -962,7 +962,7 @@ a:hover { color: var(--color-primary-hover); }
   border-radius: var(--radius-pill);
   font-weight: 700;
 }
-.woocommerce a.button.alt:hover, .woocommerce button.button.alt:hover, .woocommerce #payment #place_order:hover { background: #C94A08; }
+.woocommerce a.button.alt:hover, .woocommerce button.button.alt:hover, .woocommerce #payment #place_order:hover { background: #245691; }
 
 /* Notices */
 .woocommerce-message, .woocommerce-info, .woocommerce-error {
@@ -973,8 +973,8 @@ a:hover { color: var(--color-primary-hover); }
 }
 .woocommerce-message { border-left: 4px solid var(--success) !important; }
 .woocommerce-message::before { color: var(--success); }
-.woocommerce-info { border-left: 4px solid var(--green-600) !important; }
-.woocommerce-info::before { color: var(--green-600); }
+.woocommerce-info { border-left: 4px solid var(--blue-600) !important; }
+.woocommerce-info::before { color: var(--blue-600); }
 .woocommerce-error { border-left: 4px solid var(--danger) !important; }
 
 /* Cart & checkout */
@@ -1015,7 +1015,7 @@ a:hover { color: var(--color-primary-hover); }
   color: var(--ink-soft);
   font-weight: 500;
 }
-.woocommerce-MyAccount-navigation li.is-active a { background: var(--green-100); color: var(--green-900); font-weight: 700; }
+.woocommerce-MyAccount-navigation li.is-active a { background: var(--blue-100); color: var(--blue-900); font-weight: 700; }
 .woocommerce-MyAccount-navigation a:hover { background: var(--paper-2); }
 
 /* VIP credit chip in account */
