@@ -191,16 +191,19 @@
 
 	// Category marketing copy (client REVISED page content) below the configurator.
 	if (cat && cat.long && cat.long.length) {
+		var para = function (p) { return p.charAt(0) === '<' ? p : '<p>' + p + '</p>'; };
 		var copyEl = document.createElement('div');
 		copyEl.className = 'cat-intro';
 		copyEl.style.marginTop = 'var(--sp-6)';
 		copyEl.innerHTML =
-			'<div>' + cat.long.map(function (p) { return '<p>' + p + '</p>'; }).join('') +
+			'<div>' + (cat.heading ? '<h3>' + cat.heading + '</h3>' : '') +
+			cat.long.map(para).join('') +
 			(cat.bullets && cat.bullets.length
-				? '<details class="cat-why"><summary>Why restaurants choose ' + cat.name + '</summary><ul class="feature-list">' +
+				? '<details class="cat-why"><summary>' + (cat.whyTitle || 'Why restaurants choose ' + cat.name) + '</summary><ul class="feature-list">' +
 					cat.bullets.map(function (b) { return '<li>' + D.icon('check', 20) + '<div><strong>' + b + '</strong></div></li>'; }).join('') +
 					'</ul></details>'
 				: '') +
+			(cat.outro && cat.outro.length ? cat.outro.map(para).join('') : '') +
 			'</div>' +
 			(cat.photo ? '<div class="cat-intro-photo"><img src="' + cat.photo + '" alt="' + cat.name + ' on real takeout packaging" loading="lazy"></div>' : '');
 		document.getElementById('product-info-col').appendChild(copyEl);

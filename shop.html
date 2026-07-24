@@ -57,18 +57,21 @@
 				'<span class="p-price">From $' + from.price + ' <span>/ ' + from.qty + ' labels</span></span>' +
 				'</span></a>';
 		}).join('');
+		var para = function (p) { return p.charAt(0) === '<' ? p : '<p>' + p + '</p>'; };
 		var intro = '';
 		if (cat.long && cat.long.length) {
 			var photo = cat.photo
 				? '<div class="cat-intro-photo reveal"><img src="' + cat.photo + '" alt="' + cat.name + ' — example on real takeout packaging" loading="lazy"></div>'
 				: '';
 			var why = cat.bullets && cat.bullets.length
-				? '<details class="cat-why"><summary>Why restaurants choose ' + cat.name + '</summary><ul class="feature-list">' +
+				? '<details class="cat-why"><summary>' + (cat.whyTitle || 'Why restaurants choose ' + cat.name) + '</summary><ul class="feature-list">' +
 					cat.bullets.map(function (b) { return '<li>' + D.icon('check', 20) + '<div><strong>' + b + '</strong></div></li>'; }).join('') +
 					'</ul></details>'
 				: '';
+			var outro = cat.outro && cat.outro.length ? cat.outro.map(para).join('') : '';
 			intro = '<div class="cat-intro">' +
-				'<div>' + cat.long.map(function (p) { return '<p>' + p + '</p>'; }).join('') + why + '</div>' +
+				'<div>' + (cat.heading ? '<h3>' + cat.heading + '</h3>' : '') +
+				cat.long.map(para).join('') + why + outro + '</div>' +
 				photo + '</div>';
 		}
 		return '<section class="section--tight" id="' + cat.slug + '" style="padding-top: var(--sp-7);">' +

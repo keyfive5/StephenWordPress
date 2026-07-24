@@ -120,11 +120,29 @@
 			slug: 'food-identification-labels', name: 'Food Identification', icon: 'utensils',
 			desc: 'Stay fast, organized, and on-brand.', subs: [],
 			photo: 'assets/img/food-halal.jpg',
+			// Verbatim from Stephen's Food Identification Labels page copy.
+			heading: 'Custom Food Identification Labels & Stickers for Restaurants',
 			long: [
 				'Custom food identification labels help busy restaurants clearly mark orders, dietary needs, and packaging details without slowing down service. Designed for fast-paced kitchens, these labels improve accuracy while keeping your branding visible on every order.',
-				'Clearly mark menu items, dietary requirements, and special instructions so customers receive exactly what they ordered. This reduces mistakes, speeds up service, and improves overall kitchen efficiency. At the same time, every label reinforces your brand identity on every box, bag, and container leaving your kitchen.'
+				'Perfect for takeout bags, boxes, containers, and delivery orders, they help your team move faster while reducing mistakes and improving customer experience.',
+				'<h3>Branding Made Simple</h3>',
+				'You don’t need a designer to look professional.',
+				'Use our easy online design tool and pre-made templates to create clean, consistent food labels in minutes.',
+				'Customize your labels with:',
+				'<ul class="bullet-list"><li>Your logo or artwork</li><li>Brand colours and fonts</li><li>Dietary icons (Vegan, Gluten-Free, Dairy-Free, etc.)</li><li>Custom text for order identification or instructions</li></ul>',
+				'Simply choose a template, personalize it, and create professional food identification labels ready for printing.',
+				'<h3>Built for Better Service</h3>',
+				'Food identification labels do more than organize orders—they improve customer confidence.',
+				'Clearly mark menu items, dietary requirements, and special instructions so customers receive exactly what they ordered. This reduces mistakes, speeds up service, and improves overall kitchen efficiency.',
+				'At the same time, every label reinforces your brand identity on every box, bag, and container leaving your kitchen.'
 			],
-			bullets: ['Improve order accuracy and reduce mistakes', 'Speed up kitchen workflow and service times', 'Clearly mark dietary and allergy requirements', 'Strengthen customer trust and confidence', 'Keep packaging organized in busy environments', 'Add professional branding to every order', 'Works for takeout, delivery, and dine-in packaging']
+			whyTitle: 'Why Restaurants Choose Food Identification Labels',
+			bullets: ['Improve order accuracy and reduce mistakes', 'Speed up kitchen workflow and service times', 'Clearly mark dietary and allergy requirements', 'Strengthen customer trust and confidence', 'Keep packaging organized in busy environments', 'Add professional branding to every order', 'Works for takeout, delivery, and dine-in packaging'],
+			outro: [
+				'<h3>Built for Busy Restaurant Kitchens</h3>',
+				'Food identification labels are designed for restaurants that need speed, clarity, and consistency.',
+				'From order prep to delivery, every label helps your team stay organized while ensuring customers receive accurate, clearly marked meals—every time.'
+			]
 		}
 	];
 
