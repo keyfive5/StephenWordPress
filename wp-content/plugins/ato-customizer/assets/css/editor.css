@@ -253,7 +253,31 @@
   padding: 12px;
   max-width: 100%;
 }
-.ato-ed-canvas-hint { margin: 0.75rem 0 0; font-size: 0.8rem; color: var(--atoe-ink-soft); }
+/* Bleed guidance has to be impossible to miss — it decides whether the
+   customer's artwork survives the die-cut. */
+.ato-ed-canvas-hint {
+	margin: 0.9rem auto 0;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	gap: 0.5rem;
+	max-width: max-content;
+	padding: 0.55rem 1.1rem;
+	border-radius: 999px;
+	border: 2px dashed var(--atoe-accent);
+	background: #E1EDF9;
+	font-size: 1rem;
+	font-weight: 700;
+	color: #14304c;
+	text-align: center;
+}
+.ato-ed-canvas-hint::before {
+	content: "";
+	width: 16px; height: 16px;
+	flex: none;
+	border: 2px dashed var(--atoe-accent);
+	border-radius: 3px;
+}
 
 .ato-ed-side {
   background: #fff;
@@ -437,3 +461,25 @@
 .ato-ed-swatch:hover { transform: scale(1.08); }
 .ato-ed-swatch.is-selected { box-shadow: 0 0 0 3px rgba(86, 136, 197, 0.55); border-color: #2e639e; }
 #ato-ed-bg-panel input[type="color"] { width: 100%; height: 36px; border: 1px solid var(--atoe-border, #dbe4ef); border-radius: 8px; background: #fff; padding: 2px; cursor: pointer; }
+
+/* CMYK readout — print work is specified in CMYK, not RGB */
+.ato-ed-cmyk {
+	display: block;
+	margin-top: 4px;
+	font-size: 0.72rem;
+	font-weight: 700;
+	letter-spacing: 0.04em;
+	color: var(--atoe-ink-soft);
+	font-variant-numeric: tabular-nums;
+	white-space: nowrap;
+}
+
+/* Quantity step: roll price above, per-label price beneath */
+.ato-ed-option-grid--qty { grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); }
+.ato-ed-option .ato-ed-option-note {
+	display: block;
+	font-size: 0.75rem;
+	color: var(--atoe-ink-soft);
+	font-weight: 600;
+	margin-top: 0.1rem;
+}

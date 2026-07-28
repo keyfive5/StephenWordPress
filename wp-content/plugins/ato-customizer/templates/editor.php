@@ -93,6 +93,7 @@ defined( 'ABSPATH' ) || exit;
 					<div class="ato-ed-field" id="ato-prop-color-row">
 						<label for="ato-prop-color"><?php esc_html_e( 'Colour', 'ato-customizer' ); ?></label>
 						<input type="color" id="ato-prop-color">
+						<span class="ato-ed-cmyk" id="ato-prop-color-cmyk">C 0  M 0  Y 0  K 0</span>
 					</div>
 				</div>
 				<div class="ato-ed-btn-row">

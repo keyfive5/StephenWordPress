@@ -1,6 +1,25 @@
 # PROJECT STATE — All Take Out (single source of truth)
 
-> Read this first in any new working session. Everything below is current as of **July 23, 2026**.
+> Read this first in any new working session. Everything below is current as of **July 28, 2026**.
+
+## July 28, 2026 — Stephen's change list (2 documents + fonts + BOPP)
+
+Structural change: **one product page per category** (7 categories → 7 product pages). Shop is now a grid of 7 hero tiles (picture + name beneath); the product page is picture + description left, **"Choose a Template to Design"** grid right (mobile: picture → name → description → templates). Clicking a template opens the design tool directly on it. All the social sub-products (TikTok/FB/IG/X) merged into one **Social Media Labels** product carrying 11 templates. Slugs are now the category slugs — the bundle funnel references `branded-labels` / `qr-code-labels`.
+
+- **Currency**: CAN/US toggle in the header (`ato_currency`, USD base, demo CAD rate 1.38 in `data.js CURRENCIES`) — `ATO.money()` / `ATO.moneyUnit()` convert everywhere.
+- **Free ground shipping on every order** (not just VIP): `cartTotals()` returns shipping 0 / `shippingFree` always; cart + checkout show FREE; FAQ answer replaced with the US/Canada + Alaska/Hawaii/Yukon/Nunavut surcharge wording.
+- **Design tool**: wizard order is now **Material → Shape → Size → Quantity** and the **template + shape steps drop out** when a template was chosen on the product page (Stephen's own suggestion — the template *is* the shape). Sizes derive from the template's proportions (square → 2/3/4", rectangle → 2x3/3x4/4x6). Materials cut to **Glossy Paper + BOPP (water resistant)**. Quantities **100/250/500/1000/1500/2000** showing roll price **and price per label**. Colour controls report **CMYK** (`hexToCmyk`). Fonts replaced with Stephen's Adobe list, **Montserrat Bold default** — `FONTS` is now `{label, stack, weight, style}` where `stack` is the closest Google match; swapping to his real Adobe kit = change the stacks only. Text box on canvas given a loud blue selection border. Bleed hint reworded to "Keep important content inside the dashed line" and restyled as a large dashed pill. `areabg` now overspills the measured zone ~1.2% to kill the hairline of placeholder art showing through. `restrict: 'text'` on address-zone templates hides image/clipart/QR/background tools (Stephen's optional ask — implemented).
+- **Instant Proof** moved off checkout to its own page **`proof.html`** (cart → View instant proof → Approve → checkout), proof rendered up to 720px wide with full spec list.
+- **Bundle page**: header on top, product picture left, the whole Save-20% value stack right (mobile: header → picture → value); 4 photos split across sections instead of one gallery block, side-by-side bags captioned **"From Ordinary to Branded & Scannable"**; VIP block rewritten to Stephen's wording + **Become a VIP Member** button; extra Build-Your-Bundle button under the design-tool section.
+- **Faded text bug (root cause)**: `.lede`'s soft navy was being used inside `.section--ink`'s dark navy band. Fixed globally — `.section--ink p/.lede/li` now inherit the light band colour. That fixed both the bundle VIP block and VIP page's "Built for restaurants that move fast".
+- **VIP page**: 4 animated shapes now — 50 FREE LABELS, FREE GROUND SHIPPING, RECALL PREVIOUS ORDERS, EXCLUSIVE PROMOTIONS. Email-verification note added under "How to join".
+- **Home**: CAN/US toggle; 3 blue-check promises under the hero (Free Ground Shipping · Easy-to-Use Design Tool · Real Time Proofs); "into" lowercased in the marketing-opportunity heading; Start Designing button given breathing room; VIP kicker turned into a solid blue pill; "Roll & Bundle Order" wording.
+- **Blog**: both placeholder posts deleted (no brand voice/SEO per Stephen), empty-state + sitemap cleaned.
+- **Branding statement** "Turn Packaging into Repeat Business" (from `Branding Statement.ai`) styled in brand blue as a band on home, shop, product, about, making-labels, one-question.
+- Images added to One Question and Making Labels; "Customization Made Easy" now sits at the bottom of every product page.
+- WP plugin synced → **1.5.0**; theme 1.1.0.
+
+**Still open from Stephen's list** (he said he'd follow up): Customer Appreciation tool rework ("ideas mentioned later"), the extra QR template he wants to add, and which current photos he plans to swap.
 
 ## July 23, 2026 session (Stephen's bug list + content drop)
 
