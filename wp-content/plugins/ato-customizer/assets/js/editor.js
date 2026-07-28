@@ -330,6 +330,7 @@
 		canvas.on('object:removed', onCanvasChange);
 		canvas.on('object:modified', onCanvasChange);
 		canvas.on('text:changed', function () { dirty = true; });
+		attachQrGuard();
 
 		undoStack = [];
 		redoStack = [];
@@ -388,6 +389,7 @@
 			canvas.on('object:removed', onCanvasChange);
 			canvas.on('object:modified', onCanvasChange);
 			canvas.on('text:changed', function () { dirty = true; });
+			attachQrGuard();
 
 			undoStack = [];
 			redoStack = [];
@@ -770,6 +772,85 @@
 		}, { crossOrigin: 'anonymous' });
 	}
 
+	// ---------------------------------------------------------------------
+	// QR minimum size
+	//
+	// A QR code printed too small stops scanning, so the customer can never
+	// shrink one below MIN_QR_INCHES of finished label. The canvas is a
+	// pixel stand-in for the physical label, so the floor is worked out
+	// from the selected size (e.g. '2" x 3"') rather than a fixed pixel
+	// count — 0.6" has to mean 0.6" on a 2" label and on a 6" one.
+	// ---------------------------------------------------------------------
+	var MIN_QR_INCHES = 0.6;
+
+	/** Parse '2" x 3"' → {w: 2, h: 3}. Falls back to a square 2". */
+	function labelInches() {
+		var raw = selections.size || '';
+		var nums = raw.match(/[\d.]+/g);
+		if (nums && nums.length >= 2) {
+			return { w: parseFloat(nums[0]), h: parseFloat(nums[1]) };
+		}
+		return { w: 2, h: 2 };
+	}
+
+	/** Smallest on-canvas pixel size a QR code is allowed to be. */
+	function minQrPixels() {
+		var inches = labelInches();
+		if (!inches.w || !inches.h) return 0;
+		// Pixels per inch differs per axis when the template's proportions
+		// don't exactly match the ordered size — take the stricter one so
+		// the printed code clears 0.6" on both axes.
+		var perInchX = logicalW / inches.w;
+		var perInchY = logicalH / inches.h;
+		var minPx = MIN_QR_INCHES * Math.max(perInchX, perInchY);
+		// Never demand more than the printable zone can hold, or the code
+		// would be forced outside its own clip path.
+		var box = refBox();
+		return Math.min(minPx, Math.min(box.w, box.h) * 0.95);
+	}
+
+	/**
+	 * Clamp a QR object back up to the minimum. Returns true if it had to
+	 * step in, so callers can tell the customer why it stopped shrinking.
+	 */
+	function enforceQrMinimum(obj) {
+		if (!obj || obj.atoType !== 'qr' || !obj.width) return false;
+		var minPx = minQrPixels();
+		if (!minPx) return false;
+		var minScale = minPx / obj.width;
+		if (obj.scaleX >= minScale && obj.scaleY >= minScale) return false;
+		obj.set({ scaleX: minScale, scaleY: minScale });
+		obj.setCoords();
+		return true;
+	}
+
+	var qrNoticeAt = 0;
+	function qrMinNotice() {
+		// One message per gesture, not one per mouse-move.
+		var now = Date.now();
+		if (now - qrNoticeAt < 2000) return;
+		qrNoticeAt = now;
+		toast('QR codes stay at least ' + MIN_QR_INCHES + '" so they still scan.');
+	}
+
+	/**
+	 * Stop QR codes being dragged below the scannable minimum. Clamping on
+	 * `object:scaling` means the handle refuses to go further while the
+	 * customer is still dragging, rather than snapping back afterwards.
+	 */
+	function attachQrGuard() {
+		if (!canvas) return;
+		canvas.on('object:scaling', function (e) {
+			if (enforceQrMinimum(e.target)) qrMinNotice();
+		});
+		canvas.on('object:modified', function (e) {
+			if (enforceQrMinimum(e.target)) {
+				qrMinNotice();
+				canvas.requestRenderAll();
+			}
+		});
+	}
+
 	function addQRCode() {
 		var url = window.prompt(I18N.qrPrompt || 'Enter the link your QR code should open', 'https://');
 		if (!url || url === 'https://') return;
@@ -788,6 +869,9 @@
 				var box = refBox();
 				var c = contentCenter();
 				var scale = (Math.min(box.w, box.h) * 0.8) / img.width;
+				// Never place one below the scannable minimum either.
+				var minScale = minQrPixels() / img.width;
+				if (minScale && scale < minScale) scale = minScale;
 				img.set({
 					left: c.x,
 					top: c.y,
@@ -796,7 +880,8 @@
 					scaleX: scale,
 					scaleY: scale,
 					atoType: 'qr',
-					atoName: 'QR: ' + url
+					atoName: 'QR: ' + url,
+					lockUniScaling: true
 				});
 				canvas.add(img);
 				canvas.setActiveObject(img);

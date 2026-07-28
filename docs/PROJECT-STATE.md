@@ -19,6 +19,8 @@ Structural change: **one product page per category** (7 categories → 7 product
 - Images added to One Question and Making Labels; "Customization Made Easy" now sits at the bottom of every product page.
 - WP plugin synced → **1.5.0**; theme 1.1.0.
 
+**Follow-up asks (same day, done):** Start Designing button at the foot of One Question; **QR minimum size** — QR codes can never be scaled below **0.6" of finished label** (`MIN_QR_INCHES` in editor.js). The floor is computed from the ordered size, not a fixed pixel count: pixels-per-inch comes from the canvas vs. the selected size on each axis and the stricter axis wins, then it's capped at 95% of the printable zone so a code can never be forced outside its own clip path. Enforced at creation, live during `object:scaling` (the handle refuses to travel further rather than snapping back), and again on `object:modified`; a throttled toast explains why. Note: Stephen wrote ".06x.06" — read as 0.6" × 0.6", since 0.06" (1.5 mm) would be unscannable, which is the opposite of his intent. **Worth confirming with him.**
+
 **Still open from Stephen's list** (he said he'd follow up): Customer Appreciation tool rework ("ideas mentioned later"), the extra QR template he wants to add, and which current photos he plans to swap.
 
 ## July 23, 2026 session (Stephen's bug list + content drop)
