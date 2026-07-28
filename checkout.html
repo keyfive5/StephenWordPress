@@ -91,18 +91,16 @@
 
 	function renderSummary() {
 		var stateCode = (document.getElementById('f-state') || {}).value || 'OTHER';
-		// VIP shipping preview also applies when the shopper chose "create account".
 		var t = A.cartTotals(stateCode);
-		var vipPreview = (mode === 'signup') && !(A.getUser() && A.getUser().vip);
-		var shipping = vipPreview ? 0 : t.shipping;
-		var shippingCell = (t.shippingFree || vipPreview) ? '<span class="free">FREE — VIP</span>' : A.money(t.shipping);
-		var total = t.subtotal + shipping + t.tax;
+		// Ground shipping is free on every order, member or not.
+		var shippingCell = '<span class="free">FREE</span>';
+		var total = t.subtotal + t.shipping + t.tax;
 		document.getElementById('summary-box').innerHTML =
 			'<h3>Order summary</h3>' +
 			'<div class="summary-row"><span>Subtotal</span><span>' + A.money(t.subtotal) + '</span></div>' +
 			'<div class="summary-row"><span>Ground shipping</span><span>' + shippingCell + '</span></div>' +
 			'<div class="summary-row"><span>Sales tax — ' + t.taxName + ' (' + t.taxRate + '%)</span><span>' + A.money(t.tax) + '</span></div>' +
-			'<div class="summary-row total"><span>Total <span style="font-weight:500;font-size:var(--text-xs);">(USD)</span></span><span>' + A.money(total) + '</span></div>' +
+			'<div class="summary-row total"><span>Total <span style="font-weight:500;font-size:var(--text-xs);">(' + A.getCurrency().code + ')</span></span><span>' + A.money(total) + '</span></div>' +
 			(mode === 'signup' ? '<div class="credit-chip" style="width:100%;">' + D.icon('gift', 22) + ' +50 extra labels ship with this order (VIP)</div>' : '');
 	}
 

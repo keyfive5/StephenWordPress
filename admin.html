@@ -7,7 +7,9 @@
 <meta name="robots" content="noindex">
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Crect width='24' height='24' rx='7' fill='%232E6DB4'/%3E%3Cpath d='M8 6h5a5 5 0 0 1 5 5v5a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2Z' fill='%23F8FAFC'/%3E%3C/svg%3E">
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,600;9..144,700&family=DM+Sans:wght@400;500;700&display=swap" rel="stylesheet">
-<link href="https://fonts.googleapis.com/css2?family=Oswald:wght@500&family=Playfair+Display:wght@600&family=Pacifico&family=Bebas+Neue&family=Caveat:wght@600&family=Montserrat:wght@500;700&family=Lobster&family=Abril+Fatface&display=swap" rel="stylesheet">
+<!-- Design-tool typefaces: closest web matches for the client's Adobe Fonts list.
+     Swapping in Stephen's Adobe kit later means changing the stacks in data.js only. -->
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700&family=Righteous&family=Caveat+Brush&family=Alfa+Slab+One&family=Playfair+Display:ital,wght@1,900&family=Kaushan+Script&family=Archivo:wght@400;700&family=Yellowtail&family=Oswald:wght@600&family=Cinzel:wght@700&family=Titan+One&family=Source+Sans+3:wght@400&family=Ultra&family=Bungee&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="assets/css/site.css">
 <link rel="stylesheet" href="assets/css/editor.css">
 </head>
@@ -79,7 +81,7 @@
 		</div>
 		<div class="ato-ed-canvas-col">
 			<div class="ato-ed-canvas-wrap" id="ato-ed-canvas-wrap"><canvas id="ato-canvas"></canvas></div>
-			<p class="ato-ed-canvas-hint">The dashed line is the cut line — keep important content inside it.</p>
+			<p class="ato-ed-canvas-hint">Keep important content inside the dashed line</p>
 		</div>
 		<div class="ato-ed-side">
 			<div class="ato-ed-panel" id="ato-ed-props" hidden>
@@ -87,7 +89,7 @@
 				<div class="ato-ed-field" id="ato-prop-font-row"><label for="ato-prop-font">Font</label><select id="ato-prop-font"></select></div>
 				<div class="ato-ed-field-row">
 					<div class="ato-ed-field" id="ato-prop-size-row"><label for="ato-prop-size">Size</label><input type="number" id="ato-prop-size" min="8" max="200" step="1"></div>
-					<div class="ato-ed-field" id="ato-prop-color-row"><label for="ato-prop-color">Colour</label><input type="color" id="ato-prop-color"></div>
+					<div class="ato-ed-field" id="ato-prop-color-row"><label for="ato-prop-color">Colour</label><input type="color" id="ato-prop-color"><span class="ato-ed-cmyk" id="ato-prop-color-cmyk">C 0  M 0  Y 0  K 0</span></div>
 				</div>
 				<div class="ato-ed-btn-row">
 					<button type="button" class="ato-ed-mini-btn" id="ato-prop-bold"><strong>B</strong></button>

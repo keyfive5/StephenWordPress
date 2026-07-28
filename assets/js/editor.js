@@ -82,25 +82,80 @@
 	var wizardSteps = [];
 	var wizardIndex = 0;
 
+	/** Sizes must match the template's proportions. */
+	var SIZES_BY_SHAPE = {
+		square: ['2" x 2"', '3" x 3"', '4" x 4"'],
+		rectangle: ['2" x 3"', '3" x 4"', '4" x 6"']
+	};
+
+	/** Money helpers — the host page can override with its own currency. */
+	function fmtMoney(n) {
+		return (DATA.money && DATA.money.symbol ? DATA.money.symbol : '$') +
+			(Math.round(n * (DATA.money && DATA.money.rate ? DATA.money.rate : 1) * 100) / 100).toFixed(2);
+	}
+	function fmtUnit(n) {
+		return (DATA.money && DATA.money.symbol ? DATA.money.symbol : '$') +
+			(n * (DATA.money && DATA.money.rate ? DATA.money.rate : 1)).toFixed(3);
+	}
+
+	/**
+	 * Steps always run in the client-mandated order:
+	 *   Material → Shape → Size → Quantity → Start design.
+	 * When the customer already picked a template on the product page the
+	 * template *is* the shape, so both the template and shape steps drop
+	 * out and sizes are drawn from the template's own proportions.
+	 */
 	function startWizard() {
 		var cfg = DATA.config || {};
 		wizardSteps = [];
 		selections = {};
 
-		if (cfg.templates && cfg.templates.length) {
-			wizardSteps.push({ key: 'template', label: I18N.stepTemplate || 'Template', options: cfg.templates.map(function (t) { return { label: t.name, image: t.image, area: t.area || null }; }) });
+		var preset = cfg.presetTemplate || null;
+		if (preset) {
+			selections.template = preset.name;
+			selections.template_image = preset.image || '';
+			selections.template_area = preset.area || null;
+			selections.shape_value = preset.shape || 'rectangle';
+			selections.restrict = preset.restrict || null;
+		} else if (cfg.templates && cfg.templates.length > 1) {
+			wizardSteps.push({
+				key: 'template',
+				label: I18N.stepTemplate || 'Template',
+				options: cfg.templates.map(function (t) {
+					return { label: t.name, image: t.image, area: t.area || null, value: t.shape || 'rectangle', restrict: t.restrict || null };
+				})
+			});
 		}
+
 		if (cfg.materials && cfg.materials.length) {
 			wizardSteps.push({ key: 'material', label: I18N.stepMaterial || 'Material', options: cfg.materials.map(function (m) { return { label: m }; }) });
 		}
-		if (cfg.sizes && cfg.sizes.length) {
-			wizardSteps.push({ key: 'size', label: I18N.stepSize || 'Size', options: cfg.sizes.map(function (s) { return { label: s }; }) });
-		}
-		if (cfg.shapes && cfg.shapes.length) {
+		if (!preset && cfg.shapes && cfg.shapes.length) {
 			wizardSteps.push({ key: 'shape', label: I18N.stepShape || 'Shape', options: cfg.shapes.map(function (s) { return { label: s.label, value: s.shape }; }) });
 		}
+		// Size options depend on the shape chosen just before, so they are
+		// resolved when the step renders rather than up front.
+		wizardSteps.push({
+			key: 'size',
+			label: I18N.stepSize || 'Size',
+			optionsFn: function () {
+				var shape = selections.shape_value || (preset && preset.shape) || 'rectangle';
+				return (SIZES_BY_SHAPE[shape] || SIZES_BY_SHAPE.rectangle).map(function (s) { return { label: s }; });
+			}
+		});
 		if (cfg.quantities && cfg.quantities.length) {
-			wizardSteps.push({ key: 'quantity', label: I18N.stepQuantity || 'Quantity', options: cfg.quantities.map(function (q) { return { label: String(q.qty), price: q.price }; }) });
+			wizardSteps.push({
+				key: 'quantity',
+				label: I18N.stepQuantity || 'Quantity',
+				options: cfg.quantities.map(function (q) {
+					return {
+						label: String(q.qty) + ' labels',
+						price: q.price,
+						note: fmtUnit(q.price / q.qty) + ' per label',
+						value: String(q.qty)
+					};
+				})
+			});
 		}
 
 		wizardIndex = 0;
@@ -128,9 +183,10 @@
 		h.textContent = step.label;
 		bodyEl.appendChild(h);
 
+		var options = step.optionsFn ? step.optionsFn() : step.options;
 		var grid = document.createElement('div');
-		grid.className = 'ato-ed-option-grid';
-		step.options.forEach(function (opt) {
+		grid.className = 'ato-ed-option-grid' + (step.key === 'quantity' ? ' ato-ed-option-grid--qty' : '');
+		options.forEach(function (opt) {
 			var btn = document.createElement('button');
 			btn.type = 'button';
 			btn.className = 'ato-ed-option';
@@ -146,8 +202,14 @@
 			if (opt.price !== null && typeof opt.price !== 'undefined') {
 				var price = document.createElement('span');
 				price.className = 'ato-ed-option-price';
-				price.textContent = '$' + Number(opt.price).toFixed(2);
+				price.textContent = fmtMoney(Number(opt.price)) + ' per roll';
 				btn.appendChild(price);
+			}
+			if (opt.note) {
+				var note = document.createElement('span');
+				note.className = 'ato-ed-option-note';
+				note.textContent = opt.note;
+				btn.appendChild(note);
 			}
 			if (selections[step.key] === opt.label) btn.classList.add('is-selected');
 			btn.addEventListener('click', function () {
@@ -155,6 +217,7 @@
 				if (opt.value) selections[step.key + '_value'] = opt.value;
 				if (opt.image) selections[step.key + '_image'] = opt.image;
 				if (opt.area) selections[step.key + '_area'] = opt.area;
+				if (step.key === 'template') selections.restrict = opt.restrict || null;
 				grid.querySelectorAll('.ato-ed-option').forEach(function (b) { b.classList.remove('is-selected'); });
 				btn.classList.add('is-selected');
 			});
@@ -170,10 +233,12 @@
 		var step = wizardSteps[wizardIndex];
 		if (step && !selections[step.key]) {
 			// Auto-select the first option so nobody gets stuck.
-			selections[step.key] = step.options[0].label;
-			if (step.options[0].value) selections[step.key + '_value'] = step.options[0].value;
-			if (step.options[0].image) selections[step.key + '_image'] = step.options[0].image;
-			if (step.options[0].area) selections[step.key + '_area'] = step.options[0].area;
+			var opts = step.optionsFn ? step.optionsFn() : step.options;
+			selections[step.key] = opts[0].label;
+			if (opts[0].value) selections[step.key + '_value'] = opts[0].value;
+			if (opts[0].image) selections[step.key + '_image'] = opts[0].image;
+			if (opts[0].area) selections[step.key + '_area'] = opts[0].area;
+			if (step.key === 'template') selections.restrict = opts[0].restrict || null;
 		}
 		if (wizardIndex < wizardSteps.length - 1) {
 			wizardIndex++;
@@ -181,6 +246,7 @@
 		} else {
 			$('ato-ed-wizard').hidden = true;
 			$('ato-ed-main').hidden = false;
+			applyToolRestrictions(selections.restrict);
 			if (selections.template_image && selections.template_area) {
 				initCanvasFromTemplate(selections.template_image, selections.template_area);
 			} else {
@@ -188,6 +254,29 @@
 			}
 			updateConfigSummary();
 		}
+	}
+
+	/**
+	 * Some templates only need a handle or address, so the toolbar is
+	 * narrowed to text/font/colour for them (client request). Passing a
+	 * falsy value restores the full toolset.
+	 */
+	function applyToolRestrictions(mode) {
+		var textOnly = mode === 'text';
+		[
+			['ato-tool-upload-input', true],
+			['ato-tool-clipart', false],
+			['ato-tool-qr', false]
+		].forEach(function (pair) {
+			var el = $(pair[0]);
+			if (!el) return;
+			var host = pair[1] ? el.closest('label') : el;
+			if (host) host.style.display = textOnly ? 'none' : '';
+		});
+		var bgPanel = $('ato-ed-bg-panel');
+		if (bgPanel) bgPanel.style.display = textOnly ? 'none' : '';
+		var bgTool = $('ato-tool-bg-input');
+		if (bgTool && bgTool.closest('label')) bgTool.closest('label').style.display = textOnly ? 'none' : '';
 	}
 
 	function wizardBack() {
@@ -342,11 +431,16 @@
 		if (existing) {
 			existing.set('fill', color);
 		} else {
+			// Overspill the measured zone slightly. The template's printed
+			// box has soft/anti-aliased edges, so an exactly-sized rect left
+			// a pale hairline of the original placeholder showing through.
+			var padX = Math.max(3, Math.round(printArea.width * 0.012));
+			var padY = Math.max(3, Math.round(printArea.height * 0.012));
 			var bg = new fabric.Rect({
-				left: printArea.left,
-				top: printArea.top,
-				width: printArea.width,
-				height: printArea.height,
+				left: printArea.left - padX,
+				top: printArea.top - padY,
+				width: printArea.width + padX * 2,
+				height: printArea.height + padY * 2,
 				fill: color,
 				selectable: false,
 				evented: false,
@@ -529,18 +623,43 @@
 	// ---------------------------------------------------------------------
 	// Tools
 	// ---------------------------------------------------------------------
+	/** Font entries are {label, stack, weight, style}; older configs may
+	 *  still pass plain strings. */
+	function fontList() {
+		return (DATA.fonts || []).map(function (f) {
+			return typeof f === 'string' ? { label: f, stack: f } : f;
+		});
+	}
+	function defaultFont() {
+		var list = fontList();
+		return list.length ? list[0] : { label: 'Montserrat Bold', stack: '"Montserrat", sans-serif', weight: 700 };
+	}
+
 	function addText() {
 		var c = contentCenter();
 		var box = refBox();
+		var def = defaultFont();
 		var text = new fabric.IText(I18N.yourText || 'Your text', {
 			left: c.x,
 			top: c.y,
 			originX: 'center',
 			originY: 'center',
-			fontFamily: (DATA.fonts && DATA.fonts[0]) || 'DM Sans',
+			fontFamily: def.stack,
+			fontWeight: def.weight || 'normal',
+			fontStyle: def.style || 'normal',
 			fontSize: Math.max(20, Math.round(Math.min(box.w, box.h) * 0.2)),
 			fill: '#182a3d',
-			atoName: 'Text'
+			atoName: 'Text',
+			atoFontLabel: def.label,
+			// A loud selection box so it is obvious the text tool is live
+			// (customers were clicking past a faint outline).
+			borderColor: '#2E6DB4',
+			borderScaleFactor: 3,
+			cornerColor: '#2E6DB4',
+			cornerStrokeColor: '#FFFFFF',
+			cornerSize: 12,
+			transparentCorners: false,
+			padding: 6
 		});
 		text.atoPlaceholder = true;
 		text.on('editing:entered', function () {
@@ -711,21 +830,54 @@
 		if (isText) {
 			var fontSel = $('ato-prop-font');
 			if (!fontSel.options.length) {
-				(DATA.fonts || []).forEach(function (f) {
+				fontList().forEach(function (f) {
 					var opt = document.createElement('option');
-					opt.value = f;
-					opt.textContent = f;
-					opt.style.fontFamily = f;
+					opt.value = f.label;
+					opt.textContent = f.label;
+					opt.style.fontFamily = f.stack;
+					if (f.weight) opt.style.fontWeight = f.weight;
+					if (f.style) opt.style.fontStyle = f.style;
 					fontSel.appendChild(opt);
 				});
 			}
-			fontSel.value = obj.fontFamily || '';
+			fontSel.value = obj.atoFontLabel || defaultFont().label;
 			$('ato-prop-size').value = Math.round(obj.fontSize || 36);
 			var fill = typeof obj.fill === 'string' ? obj.fill : '#182a3d';
-			$('ato-prop-color').value = /^#([0-9a-f]{6})$/i.test(fill) ? fill : '#182a3d';
+			var hex = /^#([0-9a-f]{6})$/i.test(fill) ? fill : '#182a3d';
+			$('ato-prop-color').value = hex;
+			showCmyk('ato-prop-color-cmyk', hex);
 			$('ato-prop-bold').classList.toggle('is-active', obj.fontWeight === 'bold' || obj.fontWeight >= 600);
 		}
 		refreshLayers();
+	}
+
+	/**
+	 * Print work is specified in CMYK, so every colour control reports
+	 * CMYK rather than RGB/hex (client request). Values are the standard
+	 * naive conversion — the press applies its own ICC profile at output.
+	 */
+	function hexToCmyk(hex) {
+		var m = /^#?([0-9a-f]{2})([0-9a-f]{2})([0-9a-f]{2})$/i.exec(hex || '');
+		if (!m) return { c: 0, m: 0, y: 0, k: 0 };
+		var r = parseInt(m[1], 16) / 255, g = parseInt(m[2], 16) / 255, b = parseInt(m[3], 16) / 255;
+		var k = 1 - Math.max(r, g, b);
+		if (k >= 1) return { c: 0, m: 0, y: 0, k: 100 };
+		return {
+			c: Math.round(((1 - r - k) / (1 - k)) * 100),
+			m: Math.round(((1 - g - k) / (1 - k)) * 100),
+			y: Math.round(((1 - b - k) / (1 - k)) * 100),
+			k: Math.round(k * 100)
+		};
+	}
+
+	function cmykLabel(hex) {
+		var v = hexToCmyk(hex);
+		return 'C ' + v.c + '  M ' + v.m + '  Y ' + v.y + '  K ' + v.k;
+	}
+
+	function showCmyk(id, hex) {
+		var el = $(id);
+		if (el) el.textContent = cmykLabel(hex);
 	}
 
 	function layerDisplay(obj) {
@@ -951,6 +1103,7 @@
 		if (toolInput) toolInput.value = /^#([0-9a-f]{6})$/i.test(color) ? color : '#ffffff';
 		var custom = $('ato-bg-custom');
 		if (custom) custom.value = toolInput ? toolInput.value : '#ffffff';
+		showCmyk('ato-bg-cmyk', toolInput ? toolInput.value : color);
 		var grid = $('ato-ed-bg-swatches');
 		if (grid) {
 			grid.querySelectorAll('.ato-ed-swatch').forEach(function (b) {
@@ -974,7 +1127,8 @@
 			}).join('') +
 			'</div>' +
 			'<div class="ato-ed-field" style="margin-top:8px;"><label for="ato-bg-custom">Custom colour</label>' +
-			'<input type="color" id="ato-bg-custom" value="#ffffff"></div>';
+			'<input type="color" id="ato-bg-custom" value="#ffffff">' +
+			'<span class="ato-ed-cmyk" id="ato-bg-cmyk">C 0  M 0  Y 0  K 0</span></div>';
 		side.insertBefore(panel, side.firstChild);
 		panel.addEventListener('click', function (e) {
 			var b = e.target.closest('.ato-ed-swatch');
@@ -1017,7 +1171,16 @@
 		$('ato-prop-font').addEventListener('change', function (e) {
 			var obj = activeObj();
 			if (obj && (obj.type === 'i-text' || obj.type === 'text')) {
-				obj.set('fontFamily', e.target.value);
+				var picked = null;
+				fontList().forEach(function (f) { if (f.label === e.target.value) picked = f; });
+				if (picked) {
+					obj.set({
+						fontFamily: picked.stack,
+						fontWeight: picked.weight || 'normal',
+						fontStyle: picked.style || 'normal'
+					});
+					obj.atoFontLabel = picked.label;
+				}
 				canvas.requestRenderAll();
 				onCanvasChange();
 			}
@@ -1033,6 +1196,7 @@
 		});
 		$('ato-prop-color').addEventListener('input', function (e) {
 			var obj = activeObj();
+			showCmyk('ato-prop-color-cmyk', e.target.value);
 			if (obj) {
 				obj.set('fill', e.target.value);
 				canvas.requestRenderAll();

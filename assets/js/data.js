@@ -35,22 +35,49 @@
 		return '<svg width="' + size + '" height="' + size + '" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">' + (ICONS[name] || ICONS.sticker) + '</svg>';
 	}
 
-	var MATERIALS = ['Glossy paper', 'Matte paper', 'Waterproof vinyl'];
-	var SIZES = ['2" x 2"', '3" x 3"', '4" x 4"'];
+	// Two stocks only (client direction July 2026). "(water resistant)"
+	// must always appear alongside BOPP.
+	var MATERIALS = ['Glossy Paper', 'BOPP (water resistant)'];
+
+	// Sizes follow the template's own proportions — a rectangle template
+	// can't be ordered as a square.
+	var SIZES_BY_SHAPE = {
+		square: ['2" x 2"', '3" x 3"', '4" x 4"'],
+		rectangle: ['2" x 3"', '3" x 4"', '4" x 6"']
+	};
+	var SIZES = SIZES_BY_SHAPE.square;
+
+	// Circle comes later — only square and rectangle are offered today,
+	// and only where the chosen template supports them.
 	var SHAPES = [
-		{ shape: 'circle', label: 'Round' },
 		{ shape: 'square', label: 'Square' },
 		{ shape: 'rectangle', label: 'Rectangle' }
 	];
+
+	// Roll quantities per client spec. Price-per-label is derived so the
+	// quantity step can show "$69.00 per roll · $0.138 per label".
 	var TIERS = [
 		{ qty: 100, price: 19 },
 		{ qty: 250, price: 39 },
 		{ qty: 500, price: 69 },
-		{ qty: 1000, price: 119 }
+		{ qty: 1000, price: 119 },
+		{ qty: 1500, price: 169 },
+		{ qty: 2000, price: 209 }
 	];
 
-	function tpl(name, file, area) {
-		return { name: name, image: 'assets/templates/' + file, area: area };
+	/**
+	 * A template = fixed artwork + the printable area the customer edits.
+	 * `shape` drives which sizes are offered; `restrict` optionally limits
+	 * the editor toolset (e.g. social address zones are text-only).
+	 */
+	function tpl(name, file, area, shape, restrict) {
+		return {
+			name: name,
+			image: 'assets/templates/' + file,
+			area: area,
+			shape: shape || 'rectangle',
+			restrict: restrict || null
+		};
 	}
 
 	// Category marketing copy comes from Stephen's REVISED page PDFs
@@ -151,75 +178,71 @@
 			slug: slug, name: name, cat: cat, sub: sub, icon: iconName,
 			shapeHint: shapeHint, swatch: swatchColor, desc: desc,
 			materials: MATERIALS, sizes: SIZES, shapes: SHAPES, tiers: TIERS,
-			templates: templates && templates.length ? templates : [{ name: 'Blank canvas', image: '' }]
+			templates: templates && templates.length ? templates : [{ name: 'Blank canvas', image: '', shape: 'rectangle' }]
 		};
 	}
 
+	// One product page per category (client direction July 2026): the visitor
+	// picks a category on the Shop page, lands here, and chooses a template.
+	// `restrict: 'text'` limits the editor to text/font/colour — used on the
+	// social layouts that only need a handle or address.
 	var PRODUCTS = [
-		product('tiktok-label', 'TikTok Label', 'social-media-labels', 'TikTok', 'megaphone', 'rectangle', '#182A3D',
-			'Your TikTok where hungry people already look — right on the bag. Pick a layout, then customize the editable zone.',
+		product('social-media-labels', 'Social Media Labels', 'social-media-labels', '', 'megaphone', 'rectangle', '#182A3D',
+			'Turn every takeout order into a follower. Choose your platform and layout, then add your handle, brand colours and logo.',
 			[
-				tpl('Address zone', 'tt-address.png', { x: 0.43, y: 0.5817, w: 0.5253, h: 0.19 }),
-				tpl('Bottom strip', 'tt-bottom.png', { x: 0.022, y: 0.8553, w: 0.9582, h: 0.1203 }),
-				tpl('Message panel', 'tt-message.png', { x: 0.393, y: 0.0333, w: 0.595, h: 0.94 })
+				tpl('Instagram — Follow Us for Specials', 'ig-address.png', { x: 0.3221, y: 0.6289, w: 0.6298, h: 0.2186 }, 'rectangle', 'text'),
+				tpl('Instagram — Message panel', 'ig-message.png', { x: 0.3343, y: 0.0309, w: 0.6549, h: 0.932 }, 'rectangle'),
+				tpl('Facebook — Follow Us for Specials', 'fb-address.png', { x: 0.362, y: 0.6167, w: 0.6073, h: 0.1967 }, 'rectangle', 'text'),
+				tpl('Facebook — Bottom strip', 'fb-bottom.png', { x: 0.022, y: 0.8553, w: 0.9582, h: 0.1203 }, 'rectangle', 'text'),
+				tpl('Facebook — Message panel', 'fb-message.png', { x: 0.397, y: 0.0333, w: 0.592, h: 0.94 }, 'rectangle'),
+				tpl('TikTok — Follow and Connect', 'tt-address.png', { x: 0.43, y: 0.5817, w: 0.5253, h: 0.19 }, 'rectangle', 'text'),
+				tpl('TikTok — Bottom strip', 'tt-bottom.png', { x: 0.022, y: 0.8553, w: 0.9582, h: 0.1203 }, 'rectangle', 'text'),
+				tpl('TikTok — Message panel', 'tt-message.png', { x: 0.393, y: 0.0333, w: 0.595, h: 0.94 }, 'rectangle'),
+				tpl('X (Twitter) — Follow Us for Specials', 'x-address.png', { x: 0.362, y: 0.6167, w: 0.6073, h: 0.1967 }, 'rectangle', 'text'),
+				tpl('X (Twitter) — Bottom strip', 'x-bottom.png', { x: 0.022, y: 0.8553, w: 0.9582, h: 0.1203 }, 'rectangle', 'text'),
+				tpl('X (Twitter) — Message panel', 'x-message.png', { x: 0.402, y: 0.0333, w: 0.586, h: 0.94 }, 'rectangle')
 			]),
-		product('instagram-label', 'Instagram Label', 'social-media-labels', 'Instagram', 'megaphone', 'rectangle', '#2E6DB4',
-			'A follow-us sticker your customers will actually photograph. Fixed Instagram artwork, your details in the printable area.',
+		product('qr-code-labels', 'QR Code Labels', 'qr-code-labels', '', 'qr', 'square', '#2E639E',
+			'Paste a link and the design tool generates your QR code — menus, online ordering, Google reviews, loyalty or social.',
 			[
-				tpl('Address zone', 'ig-address.png', { x: 0.3221, y: 0.6289, w: 0.6298, h: 0.2186 }),
-				tpl('Message panel', 'ig-message.png', { x: 0.3343, y: 0.0309, w: 0.6549, h: 0.932 })
+				tpl('Generate your QR', 'qr-generate.png', { x: 0.0122, y: 0.0122, w: 0.9744, h: 0.9744 }, 'square'),
+				tpl('Our Menu — scan here', 'qr-menu.png', { x: 0.06, y: 0.3, w: 0.88, h: 0.545 }, 'rectangle'),
+				tpl('Thank You + QR', 'qr-thankyou.png', { x: 0.0108, y: 0.0309, w: 0.297, h: 0.9402 }, 'rectangle'),
+				tpl('Social Media + QR', 'qr-social.png', { x: 0.0108, y: 0.0309, w: 0.297, h: 0.9402 }, 'rectangle')
 			]),
-		product('facebook-label', 'Facebook Label', 'social-media-labels', 'Facebook', 'megaphone', 'rectangle', '#2E639E',
-			'Point customers to your page for reviews, events and specials — three layouts, one editable zone each.',
+		product('promotional-labels', 'Promotional Labels', 'promotional-labels', '', 'tag', 'rectangle', '#2E6DB4',
+			'Promote special offers, limited-time deals, new menu items and loyalty programs directly on your packaging.',
 			[
-				tpl('Address zone', 'fb-address.png', { x: 0.362, y: 0.6167, w: 0.6073, h: 0.1967 }),
-				tpl('Bottom strip', 'fb-bottom.png', { x: 0.022, y: 0.8553, w: 0.9582, h: 0.1203 }),
-				tpl('Message panel', 'fb-message.png', { x: 0.397, y: 0.0333, w: 0.592, h: 0.94 })
+				tpl('Portrait', 'promo-rect.png', { x: 0.0233, y: 0.0156, w: 0.9517, h: 0.9678 }, 'rectangle'),
+				tpl('Square', 'promo-square.png', { x: 0.0122, y: 0.0122, w: 0.9744, h: 0.9744 }, 'square')
 			]),
-		product('x-twitter-label', 'X (Twitter) Label', 'social-media-labels', 'X (Twitter)', 'megaphone', 'rectangle', '#182A3D',
-			'Short, sharp and scannable — your X handle on every order.',
+		product('branded-labels', 'Branded Labels', 'branded-labels', '', 'badge', 'rectangle', '#2E639E',
+			'Upload your logo, add your artwork, and design professional labels that make your packaging instantly recognizable.',
 			[
-				tpl('Address zone', 'x-address.png', { x: 0.362, y: 0.6167, w: 0.6073, h: 0.1967 }),
-				tpl('Bottom strip', 'x-bottom.png', { x: 0.022, y: 0.8553, w: 0.9582, h: 0.1203 }),
-				tpl('Message panel', 'x-message.png', { x: 0.402, y: 0.0333, w: 0.586, h: 0.94 })
+				tpl('Portrait', 'brand-rect.png', { x: 0.0233, y: 0.0156, w: 0.9517, h: 0.9678 }, 'rectangle'),
+				tpl('Square', 'brand-square.png', { x: 0.0122, y: 0.0122, w: 0.9744, h: 0.9744 }, 'square')
 			]),
-		product('qr-code-label', 'QR Code Label', 'qr-code-labels', '', 'qr', 'square', '#2E639E',
-			'Paste a link — the editor generates the QR code. Four layouts: from a blank QR canvas to menu and thank-you designs.',
+		product('tamper-evident-labels', 'Tamper-Evident Labels', 'tamper-evident-labels', '', 'shield', 'rectangle', '#182A3D',
+			'Seal it, brand it, protect it. Place your logo, brand name or artwork directly on the label for a clean, professional seal.',
 			[
-				tpl('Generate your QR', 'qr-generate.png', { x: 0.0122, y: 0.0122, w: 0.9744, h: 0.9744 }),
-				tpl('Our Menu — scan here', 'qr-menu.png', { x: 0.06, y: 0.3, w: 0.88, h: 0.545 }),
-				tpl('Thank You + QR', 'qr-thankyou.png', { x: 0.0108, y: 0.0309, w: 0.297, h: 0.9402 }),
-				tpl('Social Media + QR', 'qr-social.png', { x: 0.0108, y: 0.0309, w: 0.297, h: 0.9402 })
+				tpl('Portrait — design from scratch', 'brand-rect.png', { x: 0.0233, y: 0.0156, w: 0.9517, h: 0.9678 }, 'rectangle'),
+				tpl('Square — design from scratch', 'brand-square.png', { x: 0.0122, y: 0.0122, w: 0.9744, h: 0.9744 }, 'square')
 			]),
-		product('promo-label', 'Promotional Label', 'promotional-labels', '', 'tag', 'rectangle', '#2E6DB4',
-			'Create your own promotion: sales, launches and limited offers on a full-canvas template.',
+		product('customer-appreciation-stickers', 'Customer Appreciation Stickers', 'customer-appreciation-stickers', '', 'heart', 'square', '#2E6DB4',
+			'Add a simple “thank you” that makes customers feel valued, recognized, and more likely to return.',
 			[
-				tpl('Portrait', 'promo-rect.png', { x: 0.0233, y: 0.0156, w: 0.9517, h: 0.9678 }),
-				tpl('Square', 'promo-square.png', { x: 0.0122, y: 0.0122, w: 0.9744, h: 0.9744 })
+				tpl('Thanks — blue', 'thanks-blue.png', { x: 0.18, y: 0.25, w: 0.64, h: 0.19 }, 'square', 'text'),
+				tpl('Thanks · Gracias · Merci', 'thanks-multi.png', { x: 0.14, y: 0.30, w: 0.70, h: 0.42 }, 'square'),
+				tpl('You Rock!', 'thanks-rock.png', { x: 0.05, y: 0.06, w: 0.52, h: 0.52 }, 'square'),
+				tpl('Your Support', 'thanks-support.png', { x: 0.13, y: 0.05, w: 0.74, h: 0.15 }, 'square', 'text'),
+				tpl('Gratitude Grows', 'thanks-gratitude.png', { x: 0.03, y: 0.09, w: 0.55, h: 0.21 }, 'square', 'text')
 			]),
-		product('branded-label', 'Branded Label', 'branded-labels', '', 'badge', 'rectangle', '#2E639E',
-			'Your logo, your colours — a full printable canvas in two formats.',
+		product('food-identification-labels', 'Food Identification Labels', 'food-identification-labels', '', 'utensils', 'rectangle', '#2E639E',
+			'Clearly mark orders, dietary needs and packaging details without slowing down service — your brand stays visible on every order.',
 			[
-				tpl('Portrait', 'brand-rect.png', { x: 0.0233, y: 0.0156, w: 0.9517, h: 0.9678 }),
-				tpl('Square', 'brand-square.png', { x: 0.0122, y: 0.0122, w: 0.9744, h: 0.9744 })
-			]),
-		product('tamper-seal', 'Tamper-Evident Seal', 'tamper-evident-labels', '', 'shield', 'rectangle', '#182A3D',
-			'Splits cleanly when opened — customers see their food arrives untouched.', null),
-		product('thank-you-stickers', 'Thank You Stickers', 'customer-appreciation-stickers', '', 'heart', 'square', '#2E6DB4',
-			'Five designer thank-you layouts — drop your restaurant name into the printable zone and go.',
-			[
-				tpl('Thanks — blue', 'thanks-blue.png', { x: 0.18, y: 0.25, w: 0.64, h: 0.19 }),
-				tpl('Thanks · Gracias · Merci', 'thanks-multi.png', { x: 0.14, y: 0.30, w: 0.70, h: 0.42 }),
-				tpl('You Rock!', 'thanks-rock.png', { x: 0.05, y: 0.06, w: 0.52, h: 0.52 }),
-				tpl('Your Support', 'thanks-support.png', { x: 0.13, y: 0.05, w: 0.74, h: 0.15 }),
-				tpl('Gratitude Grows', 'thanks-gratitude.png', { x: 0.03, y: 0.09, w: 0.55, h: 0.21 })
-			]),
-		product('food-certification-label', 'Food Certification Label', 'food-identification-labels', '', 'utensils', 'rectangle', '#2E639E',
-			'Allergy, Halal and Kosher certification labels — your brand in the top zone, the certification mark stays fixed.',
-			[
-				tpl('Allergy', 'food-allergy.png', { x: 0.0183, y: 0.0122, w: 0.955, h: 0.3244 }),
-				tpl('Halal Certified', 'food-halal.png', { x: 0.0183, y: 0.0122, w: 0.955, h: 0.3944 }),
-				tpl('Kosher Certified', 'food-kosher.png', { x: 0.0183, y: 0.0122, w: 0.955, h: 0.4267 })
+				tpl('Allergy', 'food-allergy.png', { x: 0.0183, y: 0.0122, w: 0.955, h: 0.3244 }, 'rectangle'),
+				tpl('Halal Certified', 'food-halal.png', { x: 0.0183, y: 0.0122, w: 0.955, h: 0.3944 }, 'rectangle'),
+				tpl('Kosher Certified', 'food-kosher.png', { x: 0.0183, y: 0.0122, w: 0.955, h: 0.4267 }, 'rectangle')
 			])
 	];
 
@@ -237,7 +260,35 @@
 		'OTHER': { name: 'Other / outside US', rate: 0 }
 	};
 
-	var FONTS = ['DM Sans', 'Fraunces', 'Montserrat', 'Oswald', 'Playfair Display', 'Bebas Neue', 'Pacifico', 'Caveat', 'Lobster', 'Abril Fatface'];
+	/**
+	 * Client's Adobe Fonts list (July 2026), Montserrat Bold as default.
+	 * `stack` is the closest web-served match used until Stephen supplies
+	 * his Adobe Fonts kit id — swapping to the real kit means changing
+	 * these stacks only, the labels the customer sees stay identical.
+	 */
+	var FONTS = [
+		{ label: 'Montserrat Bold', stack: '"Montserrat", sans-serif', weight: 700 },
+		{ label: 'Bauhaus 93', stack: '"Righteous", sans-serif' },
+		{ label: 'Caveat Brush', stack: '"Caveat Brush", cursive' },
+		{ label: 'Copper Black', stack: '"Alfa Slab One", serif' },
+		{ label: 'Elephant Italic', stack: '"Playfair Display", serif', style: 'italic', weight: 900 },
+		{ label: 'Forte', stack: '"Kaushan Script", cursive' },
+		{ label: 'Acumin Pro', stack: '"Archivo", sans-serif' },
+		{ label: 'Gelato Luxe', stack: '"Yellowtail", cursive' },
+		{ label: 'Oswald SemiBold', stack: '"Oswald", sans-serif', weight: 600 },
+		{ label: 'Perpetua Titling MT Bold', stack: '"Cinzel", serif', weight: 700 },
+		{ label: 'Ravie', stack: '"Titan One", cursive' },
+		{ label: 'Source Sans 3 Regular', stack: '"Source Sans 3", sans-serif' },
+		{ label: 'Ultra Regular', stack: '"Ultra", serif' },
+		{ label: 'Wide Latin', stack: '"Bungee", cursive' }
+	];
+
+	// Currency toggle (client request). USD is the base; the CAD rate is a
+	// demo constant here and comes from the payment provider at launch.
+	var CURRENCIES = {
+		USD: { code: 'USD', symbol: '$', label: 'US', rate: 1, flag: '🇺🇸' },
+		CAD: { code: 'CAD', symbol: '$', label: 'CAN', rate: 1.38, flag: '🇨🇦' }
+	};
 
 	var CLIPART = [
 		{ file: 'burger.svg', label: 'Burger' },
@@ -281,11 +332,22 @@
 		products: PRODUCTS,
 		taxRates: TAX_RATES,
 		fonts: FONTS,
+		currencies: CURRENCIES,
 		clipart: CLIPART,
 		poll: POLL,
+		materials: MATERIALS,
+		sizesByShape: SIZES_BY_SHAPE,
+		tiers: TIERS,
+		brandStatement: 'Turn Packaging into Repeat Business',
 		productBySlug: function (slug) {
 			for (var i = 0; i < PRODUCTS.length; i++) {
 				if (PRODUCTS[i].slug === slug) return PRODUCTS[i];
+			}
+			return null;
+		},
+		productByCategory: function (catSlug) {
+			for (var i = 0; i < PRODUCTS.length; i++) {
+				if (PRODUCTS[i].cat === catSlug) return PRODUCTS[i];
 			}
 			return null;
 		},

@@ -53,10 +53,11 @@
 			'<tbody>' + rows + '</tbody></table></div>' +
 			'<aside class="summary-card"><h3>Order summary</h3>' +
 			'<div class="summary-row"><span>Subtotal</span><span>' + A.money(t.subtotal) + '</span></div>' +
-			'<div class="summary-row"><span>Ground shipping</span><span>' + (t.shippingFree ? '<span class="free">FREE — VIP</span>' : A.money(t.shipping)) + '</span></div>' +
+			'<div class="summary-row"><span>Ground shipping</span><span><span class="free">FREE</span></span></div>' +
 			'<div class="summary-row"><span>Taxes</span><span>calculated at checkout</span></div>' +
-			'<div class="summary-row total"><span>Estimated total <span style="font-weight:500;font-size:var(--text-xs);">(USD)</span></span><span>' + A.money(t.subtotal + t.shipping) + '</span></div>' +
-			'<a class="btn btn--accent btn--lg" href="checkout.html" style="width:100%; margin-top: var(--sp-4);">Proceed to checkout</a>' +
+			'<div class="summary-row total"><span>Estimated total <span style="font-weight:500;font-size:var(--text-xs);">(' + A.getCurrency().code + ')</span></span><span>' + A.money(t.subtotal + t.shipping) + '</span></div>' +
+			'<a class="btn btn--accent btn--lg" href="proof.html" style="width:100%; margin-top: var(--sp-4);">View instant proof</a>' +
+			'<p class="hint" style="font-size: var(--text-xs); color: var(--ink-faint); margin-top: var(--sp-3); text-align:center;">See your labels full size before you pay.</p>' +
 			'</aside>';
 
 		root.querySelectorAll('.remove-link').forEach(function (btn) {

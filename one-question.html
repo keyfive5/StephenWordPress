@@ -9,7 +9,12 @@
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,600;9..144,700&family=DM+Sans:wght@400;500;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="assets/css/site.css">
 <style>
-	.ato-poll { max-width: 620px; margin: 0 auto var(--sp-8); padding: var(--sp-6); background: var(--white); border: 1px solid var(--color-border); border-radius: var(--radius-lg); box-shadow: var(--shadow-md); }
+	.poll-layout { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: var(--sp-7); align-items: center; padding-bottom: var(--sp-8); }
+	@media (max-width: 900px) { .poll-layout { grid-template-columns: 1fr; } }
+	.poll-photo { margin: 0; }
+	.poll-photo img { width: 100%; height: auto; border-radius: var(--radius-lg); box-shadow: var(--shadow-md); }
+	.poll-photo figcaption { margin-top: var(--sp-3); font-size: var(--text-sm); color: var(--ink-soft); text-align: center; }
+	.ato-poll { max-width: 620px; margin: 0 auto; padding: var(--sp-6); background: var(--white); border: 1px solid var(--color-border); border-radius: var(--radius-lg); box-shadow: var(--shadow-md); }
 	.ato-poll-question { margin: 0 0 var(--sp-5); font-size: var(--text-xl); }
 	.ato-poll-options { display: grid; gap: var(--sp-3); }
 	.ato-poll-option { min-height: 48px; padding: 0.7rem 1.25rem; border: 2px solid var(--color-border); border-radius: var(--radius-pill); background: var(--white); font: inherit; font-weight: 700; cursor: pointer; text-align: left; transition: border-color 180ms var(--ease-out), transform 180ms var(--ease-out); }
@@ -38,9 +43,19 @@
 		</div>
 	</div>
 
-	<div class="container">
+	<div class="container poll-layout">
+		<figure class="poll-photo">
+			<img src="assets/img/qr-counter.jpg" alt="Restaurant counter with a scan-to-order QR code label" loading="lazy">
+			<figcaption>Your answers shape the blogs and guides we write next.</figcaption>
+		</figure>
 		<div class="ato-poll" id="the-poll"></div>
 	</div>
+
+	<section class="brand-statement--band" style="margin-top: var(--sp-8);">
+		<div class="container">
+			<p class="brand-statement">Turn Packaging <span class="bs-mark">into</span> Repeat Business</p>
+		</div>
+	</section>
 </main>
 
 <div id="app-footer"></div>

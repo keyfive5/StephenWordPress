@@ -33,6 +33,7 @@
 					<a class="btn btn--ghost btn--lg" href="bundle.html">View Bundle Package</a>
 				</div>
 				<p style="margin-top: var(--sp-4); font-family: var(--font-display); font-style: italic; color: var(--ink-soft);">Helping restaurants turn everyday packaging into repeat business.</p>
+				<ul class="trust-bar" id="hero-trust"></ul>
 			</div>
 			<div class="photo-card reveal">
 				<img src="assets/img/home-hero-1.jpg" alt="Branded takeout bag, container and coffee cup with custom restaurant labels" fetchpriority="high">
@@ -47,11 +48,11 @@
 				<img src="assets/img/home-hero-2.jpg" alt="Custom labels that turn takeout into repeat business — branded packaging examples" loading="lazy">
 			</div>
 			<div>
-				<h2>Turn Every Takeout Order Into a Marketing Opportunity</h2>
+				<h2>Turn Every Takeout Order into a Marketing Opportunity</h2>
 				<p class="lede">A plain, unbranded takeout bag is quickly forgotten. Branded packaging helps keep your restaurant top-of-mind, encourage customer engagement, and generate repeat business.</p>
 				<p class="lede">Custom labels and stickers help restaurants:</p>
 				<ul class="feature-list" id="mkt-list"></ul>
-				<a class="btn btn--accent" href="shop.html">Start Designing</a>
+				<a class="btn btn--accent" href="shop.html" style="margin-top: var(--sp-6);">Start Designing</a>
 			</div>
 		</div>
 	</section>
@@ -81,14 +82,14 @@
 	<section class="section section--ink vip-band" id="vip">
 		<div class="container vip-inner">
 			<div>
-				<span class="eyebrow">Join Our Free VIP Program</span>
+				<p class="vip-kicker">Join Our Free VIP Program</p>
 				<h2>Save More on Every Order</h2>
 				<p class="lede">Our VIP Program is completely free and designed specifically for restaurant owners who want the best value from every order.</p>
 				<ul class="feature-list" id="vip-list"></ul>
 				<p class="lede" style="font-size: var(--text-base);">Your VIP benefits begin immediately after joining.</p>
 				<a class="btn btn--accent btn--lg" href="vip.html">Join VIP Program</a>
 			</div>
-			<div class="vip-chip" aria-hidden="true"><div class="num">+50</div><div class="lbl">Bonus labels, every roll order</div></div>
+			<div class="vip-chip" aria-hidden="true"><div class="num">+50</div><div class="lbl">Bonus labels, every roll &amp; bundle order</div></div>
 		</div>
 	</section>
 
@@ -126,6 +127,13 @@
 				<p class="lede">Unlike traditional online printers and local print shops, we focus on helping restaurants turn everyday packaging into a branding and customer retention tool.</p>
 			</div>
 			<ul class="feature-list" style="max-width: 520px; margin-inline: auto;" id="why-list"></ul>
+		</div>
+	</section>
+
+	<!-- Brand statement -->
+	<section class="brand-statement--band">
+		<div class="container">
+			<p class="brand-statement">Turn Packaging <span class="bs-mark">into</span> Repeat Business</p>
 		</div>
 	</section>
 
@@ -176,8 +184,12 @@
 		li('check', 'Generates More Reviews') +
 		li('check', 'Helps Create Repeat Business');
 
+	document.getElementById('hero-trust').innerHTML =
+		['Free Ground Shipping', 'Easy-to-Use Design Tool', 'Real Time Proofs']
+			.map(function (t) { return '<li>' + D.icon('check', 22) + '<span>' + t + '</span></li>'; }).join('');
+
 	document.getElementById('vip-list').innerHTML =
-		li('gift', '50 Bonus Labels Added to Every Roll Order') +
+		li('gift', '50 Bonus Labels Added to Every Roll &amp; Bundle Order') +
 		li('truck', 'Free Ground Shipping') +
 		li('tag', 'Exclusive Promotions and Discounts') +
 		li('layers', 'Easy Reordering of Previous Designs') +

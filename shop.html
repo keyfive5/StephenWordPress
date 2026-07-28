@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Shop — All Take Out</title>
+<title>Shop — All Takeout</title>
 <meta name="description" content="Custom sticker and label products for restaurants: social media, QR code, promotional, branded, tamper-evident, appreciation and food ID labels.">
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Crect width='24' height='24' rx='7' fill='%232E639E'/%3E%3Cpath d='M8 6h5a5 5 0 0 1 5 5v5a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2Z' fill='%23F8FAFC'/%3E%3C/svg%3E">
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,600;9..144,700&family=DM+Sans:wght@400;500;700&display=swap" rel="stylesheet">
@@ -13,15 +13,23 @@
 <div id="app-header"></div>
 
 <main id="primary" class="site-main">
-	<div class="page-hero">
+	<div class="page-hero page-hero--tight">
 		<div class="container">
 			<span class="eyebrow">The shop</span>
-			<h1>Every label, made yours</h1>
-			<p class="lede">Pick a product, configure it, then design it live in the editor. Every design is reviewed by our print team before it prints.</p>
+			<h1>Choose your label</h1>
+			<p class="lede">Seven product ranges built for restaurants. Pick one, choose a template, and design it live — every order is reviewed by a real designer before it prints.</p>
 		</div>
 	</div>
 
-	<div class="container" id="shop-sections" style="padding-bottom: var(--sp-9);"></div>
+	<div class="container" style="padding-bottom: var(--sp-9);">
+		<div class="cat-tiles" id="cat-tiles"></div>
+	</div>
+
+	<section class="brand-statement--band">
+		<div class="container">
+			<p class="brand-statement">Turn Packaging <span class="bs-mark">into</span> Repeat Business</p>
+		</div>
+	</section>
 </main>
 
 <div id="app-footer"></div>
@@ -32,54 +40,26 @@
 <script>
 (function () {
 	var D = window.ATO_DATA;
+	var A = window.ATO;
 
-	function swatch(p) {
-		if (p.templates && p.templates[0] && p.templates[0].image) {
-			return '<img class="tpl-thumb" src="' + p.templates[0].image + '" alt="" loading="lazy">';
-		}
-		var square = p.shapeHint !== 'circle' ? ' p-swatch--square' : '';
-		return '<span class="p-swatch' + square + '" style="background:' + p.swatch + '">' + D.icon(p.icon, 48) + '</span>';
-	}
-
-	document.getElementById('shop-sections').innerHTML = D.categories.map(function (cat) {
-		var prods = D.products.filter(function (p) { return p.cat === cat.slug; });
-		if (!prods.length) return '';
-		var subs = cat.subs.length
-			? '<ul class="option-pills">' + cat.subs.map(function (s) { return '<li>' + s + '</li>'; }).join('') + '</ul>'
-			: '';
-		var cards = prods.map(function (p) {
-			var from = p.tiers[0];
-			return '<a class="product-card reveal" href="product.html?p=' + p.slug + '">' +
-				'<span class="product-card-art">' + swatch(p) + '</span>' +
-				'<span class="product-card-body">' +
-				'<span class="p-cat">' + (p.sub || cat.name) + '</span>' +
-				'<h3>' + p.name + '</h3>' +
-				'<span class="p-price">From $' + from.price + ' <span>/ ' + from.qty + ' labels</span></span>' +
-				'</span></a>';
-		}).join('');
-		var para = function (p) { return p.charAt(0) === '<' ? p : '<p>' + p + '</p>'; };
-		var intro = '';
-		if (cat.long && cat.long.length) {
-			var photo = cat.photo
-				? '<div class="cat-intro-photo reveal"><img src="' + cat.photo + '" alt="' + cat.name + ' — example on real takeout packaging" loading="lazy"></div>'
-				: '';
-			var why = cat.bullets && cat.bullets.length
-				? '<details class="cat-why"><summary>' + (cat.whyTitle || 'Why restaurants choose ' + cat.name) + '</summary><ul class="feature-list">' +
-					cat.bullets.map(function (b) { return '<li>' + D.icon('check', 20) + '<div><strong>' + b + '</strong></div></li>'; }).join('') +
-					'</ul></details>'
-				: '';
-			var outro = cat.outro && cat.outro.length ? cat.outro.map(para).join('') : '';
-			intro = '<div class="cat-intro">' +
-				'<div>' + (cat.heading ? '<h3>' + cat.heading + '</h3>' : '') +
-				cat.long.map(para).join('') + why + outro + '</div>' +
-				photo + '</div>';
-		}
-		return '<section class="section--tight" id="' + cat.slug + '" style="padding-top: var(--sp-7);">' +
-			'<div class="section-head"><span class="eyebrow">' + cat.name + '</span>' +
-			'<p class="lede" style="font-size: var(--text-lg); font-weight: 700;">' + cat.desc + '</p>' + subs + '</div>' +
-			intro +
-			'<div class="product-grid">' + cards + '</div></section>';
+	// One hero tile per category — the category name sits directly under
+	// the picture and the whole tile links to that category's product page.
+	document.getElementById('cat-tiles').innerHTML = D.categories.map(function (cat) {
+		var product = D.productByCategory(cat.slug);
+		if (!product) return '';
+		var art = cat.photo
+			? '<img src="' + cat.photo + '" alt="' + A.esc(cat.name) + ' on real takeout packaging" loading="lazy">'
+			: '<span class="cat-tile-fallback">' + D.icon(cat.icon, 48) + '</span>';
+		var count = product.templates.filter(function (t) { return t.image; }).length;
+		return '<a class="cat-tile reveal" href="product.html?p=' + product.slug + '">' +
+			'<span class="cat-tile-art">' + art + '</span>' +
+			'<span class="cat-tile-body">' +
+			'<span class="cat-tile-name">' + A.esc(cat.name) + '</span>' +
+			'<span class="cat-tile-desc">' + A.esc(cat.desc) + '</span>' +
+			'<span class="cat-tile-meta">' + (count ? count + ' templates · ' : '') + 'from ' + A.money(product.tiers[0].price) + '</span>' +
+			'</span></a>';
 	}).join('');
+
 	if (window.atoRevealScan) window.atoRevealScan();
 })();
 </script>

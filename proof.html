@@ -1,0 +1,139 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Your Instant Proof — All Takeout</title>
+<meta name="robots" content="noindex">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Crect width='24' height='24' rx='7' fill='%232E639E'/%3E%3Cpath d='M8 6h5a5 5 0 0 1 5 5v5a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2Z' fill='%23F8FAFC'/%3E%3C/svg%3E">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,600;9..144,700&family=DM+Sans:wght@400;500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/css/site.css">
+<style>
+	.proof-item {
+		background: var(--white);
+		border: 1px solid var(--color-border);
+		border-radius: var(--radius-lg);
+		box-shadow: var(--shadow-md);
+		padding: var(--sp-6);
+		margin-bottom: var(--sp-6);
+	}
+	.proof-stage {
+		background:
+			linear-gradient(45deg, #eef2f7 25%, transparent 25%, transparent 75%, #eef2f7 75%),
+			linear-gradient(45deg, #eef2f7 25%, #fff 25%, #fff 75%, #eef2f7 75%);
+		background-size: 24px 24px;
+		background-position: 0 0, 12px 12px;
+		border-radius: var(--radius);
+		display: grid;
+		place-items: center;
+		padding: var(--sp-6);
+		margin-bottom: var(--sp-5);
+	}
+	/* The whole point of this page: see the label big. */
+	.proof-stage img {
+		width: 100%;
+		max-width: 720px;
+		height: auto;
+		border-radius: var(--radius-sm);
+		box-shadow: var(--shadow-lg);
+		background: var(--white);
+	}
+	.proof-specs {
+		display: grid;
+		grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+		gap: var(--sp-4);
+		margin-bottom: var(--sp-5);
+	}
+	.proof-spec .k {
+		display: block;
+		font-size: var(--text-xs);
+		font-weight: 700;
+		letter-spacing: 0.08em;
+		text-transform: uppercase;
+		color: var(--ink-faint);
+	}
+	.proof-spec .v { font-weight: 700; font-size: var(--text-lg); }
+	.proof-actions { display: flex; flex-wrap: wrap; gap: var(--sp-3); }
+	.proof-check {
+		display: flex;
+		gap: var(--sp-3);
+		align-items: flex-start;
+		background: var(--blue-100);
+		border-radius: var(--radius);
+		padding: var(--sp-4);
+		margin-bottom: var(--sp-6);
+	}
+	.proof-check svg { flex: none; color: var(--blue-700); margin-top: 2px; }
+</style>
+</head>
+<body data-page="cart">
+<div id="app-header"></div>
+
+<main id="primary" class="site-main">
+	<div class="page-hero">
+		<div class="container">
+			<span class="eyebrow">Instant proof</span>
+			<h1>Check your labels before they print</h1>
+			<p class="lede">This is exactly what goes to press. Look it over at full size — spelling, colours, placement — then approve it and continue to checkout.</p>
+		</div>
+	</div>
+
+	<div class="container" style="padding-bottom: var(--sp-9);">
+		<div id="proof-root"></div>
+	</div>
+</main>
+
+<div id="app-footer"></div>
+
+<script src="assets/js/data.js"></script>
+<script src="assets/js/store.js"></script>
+<script src="assets/js/main.js"></script>
+<script>
+(function () {
+	var A = window.ATO;
+	var D = window.ATO_DATA;
+	var root = document.getElementById('proof-root');
+	var cart = A.getCart();
+
+	if (!cart.length) {
+		root.innerHTML = '<div class="empty-state"><div class="num">0</div>' +
+			'<h2>Nothing to proof yet</h2><p class="lede">Design a label and your proof will appear here at full size.</p>' +
+			'<a class="btn btn--primary btn--lg" href="shop.html">Go to the shop</a></div>';
+		return;
+	}
+
+	root.innerHTML =
+		'<div class="proof-check">' + D.icon('eye', 24) +
+		'<div><strong>A designer checks this too.</strong> After you approve, a real member of our design team reviews artwork quality, sizing, alignment and print readiness before anything goes on press.</div></div>' +
+		cart.map(function (item) {
+			var cfg = item.config || {};
+			var specs = [
+				['Product', item.name],
+				['Template', cfg.template || '—'],
+				['Material', cfg.material || '—'],
+				['Size', cfg.size || '—'],
+				['Quantity', item.qty + ' labels/roll'],
+				['Rolls', String(item.packs)]
+			];
+			return '<article class="proof-item">' +
+				'<div class="proof-stage">' +
+				(item.preview
+					? '<img src="' + item.preview + '" alt="Full-size proof of design ' + A.esc(item.designRef) + '">'
+					: '<p class="lede">No preview available for this item.</p>') +
+				'</div>' +
+				'<h2>' + A.esc(item.name) + ' <span style="font-size: var(--text-sm); color: var(--ink-faint); font-family: var(--font-body);">Design ' + A.esc(item.designRef) + '</span></h2>' +
+				'<div class="proof-specs">' + specs.map(function (s) {
+					return '<div class="proof-spec"><span class="k">' + s[0] + '</span><span class="v">' + A.esc(String(s[1])) + '</span></div>';
+				}).join('') + '</div>' +
+				'<div class="proof-actions">' +
+				'<a class="btn btn--ghost" href="product.html?p=' + A.esc(item.product) + '">Edit this design</a>' +
+				'</div></article>';
+		}).join('') +
+		'<div class="text-center" style="margin-top: var(--sp-6);">' +
+		'<a class="btn btn--accent btn--lg" href="checkout.html">Approve proof &amp; continue to checkout</a>' +
+		'<p class="hint" style="margin-top: var(--sp-3); color: var(--ink-faint);">Not right yet? <a href="cart.html">Back to cart</a></p>' +
+		'</div>';
+})();
+</script>
+</body>
+</html>

@@ -66,7 +66,33 @@
 			return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c];
 		});
 	}
-	function money(n) { return '$' + (Math.round(n * 100) / 100).toFixed(2); }
+	// ------------------------------------------------------------------
+	// Currency (CAN/US toggle). Catalogue prices are USD; the toggle
+	// converts for display only and the choice is remembered per device.
+	// ------------------------------------------------------------------
+	function getCurrency() {
+		var code = read('ato_currency', 'USD');
+		return (D.currencies && D.currencies[code]) ? D.currencies[code] : D.currencies.USD;
+	}
+
+	function setCurrency(code) {
+		if (!D.currencies[code]) return;
+		write('ato_currency', code);
+		window.location.reload();
+	}
+
+	function money(n) {
+		var c = getCurrency();
+		var v = n * c.rate;
+		return c.symbol + (Math.round(v * 100) / 100).toFixed(2);
+	}
+
+	/** Per-unit price needs 3 decimals — labels cost cents. */
+	function moneyUnit(n) {
+		var c = getCurrency();
+		var v = n * c.rate;
+		return c.symbol + v.toFixed(3);
+	}
 	function now() { return new Date().toLocaleString(); }
 
 	// ------------------------------------------------------------------
@@ -145,13 +171,17 @@
 		var user = getUser();
 		var subtotal = 0;
 		cart.forEach(function (item) { subtotal += item.price * item.packs; });
-		var shipping = cart.length ? (user && user.vip ? 0 : 9.99) : 0;
+		// Every order ships free by ground across the US and Canada
+		// (client direction July 2026). Surcharges for Alaska, Hawaii,
+		// Yukon, Nunavut and extended service areas are quoted at
+		// fulfilment, not in the cart.
+		var shipping = 0;
 		var taxInfo = (D.taxRates[stateCode] || D.taxRates.OTHER);
 		var tax = Math.round(subtotal * taxInfo.rate) / 100;
 		return {
 			subtotal: subtotal,
 			shipping: shipping,
-			shippingFree: !!(user && user.vip && cart.length),
+			shippingFree: cart.length > 0,
 			taxRate: taxInfo.rate,
 			taxName: taxInfo.name,
 			tax: tax,
@@ -315,11 +345,33 @@
 			'<button class="nav-close" id="nav-close" aria-label="Close menu">' + D.icon('close', 22) + '</button>' +
 			'<ul>' + links + '</ul></nav>' +
 			'<div class="header-actions">' +
+			currencyToggleHtml() +
 			'<a class="cart-link" href="account.html" aria-label="Account" title="' + (user ? esc(user.name) : 'Account') + '">' + D.icon('user', 20) + '</a>' +
 			'<a class="cart-link" href="cart.html" aria-label="View cart">' + D.icon('cart', 20) + '<span class="cart-count" id="ato-cart-count">0</span></a>' +
 			'<a class="btn btn--accent btn--sm header-cta" href="bundle.html">Build my bundle</a>' +
 			'<button class="nav-toggle" id="nav-toggle" aria-expanded="false" aria-controls="main-nav" aria-label="Open menu">' + D.icon('menu', 22) + '</button>' +
 			'</div></div></header>';
+
+		var toggle = document.querySelector('.currency-toggle');
+		if (toggle) {
+			toggle.addEventListener('click', function (e) {
+				var btn = e.target.closest('button[data-cur]');
+				if (btn) setCurrency(btn.getAttribute('data-cur'));
+			});
+		}
+	}
+
+	/** CAN/US price toggle shown in the header. */
+	function currencyToggleHtml() {
+		var active = getCurrency().code;
+		return '<div class="currency-toggle" role="group" aria-label="Display currency">' +
+			['USD', 'CAD'].map(function (code) {
+				var c = D.currencies[code];
+				return '<button type="button" data-cur="' + code + '"' +
+					(code === active ? ' class="is-active" aria-current="true"' : '') +
+					' title="Show prices in ' + code + '">' + c.flag + ' ' + c.label + '</button>';
+			}).join('') +
+			'</div>';
 	}
 
 	function renderFooter() {
@@ -385,6 +437,9 @@
 	window.ATO = {
 		esc: esc,
 		money: money,
+		moneyUnit: moneyUnit,
+		getCurrency: getCurrency,
+		setCurrency: setCurrency,
 		uid: uid,
 		listDesigns: listDesigns,
 		saveDesign: saveDesign,
