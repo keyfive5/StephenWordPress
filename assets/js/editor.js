@@ -144,14 +144,24 @@
 			}
 		});
 		if (cfg.quantities && cfg.quantities.length) {
+			// The two prices do the selling, so the tile carries nothing but
+			// them plus the quantity: no repeated "per roll" / "per label".
+			// The unit price is what nudges shoppers up the ladder, so the
+			// cheapest-per-label tier is flagged.
+			var qtys = cfg.quantities;
+			var best = 0;
+			qtys.forEach(function (q, i) {
+				if (q.price / q.qty < qtys[best].price / qtys[best].qty) best = i;
+			});
 			wizardSteps.push({
 				key: 'quantity',
 				label: I18N.stepQuantity || 'Quantity',
-				options: cfg.quantities.map(function (q) {
+				options: qtys.map(function (q, i) {
 					return {
 						label: String(q.qty) + ' labels',
 						price: q.price,
-						note: fmtUnit(q.price / q.qty) + ' per label',
+						note: fmtUnit(q.price / q.qty) + ' each',
+						badge: i === best ? 'Best value' : null,
 						value: String(q.qty)
 					};
 				})
@@ -197,12 +207,13 @@
 				btn.appendChild(img);
 			}
 			var span = document.createElement('span');
+			span.className = 'ato-ed-option-label';
 			span.textContent = opt.label;
 			btn.appendChild(span);
 			if (opt.price !== null && typeof opt.price !== 'undefined') {
 				var price = document.createElement('span');
 				price.className = 'ato-ed-option-price';
-				price.textContent = fmtMoney(Number(opt.price)) + ' per roll';
+				price.textContent = fmtMoney(Number(opt.price));
 				btn.appendChild(price);
 			}
 			if (opt.note) {
@@ -210,6 +221,12 @@
 				note.className = 'ato-ed-option-note';
 				note.textContent = opt.note;
 				btn.appendChild(note);
+			}
+			if (opt.badge) {
+				var badge = document.createElement('span');
+				badge.className = 'ato-ed-option-badge';
+				badge.textContent = opt.badge;
+				btn.appendChild(badge);
 			}
 			if (selections[step.key] === opt.label) btn.classList.add('is-selected');
 			btn.addEventListener('click', function () {

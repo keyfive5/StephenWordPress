@@ -474,8 +474,62 @@
 	white-space: nowrap;
 }
 
-/* Quantity step: roll price above, per-label price beneath */
-.ato-ed-option-grid--qty { grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); }
+/* Quantity step.
+   Three facts per tile and nothing else: how many, what the roll costs,
+   what each label costs. The quantity is only the option's name so it
+   recedes; the roll price is the headline; the unit price is set in the
+   accent colour because it's what moves people up to a bigger roll. */
+/* 170px min lands 6 tiers on a tidy 3x2 so the unit price reads as a
+   ladder down the column rather than wrapping 4-then-2. */
+.ato-ed-option-grid--qty { grid-template-columns: repeat(auto-fill, minmax(170px, 1fr)); gap: 0.6rem; }
+.ato-ed-option-grid--qty .ato-ed-option { position: relative; padding: 0.85rem 0.7rem; }
+
+.ato-ed-option-grid--qty .ato-ed-option .ato-ed-option-label {
+	display: block;
+	font-size: 0.75rem;
+	font-weight: 700;
+	letter-spacing: 0.07em;
+	text-transform: uppercase;
+	color: var(--atoe-ink-soft);
+	line-height: 1.2;
+}
+.ato-ed-option-grid--qty .ato-ed-option .ato-ed-option-price {
+	display: block;
+	font-size: 1.45rem;
+	font-weight: 800;
+	color: var(--atoe-ink);
+	line-height: 1.1;
+	margin-top: 0.3rem;
+	font-variant-numeric: tabular-nums;
+}
+.ato-ed-option-grid--qty .ato-ed-option .ato-ed-option-note {
+	display: block;
+	font-size: 1rem;
+	font-weight: 800;
+	color: var(--atoe-accent);
+	line-height: 1.2;
+	margin-top: 0.1rem;
+	font-variant-numeric: tabular-nums;
+}
+/* Cheapest per label — the whole point of showing a unit price. */
+.ato-ed-option-badge {
+	position: absolute;
+	top: -9px;
+	left: 50%;
+	transform: translateX(-50%);
+	padding: 0.15rem 0.55rem;
+	border-radius: 999px;
+	background: var(--atoe-accent);
+	color: #fff;
+	font-size: 0.65rem;
+	font-weight: 800;
+	letter-spacing: 0.06em;
+	text-transform: uppercase;
+	white-space: nowrap;
+}
+.ato-ed-option-grid--qty .ato-ed-option.is-selected .ato-ed-option-label { color: var(--atoe-blue-dark); }
+
+/* Other steps keep the old quiet note styling */
 .ato-ed-option .ato-ed-option-note {
 	display: block;
 	font-size: 0.75rem;

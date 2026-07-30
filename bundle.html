@@ -14,13 +14,36 @@
 	.bundle-step { background: var(--white); border: 1px solid var(--color-border); border-radius: var(--radius-lg); padding: var(--sp-6); margin-bottom: var(--sp-5); }
 	.bundle-step h3 { display: flex; align-items: center; gap: var(--sp-3); margin-top: 0; }
 	.bundle-step h3 .step-num { width: 36px; height: 36px; border-radius: 50%; background: var(--blue-700); color: var(--white); display: inline-grid; place-items: center; font-family: var(--font-body); font-size: var(--text-base); flex: none; }
-	.tier-pills { display: flex; flex-wrap: wrap; gap: var(--sp-2); }
-	.tier-pill { min-height: 48px; padding: 0.5rem 1.1rem; border: 2px solid var(--color-border); border-radius: var(--radius-pill); background: var(--white); font: inherit; font-weight: 700; cursor: pointer; }
+	/* Quantity tiles: quantity, roll price, price each. Nothing else —
+	   the unit price is what talks people into a bigger roll, so it gets
+	   the accent colour rather than another line of words. */
+	.tier-pills { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: var(--sp-3); }
+	.tier-pill {
+		position: relative;
+		display: flex;
+		flex-direction: column;
+		gap: 2px;
+		padding: 0.75rem 0.7rem;
+		border: 2px solid var(--color-border);
+		border-radius: var(--radius);
+		background: var(--white);
+		font: inherit;
+		text-align: center;
+		cursor: pointer;
+		line-height: 1.2;
+		transition: border-color var(--dur) var(--ease-out), box-shadow var(--dur) var(--ease-out);
+	}
+	.tier-pill:hover { border-color: var(--blue-600); }
 	.tier-pill.is-selected { border-color: var(--accent); box-shadow: 0 0 0 3px rgba(46, 109, 180, 0.18); }
-	.tier-pill { display: flex; flex-direction: column; align-items: flex-start; gap: 2px; line-height: 1.3; }
-	.tier-pill s { color: var(--ink-faint); font-weight: 500; margin-right: 6px; }
-	.tier-pill small { font-size: var(--text-xs); font-weight: 600; color: var(--ink-faint); }
-	.tier-pill .now { color: var(--accent); }
+	.tp-qty { font-size: var(--text-xs); font-weight: 700; letter-spacing: 0.07em; text-transform: uppercase; color: var(--ink-soft); }
+	.tp-price { font-size: 1.3rem; font-weight: 800; color: var(--ink); font-variant-numeric: tabular-nums; margin-top: 2px; }
+	.tp-unit { font-size: 0.95rem; font-weight: 800; color: var(--accent); font-variant-numeric: tabular-nums; }
+	.tp-badge {
+		position: absolute; top: -9px; left: 50%; transform: translateX(-50%);
+		padding: 0.12rem 0.5rem; border-radius: var(--radius-pill);
+		background: var(--accent); color: var(--white);
+		font-size: 0.62rem; font-weight: 800; letter-spacing: 0.06em; text-transform: uppercase; white-space: nowrap;
+	}
 	.bundle-tpl-preview { display: flex; gap: var(--sp-3); margin-top: var(--sp-4); flex-wrap: wrap; }
 	.bundle-tpl-preview img { height: 74px; border: 1px solid var(--color-border); border-radius: var(--radius-sm); background: var(--white); padding: 4px; }
 	.bundle-figure { margin: 0; }
@@ -85,14 +108,14 @@
 		<div>
 			<div class="bundle-step">
 				<h3><span class="step-num">1</span> Choose your Branded Label quantity</h3>
-				<p class="lede" style="font-size: var(--text-sm);">Your logo and colours on every order that leaves the kitchen. You'll design it in the editor next.</p>
+				<p class="lede" style="font-size: var(--text-sm);">Your logo and colours on every order that leaves the kitchen. Prices below already include your 20% bundle discount.</p>
 				<div class="tier-pills" id="branded-tiers"></div>
 				<div class="bundle-tpl-preview" id="branded-preview"></div>
 			</div>
 
 			<div class="bundle-step">
 				<h3><span class="step-num">2</span> Choose your QR Code Label quantity</h3>
-				<p class="lede" style="font-size: var(--text-sm);">Menus, Google reviews, loyalty, social — the editor generates the QR code for you.</p>
+				<p class="lede" style="font-size: var(--text-sm);">Menus, Google reviews, loyalty, social — the editor generates the QR code for you. Bundle discount already applied.</p>
 				<div class="tier-pills" id="qr-tiers"></div>
 				<div class="bundle-tpl-preview" id="qr-preview"></div>
 			</div>
@@ -245,9 +268,13 @@
 	function pills(el, product, key) {
 		el.innerHTML = product.tiers.map(function (t, i) {
 			var disc = Math.round(t.price * 0.8 * 100) / 100;
+			var isBest = i === product.tiers.length - 1;
 			return '<button type="button" class="tier-pill' + (sel[key].qty === t.qty ? ' is-selected' : '') + '" data-i="' + i + '">' +
-				t.qty + ' labels — <s>' + A.money(t.price) + '</s> <span class="now">' + A.money(disc) + '</span>' +
-				'<small>' + A.moneyUnit(disc / t.qty) + ' per label</small></button>';
+				(isBest ? '<span class="tp-badge">Best value</span>' : '') +
+				'<span class="tp-qty">' + t.qty + ' labels</span>' +
+				'<span class="tp-price">' + A.money(disc) + '</span>' +
+				'<span class="tp-unit">' + A.moneyUnit(disc / t.qty) + ' each</span>' +
+				'</button>';
 		}).join('');
 		el.querySelectorAll('.tier-pill').forEach(function (btn) {
 			btn.addEventListener('click', function () {
