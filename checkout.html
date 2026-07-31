@@ -97,10 +97,10 @@
 		var total = t.subtotal + t.shipping + t.tax;
 		document.getElementById('summary-box').innerHTML =
 			'<h3>Order summary</h3>' +
-			'<div class="summary-row"><span>Subtotal</span><span>' + A.money(t.subtotal) + '</span></div>' +
+			'<div class="summary-row"><span>Subtotal</span><span>' + A.money(t.subtotal, t.subtotalCad) + '</span></div>' +
 			'<div class="summary-row"><span>Ground shipping</span><span>' + shippingCell + '</span></div>' +
-			'<div class="summary-row"><span>Sales tax — ' + t.taxName + ' (' + t.taxRate + '%)</span><span>' + A.money(t.tax) + '</span></div>' +
-			'<div class="summary-row total"><span>Total <span style="font-weight:500;font-size:var(--text-xs);">(' + A.getCurrency().code + ')</span></span><span>' + A.money(total) + '</span></div>' +
+			'<div class="summary-row"><span>Sales tax — ' + t.taxName + ' (' + t.taxRate + '%)</span><span>' + A.money(t.tax, t.taxCad) + '</span></div>' +
+			'<div class="summary-row total"><span>Total <span style="font-weight:500;font-size:var(--text-xs);">(' + A.getCurrency().code + ')</span></span><span>' + A.money(total, t.totalCad) + '</span></div>' +
 			(mode === 'signup' ? '<div class="credit-chip" style="width:100%;">' + D.icon('gift', 22) + ' +50 extra labels ship with this order (VIP)</div>' : '');
 	}
 

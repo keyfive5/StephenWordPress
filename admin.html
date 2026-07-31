@@ -286,89 +286,382 @@
 			'<h3 style="margin-top: var(--sp-6);">Archived questions</h3>' + archiveHtml;
 	}
 
-	// --- Products manager: the "own dashboard" — add and edit products
-	// without touching code. Stored locally in the demo; same shape as
-	// the launch API. ---
+	// ------------------------------------------------------------------
+	// Products manager
+	//
+	// Three-step flow modelled on the dashboard the previous developer
+	// built: Product details → Variant pricing → Templates. Pricing is
+	// per variant and per currency, so a Canadian price is a real figure
+	// the owner typed rather than a converted US one.
+	// ------------------------------------------------------------------
+	var ALL_SIZES = ['2" x 2"', '3" x 3"', '4" x 4"', '2" x 3"', '3" x 4"', '4" x 6"'];
+	var ALL_SHAPES = ['Square', 'Rectangle'];
+	var ALL_QTYS = [100, 250, 500, 1000, 1500, 2000];
+
+	var draft = null;   // product being added/edited across the wizard steps
+	var step = 1;
+	var catFilter = '';
+
+	function blankDraft() {
+		return {
+			slug: '', name: '', cat: D.categories[0].slug, sub: '', desc: '', image: '',
+			materials: D.materials.slice(), sizes: ['2" x 2"', '3" x 3"'], shapes: ['Square'],
+			qtys: ALL_QTYS.slice(), variants: [], templates: [], custom: true
+		};
+	}
+
+	/** Existing product -> draft the wizard can edit. */
+	function draftFrom(p) {
+		return {
+			slug: p.slug, name: p.name, cat: p.cat, sub: p.sub || '', desc: p.desc || '',
+			image: p.image || '',
+			materials: (p.materials || D.materials).slice(),
+			sizes: (p.sizes || []).slice(),
+			shapes: (p.shapes || []).map(function (s) { return s.label || s; }),
+			qtys: (p.tiers || []).map(function (t) { return t.qty; }),
+			variants: (p.variants || []).slice(),
+			templates: (p.templates || []).filter(function (t) { return t.image; }).map(function (t) {
+				return Object.assign({}, t, { area: Object.assign({}, t.area) });
+			}),
+			custom: !!p.custom
+		};
+	}
+
+	/** Every material x size x shape x quantity the product offers. */
+	function variantRows(d) {
+		var rows = [];
+		(d.materials.length ? d.materials : ['']).forEach(function (m) {
+			(d.sizes.length ? d.sizes : ['']).forEach(function (s) {
+				(d.shapes.length ? d.shapes : ['']).forEach(function (sh) {
+					(d.qtys.length ? d.qtys : [0]).forEach(function (q) {
+						rows.push({ material: m, size: s, shape: sh, qty: q });
+					});
+				});
+			});
+		});
+		return rows;
+	}
+
+	function findVariant(d, row) {
+		for (var i = 0; i < d.variants.length; i++) {
+			var v = d.variants[i];
+			if (v.material === row.material && v.size === row.size &&
+				v.shape === row.shape && Number(v.qty) === Number(row.qty)) return v;
+		}
+		return null;
+	}
+
+	function checkList(name, options, selected) {
+		return '<div class="opt-checks">' + options.map(function (o, i) {
+			var val = String(o);
+			var on = selected.indexOf(val) > -1 || selected.indexOf(o) > -1;
+			return '<label class="opt-check"><input type="checkbox" name="' + name + '" value="' +
+				A.esc(val) + '"' + (on ? ' checked' : '') + '> <span>' + A.esc(val) + '</span></label>';
+		}).join('') + '</div>';
+	}
+
+	// ---- Step 1: product details -------------------------------------
+	function stepDetails(d) {
+		var cat = D.categoryBySlug(d.cat) || D.categories[0];
+		var subs = (cat.subs || []);
+		return '<h3>Product details</h3>' +
+			'<div class="wiz-body">' +
+			'<div class="field"><label for="wd-name">Title *</label><input id="wd-name" value="' + A.esc(d.name) + '" required></div>' +
+			'<div class="field"><label for="wd-cat">Category</label><select id="wd-cat">' +
+			D.categories.map(function (c) {
+				return '<option value="' + c.slug + '"' + (c.slug === d.cat ? ' selected' : '') + '>' + A.esc(c.name) + '</option>';
+			}).join('') + '</select></div>' +
+			'<div class="field"><label for="wd-sub">Subcategory</label><select id="wd-sub">' +
+			'<option value="">N/A</option>' +
+			subs.map(function (s) {
+				return '<option value="' + A.esc(s) + '"' + (s === d.sub ? ' selected' : '') + '>' + A.esc(s) + '</option>';
+			}).join('') + '</select></div>' +
+			'<div class="field full"><label for="wd-desc">Description</label><input id="wd-desc" value="' + A.esc(d.desc) + '"></div>' +
+			'<div class="field full"><label>Product image</label>' +
+			'<div class="img-row"><label class="btn btn--ghost btn--sm" for="wd-img">Upload image</label>' +
+			'<input type="file" id="wd-img" accept="image/*" hidden>' +
+			'<span id="wd-img-prev">' + (d.image ? '<img src="' + d.image + '" alt="Product image">' : '<em style="color:var(--ink-faint)">No image yet</em>') + '</span>' +
+			'</div></div>' +
+			'<div class="field full"><label>Materials</label>' + checkList('wd-mat', D.materials, d.materials) + '</div>' +
+			'<div class="field full"><label>Sizes</label>' + checkList('wd-size', ALL_SIZES, d.sizes) + '</div>' +
+			'<div class="field full"><label>Shapes</label>' + checkList('wd-shape', ALL_SHAPES, d.shapes) + '</div>' +
+			'<div class="field full"><label>Quantities</label>' + checkList('wd-qty', ALL_QTYS, d.qtys.map(String)) + '</div>' +
+			'</div>';
+	}
+
+	// ---- Step 2: variant pricing -------------------------------------
+	function stepPricing(d) {
+		var rows = variantRows(d);
+		var body = rows.map(function (r, i) {
+			var v = findVariant(d, r) || {};
+			return '<tr>' +
+				'<td>' + A.esc(r.material) + '</td><td>' + A.esc(r.size) + '</td>' +
+				'<td>' + A.esc(r.shape) + '</td><td>' + r.qty + '</td>' +
+				'<td><input type="number" step="0.01" min="0" class="px-usd" data-i="' + i + '" value="' + (v.usd != null ? v.usd : '') + '" placeholder="0.00"></td>' +
+				'<td><input type="number" step="0.01" min="0" class="px-cad" data-i="' + i + '" value="' + (v.cad != null ? v.cad : '') + '" placeholder="0.00"></td>' +
+				'</tr>';
+		}).join('');
+		return '<h3>Variant pricing</h3>' +
+			'<div class="notice"><strong>Currency pricing.</strong> Enter USD and/or CAD for each variant. If one is empty, the other will be used as the fallback.</div>' +
+			'<div class="wiz-fill">' +
+			'<label>Fill every row:</label> ' +
+			'<input type="number" step="0.01" id="fill-usd" placeholder="USD"> ' +
+			'<input type="number" step="0.01" id="fill-cad" placeholder="CAD"> ' +
+			'<button type="button" class="btn btn--ghost btn--sm" id="fill-go">Apply</button>' +
+			'</div>' +
+			'<div class="wiz-scroll"><table class="ato-table price-table"><thead><tr>' +
+			'<th>Material</th><th>Size</th><th>Shape</th><th>Qty</th><th>USD</th><th>CAD</th>' +
+			'</tr></thead><tbody>' + body + '</tbody></table></div>' +
+			'<p class="hint" style="color:var(--ink-faint);font-size:var(--text-xs);">' + rows.length + ' variants</p>';
+	}
+
+	// ---- Step 3: templates -------------------------------------------
+	function stepTemplates(d) {
+		var rows = d.templates.map(function (t, i) {
+			var a = t.area || {};
+			return '<tr>' +
+				'<td><input class="t-name" data-i="' + i + '" value="' + A.esc(t.name || '') + '" placeholder="Template name"></td>' +
+				'<td><input class="t-img" data-i="' + i + '" value="' + A.esc(t.image || '') + '" placeholder="assets/templates/..."></td>' +
+				'<td><input class="t-area" data-i="' + i + '" value="' + [a.x, a.y, a.w, a.h].map(function (n) { return n == null ? '' : n; }).join(', ') + '" placeholder="0.05, 0.05, 0.9, 0.9"></td>' +
+				'<td><input class="t-angle" data-i="' + i + '" type="number" step="0.01" value="' + (a.angle || 0) + '"></td>' +
+				'<td><button type="button" class="remove-link" data-tdel="' + i + '">Remove</button></td>' +
+				'</tr>';
+		}).join('');
+		return '<h3>Templates</h3>' +
+			'<div class="notice">Each template is the fixed artwork plus the printable area the customer edits — x, y, w, h as fractions of the image. Angle tilts the zone for diagonal designs. Leave the list empty for a blank canvas.</div>' +
+			'<div class="wiz-scroll"><table class="ato-table"><thead><tr>' +
+			'<th>Name</th><th>Image URL</th><th>Area x, y, w, h</th><th>Angle</th><th></th>' +
+			'</tr></thead><tbody>' + (rows || '<tr><td colspan="5" style="color:var(--ink-faint)">No templates — customers get a blank canvas.</td></tr>') + '</tbody></table></div>' +
+			'<button type="button" class="btn btn--ghost btn--sm" id="t-add">Add template</button>';
+	}
+
+	function renderWizard() {
+		var card = document.getElementById('prod-modal-card');
+		var titles = ['Product details', 'Variant pricing', 'Templates'];
+		card.innerHTML =
+			'<div class="wiz-head"><h2>' + (draft.slug ? 'Edit product' : 'Add product') + '</h2>' +
+			'<ol class="wiz-steps">' + titles.map(function (t, i) {
+				return '<li class="' + (i + 1 === step ? 'is-active' : (i + 1 < step ? 'is-done' : '')) + '">' + t + '</li>';
+			}).join('') + '</ol></div>' +
+			(step === 1 ? stepDetails(draft) : step === 2 ? stepPricing(draft) : stepTemplates(draft)) +
+			'<div class="wiz-nav">' +
+			'<button type="button" class="btn btn--ghost" id="wz-cancel">Cancel</button>' +
+			'<div>' +
+			(step > 1 ? '<button type="button" class="btn btn--ghost" id="wz-back">Back</button> ' : '') +
+			'<button type="button" class="btn btn--primary" id="wz-next">' + (step === 3 ? 'Save product' : 'Next') + '</button>' +
+			'</div></div>';
+		bindWizardStep();
+	}
+
+	function collectStep() {
+		if (step === 1) {
+			draft.name = document.getElementById('wd-name').value.trim();
+			draft.cat = document.getElementById('wd-cat').value;
+			draft.sub = document.getElementById('wd-sub').value;
+			draft.desc = document.getElementById('wd-desc').value.trim();
+			var pick = function (n) {
+				return Array.prototype.slice.call(document.querySelectorAll('input[name="' + n + '"]:checked'))
+					.map(function (c) { return c.value; });
+			};
+			draft.materials = pick('wd-mat');
+			draft.sizes = pick('wd-size');
+			draft.shapes = pick('wd-shape');
+			draft.qtys = pick('wd-qty').map(Number).sort(function (a, b) { return a - b; });
+		} else if (step === 2) {
+			var rows = variantRows(draft);
+			var out = [];
+			document.querySelectorAll('.px-usd').forEach(function (inp) {
+				var i = parseInt(inp.getAttribute('data-i'), 10);
+				var cad = document.querySelector('.px-cad[data-i="' + i + '"]');
+				var usd = inp.value === '' ? null : Number(inp.value);
+				var cadV = (!cad || cad.value === '') ? null : Number(cad.value);
+				if (usd === null && cadV === null) return;
+				out.push(Object.assign({}, rows[i], { usd: usd, cad: cadV }));
+			});
+			draft.variants = out;
+		} else {
+			var tpls = [];
+			document.querySelectorAll('.t-img').forEach(function (inp) {
+				var i = inp.getAttribute('data-i');
+				var url = inp.value.trim();
+				if (!url) return;
+				var nums = (document.querySelector('.t-area[data-i="' + i + '"]').value || '')
+					.split(',').map(function (n) { return parseFloat(n); });
+				var area = (nums.length === 4 && nums.every(function (n) { return !isNaN(n); }))
+					? { x: nums[0], y: nums[1], w: nums[2], h: nums[3] }
+					: { x: 0.05, y: 0.05, w: 0.9, h: 0.9 };
+				var ang = parseFloat(document.querySelector('.t-angle[data-i="' + i + '"]').value);
+				if (ang) area.angle = ang;
+				tpls.push({
+					name: (document.querySelector('.t-name[data-i="' + i + '"]').value || 'Template').trim(),
+					image: url, area: area,
+					shape: (draft.shapes[0] || 'Rectangle').toLowerCase(),
+					restrict: null
+				});
+			});
+			draft.templates = tpls;
+		}
+	}
+
+	function bindWizardStep() {
+		document.getElementById('wz-cancel').addEventListener('click', closeWizard);
+		var back = document.getElementById('wz-back');
+		if (back) back.addEventListener('click', function () { collectStep(); step--; renderWizard(); });
+		document.getElementById('wz-next').addEventListener('click', function () {
+			collectStep();
+			if (step === 1 && !draft.name) { window.alert('Give the product a title first.'); return; }
+			if (step === 3) { saveDraft(); return; }
+			step++;
+			renderWizard();
+		});
+
+		if (step === 1) {
+			// Category change re-renders so the subcategory list follows it.
+			document.getElementById('wd-cat').addEventListener('change', function () {
+				collectStep();
+				draft.sub = '';
+				renderWizard();
+			});
+			document.getElementById('wd-img').addEventListener('change', function (e) {
+				var f = e.target.files[0];
+				if (!f) return;
+				var r = new FileReader();
+				r.onload = function (ev) {
+					draft.image = ev.target.result;
+					document.getElementById('wd-img-prev').innerHTML = '<img src="' + draft.image + '" alt="Product image">';
+				};
+				r.readAsDataURL(f);
+			});
+		}
+		if (step === 2) {
+			document.getElementById('fill-go').addEventListener('click', function () {
+				var u = document.getElementById('fill-usd').value;
+				var c = document.getElementById('fill-cad').value;
+				if (u !== '') document.querySelectorAll('.px-usd').forEach(function (i) { i.value = u; });
+				if (c !== '') document.querySelectorAll('.px-cad').forEach(function (i) { i.value = c; });
+			});
+		}
+		if (step === 3) {
+			document.getElementById('t-add').addEventListener('click', function () {
+				collectStep();
+				draft.templates.push({ name: '', image: '', area: { x: 0.05, y: 0.05, w: 0.9, h: 0.9 } });
+				renderWizard();
+			});
+			document.querySelectorAll('[data-tdel]').forEach(function (b) {
+				b.addEventListener('click', function () {
+					collectStep();
+					draft.templates.splice(parseInt(b.getAttribute('data-tdel'), 10), 1);
+					renderWizard();
+				});
+			});
+		}
+	}
+
+	function saveDraft() {
+		var d = draft;
+		// Quantity tiers stay the storefront's pricing spine; each takes the
+		// cheapest variant at that quantity so "from $X" stays truthful.
+		var tiers = d.qtys.map(function (q) {
+			var best = null;
+			d.variants.forEach(function (v) {
+				if (Number(v.qty) !== q) return;
+				var usd = v.usd != null ? v.usd : (v.cad != null ? v.cad / D.currencies.CAD.rate : null);
+				if (usd === null) return;
+				if (best === null || usd < best.price) best = { qty: q, price: usd, cad: v.cad };
+			});
+			return best || { qty: q, price: 0, cad: null };
+		}).filter(function (t) { return t.qty > 0; });
+
+		var partial = {
+			name: d.name, desc: d.desc, cat: d.cat, sub: d.sub, image: d.image,
+			materials: d.materials,
+			sizes: d.sizes,
+			shapes: d.shapes.map(function (s) { return { shape: s.toLowerCase(), label: s }; }),
+			tiers: tiers.length ? tiers : [{ qty: 100, price: 0, cad: null }],
+			variants: d.variants,
+			templates: d.templates.length ? d.templates : [{ name: 'Blank canvas', image: '', shape: 'rectangle' }]
+		};
+
+		if (d.slug) {
+			A.updateProduct(d.slug, partial);
+		} else {
+			A.addProduct(Object.assign({
+				slug: d.name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '') + '-' + Math.random().toString(36).slice(2, 5),
+				icon: 'sticker', shapeHint: 'rectangle', swatch: '#2E639E', custom: true
+			}, partial));
+		}
+		closeWizard();
+		bindProductsPanel();
+	}
+
+	function openWizard(product) {
+		draft = product ? draftFrom(product) : blankDraft();
+		step = 1;
+		document.getElementById('prod-modal').hidden = false;
+		document.getElementById('prod-modal').classList.add('is-wizard');
+		renderWizard();
+	}
+
+	function closeWizard() {
+		document.getElementById('prod-modal').hidden = true;
+		document.getElementById('prod-modal').classList.remove('is-wizard');
+		draft = null;
+	}
+
 	function productsPanel() {
-		var rows = D.products.map(function (p) {
-			var tiers = p.tiers.map(function (t) { return t.qty + '|' + t.price; }).join('  ');
-			return '<tr><td><strong>' + A.esc(p.name) + '</strong>' + (p.custom ? ' <span class="badge badge--vip">added here</span>' : '') +
+		var list = D.products.filter(function (p) { return !catFilter || p.cat === catFilter; });
+		var rows = list.map(function (p, i) {
+			var price = A.priceOf(p, {}, p.tiers[0] && p.tiers[0].qty);
+			var thumb = p.image || (p.templates[0] && p.templates[0].image) || '';
+			var shapes = (p.shapes || []).map(function (s) { return s.label || s; }).join(', ');
+			return '<tr>' +
+				'<td>' + (i + 1) + '</td>' +
+				'<td>' + (thumb ? '<img class="prod-thumb" src="' + thumb + '" alt="">' : '—') + '</td>' +
+				'<td><strong>' + A.esc(p.name) + '</strong>' + (p.custom ? ' <span class="badge badge--vip">added here</span>' : '') +
 				'<span class="cart-config">' + A.esc(p.slug) + '</span></td>' +
 				'<td>' + A.esc((D.categoryBySlug(p.cat) || {}).name || p.cat) + '</td>' +
-				'<td><span class="cart-config">' + tiers + '</span></td>' +
-				'<td>' + p.templates.filter(function (t) { return t.image; }).length + '</td>' +
+				'<td>' + A.esc(p.sub || 'N/A') + '</td>' +
+				'<td>USD $' + price.usd.toFixed(2) + '<br>CAD ' +
+				(price.cad != null ? 'CA$' + Number(price.cad).toFixed(2) : '<span style="color:var(--ink-faint)">converted</span>') + '</td>' +
+				'<td>' + A.esc((p.materials || []).join(', ')) + '</td>' +
+				'<td>' + A.esc((p.sizes || []).join(', ')) + '</td>' +
+				'<td>' + A.esc(shapes) + '</td>' +
+				'<td>' + ((p.variants || []).length || (p.tiers || []).length) + '</td>' +
 				'<td><button class="btn btn--ghost btn--sm" data-edit="' + p.slug + '">Edit</button>' +
 				(p.custom ? ' <button class="remove-link" data-del="' + p.slug + '">Delete</button>' : '') + '</td></tr>';
 		}).join('');
-		var catOptions = D.categories.map(function (c) { return '<option value="' + c.slug + '">' + A.esc(c.name) + '</option>'; }).join('');
-		return '<div class="notice">Add a product or edit prices below — it appears in the shop immediately. Templates use a URL plus a printable area (x, y, w, h as fractions of the image, e.g. 0.4, 0.6, 0.55, 0.23).</div>' +
-			'<form id="prod-form" class="form-grid" style="max-width:860px; margin-bottom: var(--sp-6);">' +
-			'<input type="hidden" id="pf-slug">' +
-			'<div class="field"><label for="pf-name">Product name *</label><input id="pf-name" required></div>' +
-			'<div class="field"><label for="pf-cat">Category</label><select id="pf-cat">' + catOptions + '</select></div>' +
-			'<div class="field full"><label for="pf-desc">Description</label><input id="pf-desc"></div>' +
-			'<div class="field full"><label for="pf-tiers">Quantity tiers (one per line: qty|price)</label><textarea id="pf-tiers" rows="3" style="font-family:inherit; padding:0.6rem 1rem; border:1px solid var(--color-border); border-radius: var(--radius-sm);">100|19\n250|39\n500|69\n1000|119</textarea></div>' +
-			'<div class="field"><label for="pf-tpl-url">Template image URL (optional)</label><input id="pf-tpl-url" placeholder="assets/templates/..."></div>' +
-			'<div class="field"><label for="pf-tpl-area">Printable area x,y,w,h</label><input id="pf-tpl-area" placeholder="0.05, 0.05, 0.9, 0.9"></div>' +
-			'<div class="full"><button type="submit" class="btn btn--primary" id="pf-submit">Add product</button> <button type="button" class="remove-link" id="pf-reset">Clear form</button></div>' +
-			'</form>' +
-			'<table class="ato-table"><thead><tr><th>Product</th><th>Category</th><th>Tiers (qty|$)</th><th>Templates</th><th></th></tr></thead><tbody>' + rows + '</tbody></table>';
-	}
 
-	function parseTiers(text) {
-		return text.split(/\n+/).map(function (line) {
-			var m = line.split('|');
-			return { qty: parseInt(m[0], 10) || 0, price: parseFloat(m[1]) || 0 };
-		}).filter(function (t) { return t.qty > 0; });
+		return '<div class="prod-toolbar">' +
+			'<div><label for="prod-filter" style="font-weight:700;">Filter</label> ' +
+			'<select id="prod-filter"><option value="">All categories</option>' +
+			D.categories.map(function (c) {
+				return '<option value="' + c.slug + '"' + (c.slug === catFilter ? ' selected' : '') + '>' + A.esc(c.name) + '</option>';
+			}).join('') + '</select></div>' +
+			'<button class="btn btn--primary" id="prod-add">Add product</button>' +
+			'</div>' +
+			'<div class="wiz-scroll"><table class="ato-table"><thead><tr>' +
+			'<th>#</th><th>Image</th><th>Name</th><th>Category</th><th>Subcategory</th><th>Pricing</th>' +
+			'<th>Materials</th><th>Sizes</th><th>Shapes</th><th>Variants</th><th>Action</th>' +
+			'</tr></thead><tbody>' + rows + '</tbody></table></div>';
 	}
 
 	function bindProductsPanel() {
 		var panel = document.getElementById('tab-products');
 		panel.innerHTML = productsPanel();
-		var form = document.getElementById('prod-form');
-		form.addEventListener('submit', function (e) {
-			e.preventDefault();
-			var slug = document.getElementById('pf-slug').value;
-			var name = document.getElementById('pf-name').value.trim();
-			var tiers = parseTiers(document.getElementById('pf-tiers').value);
-			if (!name || !tiers.length) return;
-			var partial = { name: name, desc: document.getElementById('pf-desc').value.trim(), cat: document.getElementById('pf-cat').value, tiers: tiers };
-			var tplUrl = document.getElementById('pf-tpl-url').value.trim();
-			if (tplUrl) {
-				var nums = document.getElementById('pf-tpl-area').value.split(',').map(function (n) { return parseFloat(n); });
-				var area = nums.length === 4 && nums.every(function (n) { return !isNaN(n); }) ? { x: nums[0], y: nums[1], w: nums[2], h: nums[3] } : { x: 0.05, y: 0.05, w: 0.9, h: 0.9 };
-				partial.templates = [{ name: 'Template', image: tplUrl, area: area }];
-			}
-			if (slug) {
-				A.updateProduct(slug, partial);
-			} else {
-				var base = D.products[0];
-				A.addProduct(Object.assign({
-					slug: name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '') + '-' + Math.random().toString(36).slice(2, 5),
-					sub: '', icon: 'sticker', shapeHint: 'rectangle', swatch: '#2E639E',
-					materials: base.materials, sizes: base.sizes, shapes: base.shapes,
-					templates: [{ name: 'Blank canvas', image: '' }],
-					custom: true
-				}, partial));
-			}
+		document.getElementById('prod-add').addEventListener('click', function () { openWizard(null); });
+		document.getElementById('prod-filter').addEventListener('change', function (e) {
+			catFilter = e.target.value;
 			bindProductsPanel();
 		});
-		document.getElementById('pf-reset').addEventListener('click', function () { bindProductsPanel(); });
 		panel.querySelectorAll('[data-edit]').forEach(function (btn) {
 			btn.addEventListener('click', function () {
 				var p = D.productBySlug(btn.getAttribute('data-edit'));
-				if (!p) return;
-				document.getElementById('pf-slug').value = p.slug;
-				document.getElementById('pf-name').value = p.name;
-				document.getElementById('pf-desc').value = p.desc || '';
-				document.getElementById('pf-cat').value = p.cat;
-				document.getElementById('pf-tiers').value = p.tiers.map(function (t) { return t.qty + '|' + t.price; }).join('\n');
-				document.getElementById('pf-submit').textContent = 'Save changes';
-				window.scrollTo({ top: 0, behavior: 'smooth' });
+				if (p) openWizard(p);
 			});
 		});
 		panel.querySelectorAll('[data-del]').forEach(function (btn) {
 			btn.addEventListener('click', function () {
+				if (!window.confirm('Delete this product?')) return;
 				A.removeCustomProduct(btn.getAttribute('data-del'));
 				bindProductsPanel();
 			});

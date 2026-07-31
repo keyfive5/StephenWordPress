@@ -51,12 +51,13 @@
 			? '<img src="' + cat.photo + '" alt="' + A.esc(cat.name) + ' on real takeout packaging" loading="lazy">'
 			: '<span class="cat-tile-fallback">' + D.icon(cat.icon, 48) + '</span>';
 		var count = product.templates.filter(function (t) { return t.image; }).length;
+		var from_ = A.priceOf(product, {}, product.tiers[0].qty);
 		return '<a class="cat-tile reveal" href="product.html?p=' + product.slug + '">' +
 			'<span class="cat-tile-art">' + art + '</span>' +
 			'<span class="cat-tile-body">' +
 			'<span class="cat-tile-name">' + A.esc(cat.name) + '</span>' +
 			'<span class="cat-tile-desc">' + A.esc(cat.desc) + '</span>' +
-			'<span class="cat-tile-meta">' + (count ? count + ' templates · ' : '') + 'from ' + A.money(product.tiers[0].price) + '</span>' +
+			'<span class="cat-tile-meta">' + (count ? count + ' templates · ' : '') + 'from ' + A.money(from_.usd, from_.cad) + '</span>' +
 			'</span></a>';
 	}).join('');
 

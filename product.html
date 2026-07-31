@@ -211,7 +211,8 @@
 	document.getElementById('p-cat').textContent = cat ? cat.name : '';
 	document.getElementById('p-name').textContent = product.name;
 	document.getElementById('p-desc').textContent = product.desc;
-	document.getElementById('p-price').innerHTML = 'From ' + A.money(product.tiers[0].price) +
+	var fromPrice = A.priceOf(product, {}, product.tiers[0].qty);
+	document.getElementById('p-price').innerHTML = 'From ' + A.money(fromPrice.usd, fromPrice.cad) +
 		' <small>/ roll of ' + product.tiers[0].qty + ' &middot; up to ' + product.tiers[product.tiers.length - 1].qty + ' per roll</small>';
 	document.getElementById('p-pills').innerHTML =
 		product.materials.map(function (m) { return '<li>' + m + '</li>'; }).join('') +
@@ -337,9 +338,14 @@
 		if (!d) return;
 		var qty = parseInt((d.config && d.config.quantity) || product.tiers[0].qty, 10);
 		var packs = Math.max(1, parseInt(document.getElementById('ato-packs').value, 10) || 1);
-		var price = window.ATO.tierPrice(product, qty);
+		var resolved = window.ATO.priceOf(product, d.config, qty);
+		var price = resolved.usd;
+		var priceCad = resolved.cad;
 		var isBundle = !!bundleCtx;
-		if (isBundle) price = Math.round(price * 0.8 * 100) / 100;
+		if (isBundle) {
+			price = Math.round(price * 0.8 * 100) / 100;
+			if (priceCad != null) priceCad = Math.round(priceCad * 0.8 * 100) / 100;
+		}
 		window.ATO.addToCart({
 			product: product.slug,
 			name: product.name,
@@ -350,6 +356,7 @@
 			qty: qty,
 			packs: packs,
 			price: price,
+			priceCad: priceCad,
 			bundle: isBundle
 		});
 		if (isBundle && bundleCtx.step === 1) {

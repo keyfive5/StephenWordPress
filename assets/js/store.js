@@ -81,17 +81,94 @@
 		window.location.reload();
 	}
 
-	function money(n) {
+	/**
+	 * Format an amount for the active currency.
+	 *
+	 * `usd` is the base figure. When a product carries a price the owner
+	 * typed in Canadian dollars, pass it as `cadOverride` and it is shown
+	 * verbatim instead of being converted — a real CAD price beats an FX
+	 * estimate. Without an override the demo rate is applied.
+	 */
+	function money(usd, cadOverride) {
 		var c = getCurrency();
-		var v = n * c.rate;
+		var v = (c.code === 'CAD' && cadOverride != null && isFinite(cadOverride))
+			? Number(cadOverride)
+			: usd * c.rate;
 		return c.symbol + (Math.round(v * 100) / 100).toFixed(2);
 	}
 
 	/** Per-unit price needs 3 decimals — labels cost cents. */
-	function moneyUnit(n) {
+	function moneyUnit(usd, cadOverride) {
 		var c = getCurrency();
-		var v = n * c.rate;
+		var v = (c.code === 'CAD' && cadOverride != null && isFinite(cadOverride))
+			? Number(cadOverride)
+			: usd * c.rate;
 		return c.symbol + v.toFixed(3);
+	}
+
+	function num(v) {
+		if (v === null || v === undefined || v === '') return null;
+		var n = Number(v);
+		return isFinite(n) ? n : null;
+	}
+
+	/**
+	 * Pick the variant row that best fits a chosen configuration. A blank
+	 * field on a variant means "any", so a product priced only by quantity
+	 * still matches every material and size.
+	 */
+	function matchVariant(product, config, qty) {
+		if (!product.variants || !product.variants.length) return null;
+		var cfg = config || {};
+		var best = null;
+		var bestScore = -1;
+		product.variants.forEach(function (v) {
+			if (num(v.qty) !== qty) return;
+			var score = 0;
+			var keys = [['material', 'material'], ['size', 'size'], ['shape', 'shape']];
+			for (var i = 0; i < keys.length; i++) {
+				var want = v[keys[i][0]];
+				if (!want) continue;                       // wildcard
+				if (cfg[keys[i][1]] !== want) return;      // mismatch
+				score++;
+			}
+			if (score > bestScore) { bestScore = score; best = v; }
+		});
+		return best;
+	}
+
+	function tierFor(product, qty) {
+		var tiers = product.tiers || [];
+		for (var i = 0; i < tiers.length; i++) {
+			if (tiers[i].qty === qty) return tiers[i];
+		}
+		return tiers[0] || null;
+	}
+
+	/**
+	 * Resolve what a configuration costs, in both currencies.
+	 * Returns { usd, cad } where `cad` is null when the owner hasn't set an
+	 * explicit Canadian price (display then converts).
+	 */
+	function priceOf(product, config, qtyOverride) {
+		var qty = parseInt(qtyOverride || (config && config.quantity) || 0, 10);
+		if (!qty) qty = (product.tiers && product.tiers[0]) ? product.tiers[0].qty : 0;
+
+		var v = matchVariant(product, config, qty);
+		if (v) {
+			var usd = num(v.usd);
+			var cad = num(v.cad);
+			// "If one is empty, the other is used as the fallback."
+			if (usd === null && cad !== null) usd = cad / D.currencies.CAD.rate;
+			if (usd !== null) return { usd: usd, cad: cad };
+		}
+
+		var t = tierFor(product, qty);
+		if (!t) return { usd: 0, cad: null };
+		var tUsd = num(t.usd) !== null ? num(t.usd) : num(t.price);
+		var tCad = num(t.cad);
+		if (tUsd === null && tCad !== null) tUsd = tCad / D.currencies.CAD.rate;
+		return { usd: tUsd || 0, cad: tCad };
 	}
 	function now() { return new Date().toLocaleString(); }
 
@@ -168,9 +245,20 @@
 
 	function cartTotals(stateCode) {
 		var cart = getCart();
-		var user = getUser();
 		var subtotal = 0;
-		cart.forEach(function (item) { subtotal += item.price * item.packs; });
+		// Track the Canadian side separately so owner-entered CAD prices
+		// survive to the total instead of being re-derived from USD.
+		var subtotalCad = 0;
+		var anyCad = false;
+		cart.forEach(function (item) {
+			subtotal += item.price * item.packs;
+			if (num(item.priceCad) !== null) {
+				subtotalCad += Number(item.priceCad) * item.packs;
+				anyCad = true;
+			} else {
+				subtotalCad += item.price * D.currencies.CAD.rate * item.packs;
+			}
+		});
 		// Every order ships free by ground across the US and Canada
 		// (client direction July 2026). Surcharges for Alaska, Hawaii,
 		// Yukon, Nunavut and extended service areas are quoted at
@@ -178,14 +266,18 @@
 		var shipping = 0;
 		var taxInfo = (D.taxRates[stateCode] || D.taxRates.OTHER);
 		var tax = Math.round(subtotal * taxInfo.rate) / 100;
+		var taxCad = Math.round(subtotalCad * taxInfo.rate) / 100;
 		return {
 			subtotal: subtotal,
+			subtotalCad: anyCad ? subtotalCad : null,
 			shipping: shipping,
 			shippingFree: cart.length > 0,
 			taxRate: taxInfo.rate,
 			taxName: taxInfo.name,
 			tax: tax,
-			total: subtotal + shipping + tax
+			taxCad: anyCad ? taxCad : null,
+			total: subtotal + shipping + tax,
+			totalCad: anyCad ? subtotalCad + taxCad : null
 		};
 	}
 
@@ -389,7 +481,8 @@
 			'<div class="footer-col"><h4>Company</h4><ul><li><a href="about.html">About Us</a></li><li><a href="vip.html">VIP Members</a></li><li><a href="making-labels.html">Making Labels</a></li><li><a href="faqs.html">FAQs</a></li><li><a href="blog.html">Blog</a></li></ul></div>' +
 			'<div class="footer-col"><h4>Account</h4><ul><li><a href="account.html">My Account</a></li><li><a href="cart.html">Cart</a></li><li><a href="admin.html">Admin panel</a></li></ul></div>' +
 			'</div>' +
-			'<div class="footer-bottom"><span>&copy; 2026 All Take Out &middot; Kew Stick Inc.</span><span>Custom platform — no CMS required</span></div>' +
+			'<div class="footer-bottom"><span>&copy; 2026 All Take Out &middot; Kew Stick Inc.</span>' +
+			'<a class="admin-link" href="admin.html">' + D.icon('user', 16) + ' Owner login</a></div>' +
 			'</div></footer>';
 	}
 
@@ -440,6 +533,7 @@
 		moneyUnit: moneyUnit,
 		getCurrency: getCurrency,
 		setCurrency: setCurrency,
+		priceOf: priceOf,
 		uid: uid,
 		listDesigns: listDesigns,
 		saveDesign: saveDesign,
