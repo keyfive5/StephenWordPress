@@ -34,6 +34,19 @@ Measured values (fractions of the template image, `angle` in degrees):
 
 thanks-blue and thanks-support are genuinely axis-aligned (no angle). Method, for when more rotated templates arrive: scratchpad `detect3.py` masks the guide marks by colour, takes the principal axis for the angle, then reads the edges from the density profile **when the zone is a full dashed rectangle** (thanks-multi). Where the zone is only marked by four corner brackets with decorative dashes inside (rock, gratitude) the profile locks onto the wrong lines — those two were measured off a labelled grid overlay (`grid.py`) and confirmed with `verify.py`, which draws a candidate rect back over the artwork.
 
+**Admin products manager rebuilt (July 2026)** to mirror the previous developer's dashboard, which Hasan wants to keep as the working model. Three-step modal — **Product details → Variant pricing → Templates** — reached from an **Add product** button, with a category filter and a table carrying #, image, name, category, subcategory, pricing, materials, sizes, shapes, variant count and Edit/Delete.
+
+**Real per-currency pricing** is the point of it. Step 1 selects which materials/sizes/shapes/quantities a product offers; step 2 generates a row per combination with **USD and CAD fields** ("if one is empty, the other is used as the fallback", the legacy dashboard's own rule). New model pieces:
+- `product.variants[] = {material, size, shape, qty, usd, cad}`; a blank field is a wildcard, so a product priced by quantity alone still matches every material.
+- `ATO.priceOf(product, config, qty)` → `{usd, cad}`; `cad` is null when the owner never typed one.
+- `money(usd, cadOverride)` / `moneyUnit(...)` show a typed CAD figure verbatim and only fall back to the demo 1.38 rate when there isn't one. Same treatment in the editor's quantity step (`localAmount`).
+- Cart items carry `priceCad`; `cartTotals()` returns `subtotalCad`/`taxCad`/`totalCad` so an owner-set CAD price survives to the order total instead of being re-derived.
+- Tiers gained an optional `cad`; `saveDraft()` keeps `tiers` as the storefront's spine (cheapest variant per quantity) so "from $X" stays truthful.
+
+**Owner login link**: the footer bottom bar now carries an "Owner login" button on every page — Hasan was typing `/admin.html` by hand.
+
+**Gotcha:** the python preview server + browser cache will happily serve a stale `store.js`; if new `ATO.*` exports read as undefined, re-fetch with `{cache:'reload'}` before assuming a code fault.
+
 **Still open from Stephen's list** (he said he'd follow up): Customer Appreciation tool rework ("ideas mentioned later"), the extra QR template he wants to add, and which current photos he plans to swap.
 
 ## July 23, 2026 session (Stephen's bug list + content drop)

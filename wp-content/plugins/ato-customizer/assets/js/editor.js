@@ -88,14 +88,26 @@
 		rectangle: ['2" x 3"', '3" x 4"', '4" x 6"']
 	};
 
-	/** Money helpers — the host page can override with its own currency. */
-	function fmtMoney(n) {
-		return (DATA.money && DATA.money.symbol ? DATA.money.symbol : '$') +
-			(Math.round(n * (DATA.money && DATA.money.rate ? DATA.money.rate : 1) * 100) / 100).toFixed(2);
+	/**
+	 * Money helpers. The host page supplies the active currency; when a
+	 * tier carries a price the owner typed in that currency it is shown
+	 * as-is rather than converted from USD.
+	 */
+	function curSymbol() { return (DATA.money && DATA.money.symbol) ? DATA.money.symbol : '$'; }
+	function curRate() { return (DATA.money && DATA.money.rate) ? DATA.money.rate : 1; }
+	function isCad() { return !!(DATA.money && DATA.money.code === 'CAD'); }
+
+	function localAmount(usd, cadOverride) {
+		if (isCad() && cadOverride !== null && cadOverride !== undefined && isFinite(cadOverride)) {
+			return Number(cadOverride);
+		}
+		return usd * curRate();
 	}
-	function fmtUnit(n) {
-		return (DATA.money && DATA.money.symbol ? DATA.money.symbol : '$') +
-			(n * (DATA.money && DATA.money.rate ? DATA.money.rate : 1)).toFixed(3);
+	function fmtMoney(usd, cadOverride) {
+		return curSymbol() + (Math.round(localAmount(usd, cadOverride) * 100) / 100).toFixed(2);
+	}
+	function fmtUnit(usd, cadOverride) {
+		return curSymbol() + localAmount(usd, cadOverride).toFixed(3);
 	}
 
 	/**
@@ -157,10 +169,12 @@
 				key: 'quantity',
 				label: I18N.stepQuantity || 'Quantity',
 				options: qtys.map(function (q, i) {
+					var cad = (q.cad === null || q.cad === undefined) ? null : Number(q.cad);
 					return {
 						label: String(q.qty) + ' labels',
 						price: q.price,
-						note: fmtUnit(q.price / q.qty) + ' each',
+						priceCad: cad,
+						note: fmtUnit(q.price / q.qty, cad === null ? null : cad / q.qty) + ' each',
 						badge: i === best ? 'Best value' : null,
 						value: String(q.qty)
 					};
@@ -213,7 +227,7 @@
 			if (opt.price !== null && typeof opt.price !== 'undefined') {
 				var price = document.createElement('span');
 				price.className = 'ato-ed-option-price';
-				price.textContent = fmtMoney(Number(opt.price));
+				price.textContent = fmtMoney(Number(opt.price), opt.priceCad);
 				btn.appendChild(price);
 			}
 			if (opt.note) {
