@@ -231,11 +231,14 @@
 		product('customer-appreciation-stickers', 'Customer Appreciation Stickers', 'customer-appreciation-stickers', '', 'heart', 'square', '#2E6DB4',
 			'Add a simple “thank you” that makes customers feel valued, recognized, and more likely to return.',
 			[
-				tpl('Thanks — blue', 'thanks-blue.png', { x: 0.18, y: 0.25, w: 0.64, h: 0.19 }, 'square', 'text'),
-				tpl('Thanks · Gracias · Merci', 'thanks-multi.png', { x: 0.14, y: 0.30, w: 0.70, h: 0.42 }, 'square'),
-				tpl('You Rock!', 'thanks-rock.png', { x: 0.05, y: 0.06, w: 0.52, h: 0.52 }, 'square'),
+				// Three of these set the name panel on a diagonal, so the zone
+				// carries an `angle` in degrees too. Values were measured off each
+				// design's own dashed guide / corner brackets.
+				tpl('Thanks — blue', 'thanks-blue.png', { x: 0.17, y: 0.255, w: 0.66, h: 0.165 }, 'square', 'text'),
+				tpl('Thanks · Gracias · Merci', 'thanks-multi.png', { x: 0.0929, y: 0.3590, w: 0.8111, h: 0.2778, angle: -26.06 }, 'square'),
+				tpl('You Rock!', 'thanks-rock.png', { x: 0.0103, y: 0.2348, w: 0.6124, h: 0.1705, angle: -44.5 }, 'square', 'text'),
 				tpl('Your Support', 'thanks-support.png', { x: 0.13, y: 0.05, w: 0.74, h: 0.15 }, 'square', 'text'),
-				tpl('Gratitude Grows', 'thanks-gratitude.png', { x: 0.03, y: 0.09, w: 0.55, h: 0.21 }, 'square', 'text')
+				tpl('Gratitude Grows', 'thanks-gratitude.png', { x: 0.0283, y: 0.1165, w: 0.5284, h: 0.145, angle: -20.5 }, 'square', 'text')
 			]),
 		product('food-identification-labels', 'Food Identification Labels', 'food-identification-labels', '', 'utensils', 'rectangle', '#2E639E',
 			'Clearly mark orders, dietary needs and packaging details without slowing down service — your brand stays visible on every order.',
