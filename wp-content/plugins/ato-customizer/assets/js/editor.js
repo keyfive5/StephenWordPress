@@ -367,7 +367,12 @@
 	 * clipped to the area so the surrounding artwork stays untouched.
 	 *
 	 * @param {string} url      Template image URL.
-	 * @param {object} areaFrac Printable area as fractions {x, y, w, h}.
+	 * @param {object} areaFrac Printable area as fractions {x, y, w, h} plus
+	 *                          an optional `angle` in degrees. Several of
+	 *                          Stephen's designs set the name panel on a
+	 *                          diagonal, so the zone — its guide, its
+	 *                          background fill and the clip applied to the
+	 *                          customer's artwork — rotates with it.
 	 */
 	function initCanvasFromTemplate(url, areaFrac) {
 		fabric.Image.fromURL(url, function (img) {
@@ -387,7 +392,8 @@
 				left: Math.round(areaFrac.x * logicalW),
 				top: Math.round(areaFrac.y * logicalH),
 				width: Math.round(areaFrac.w * logicalW),
-				height: Math.round(areaFrac.h * logicalH)
+				height: Math.round(areaFrac.h * logicalH),
+				angle: areaFrac.angle || 0
 			};
 			templateUrl = url;
 			img.set({ left: 0, top: 0, selectable: false, evented: false, atoType: 'template', atoName: 'Template (locked)' });
@@ -419,14 +425,34 @@
 		}, { crossOrigin: 'anonymous' });
 	}
 
+	/** The zone's tilt, in degrees. 0 for the axis-aligned templates. */
+	function zoneAngle() {
+		return (printArea && printArea.angle) || 0;
+	}
+
+	/**
+	 * Fabric geometry matching the printable zone, optionally inflated.
+	 * Anchored at the centre so `angle` pivots about the middle of the
+	 * zone rather than its top-left corner.
+	 */
+	function areaRectProps(padX, padY) {
+		padX = padX || 0;
+		padY = padY || 0;
+		return {
+			left: printArea.left + printArea.width / 2,
+			top: printArea.top + printArea.height / 2,
+			originX: 'center',
+			originY: 'center',
+			width: printArea.width + padX * 2,
+			height: printArea.height + padY * 2,
+			angle: zoneAngle()
+		};
+	}
+
 	/** Dashed guide around the printable area. */
 	function addAreaCutline() {
 		if (!printArea || !canvas) return;
-		var cut = new fabric.Rect({
-			left: printArea.left,
-			top: printArea.top,
-			width: printArea.width,
-			height: printArea.height,
+		var cut = new fabric.Rect(Object.assign(areaRectProps(), {
 			fill: 'transparent',
 			stroke: '#2E6DB4',
 			strokeDashArray: [7, 6],
@@ -435,7 +461,7 @@
 			evented: false,
 			excludeFromExport: true,
 			atoType: 'cutline'
-		});
+		}));
 		canvas.add(cut);
 		canvas.bringToFront(cut);
 	}
@@ -455,17 +481,13 @@
 			// a pale hairline of the original placeholder showing through.
 			var padX = Math.max(3, Math.round(printArea.width * 0.012));
 			var padY = Math.max(3, Math.round(printArea.height * 0.012));
-			var bg = new fabric.Rect({
-				left: printArea.left - padX,
-				top: printArea.top - padY,
-				width: printArea.width + padX * 2,
-				height: printArea.height + padY * 2,
+			var bg = new fabric.Rect(Object.assign(areaRectProps(padX, padY), {
 				fill: color,
 				selectable: false,
 				evented: false,
 				atoType: 'areabg',
 				atoName: 'Area background'
-			});
+			}));
 			canvas.add(bg);
 			// keep it right above the template artwork
 			canvas.getObjects().forEach(function (o) {
@@ -483,13 +505,9 @@
 	/** Clip a user object to the printable area (template mode only). */
 	function clipToArea(obj) {
 		if (!printArea || !obj || obj.atoType === 'cutline' || obj.atoType === 'template' || obj.clipPath) return;
-		obj.clipPath = new fabric.Rect({
-			left: printArea.left,
-			top: printArea.top,
-			width: printArea.width,
-			height: printArea.height,
+		obj.clipPath = new fabric.Rect(Object.assign(areaRectProps(), {
 			absolutePositioned: true
-		});
+		}));
 	}
 
 	function onObjectAdded(e) {
@@ -663,6 +681,7 @@
 			top: c.y,
 			originX: 'center',
 			originY: 'center',
+			angle: zoneAngle(),
 			fontFamily: def.stack,
 			fontWeight: def.weight || 'normal',
 			fontStyle: def.style || 'normal',
@@ -723,6 +742,7 @@
 					top: c.y,
 					originX: 'center',
 					originY: 'center',
+					angle: zoneAngle(),
 					scaleX: scale,
 					scaleY: scale,
 					atoName: file.name
@@ -779,6 +799,7 @@
 				top: c.y,
 				originX: 'center',
 				originY: 'center',
+				angle: zoneAngle(),
 				scaleX: scale,
 				scaleY: scale,
 				atoType: 'clipart',
@@ -894,6 +915,7 @@
 					top: c.y,
 					originX: 'center',
 					originY: 'center',
+					angle: zoneAngle(),
 					scaleX: scale,
 					scaleY: scale,
 					atoType: 'qr',

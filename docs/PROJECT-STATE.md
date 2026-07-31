@@ -23,6 +23,17 @@ Structural change: **one product page per category** (7 categories → 7 product
 
 **Quantity tile redesign (feedback via Stephen's friend — tiles read cluttered):** each tile now carries three facts and no repeated words — quantity as a small uppercase label (it's only the option's name), roll price as the 1.45rem headline, and unit price in the accent blue at 1rem/800 so it pops by colour rather than by size. "per roll"/"per label" dropped for a single "each". Cheapest-per-label tier gets a compact **Best value** chip, since the unit price is the lever that moves people up a tier. Grid pinned to 3×2 (170px min) so the unit prices read as a descending ladder. Same treatment applied to the bundle page tier tiles for consistency; the struck original price was removed there (it was a third competing number and the 20% is already stated in the hero, the step intro and the summary row). **Gotcha:** the generic `.ato-ed-option .ato-ed-option-note` rule sits later in editor.css with equal specificity, so the quantity variants need the extra `.ato-ed-option` in the selector to win.
 
+**Rotated printable zones (Customer Appreciation fix).** Three appreciation designs set the name panel on a diagonal, but the area model only did axis-aligned boxes, so the editable rect sat flat over the artwork's slanted guides. `area` now takes an optional **`angle`** (degrees) and the whole zone pipeline honours it — `areaRectProps()` builds every zone rect centre-anchored so `angle` pivots about the middle, and the guide, the `areabg` fill and each object's `clipPath` all use it. New text/images/clipart/QR default to `zoneAngle()` so artwork follows the tilt instead of being clipped to a sliver. `printArea` is serialised whole, so the angle survives save/reload in the admin editor.
+
+Measured values (fractions of the template image, `angle` in degrees):
+| template | x | y | w | h | angle |
+|---|---|---|---|---|---|
+| thanks-multi | 0.0929 | 0.3590 | 0.8111 | 0.2778 | −26.06 |
+| thanks-rock | 0.0103 | 0.2348 | 0.6124 | 0.1705 | −44.5 |
+| thanks-gratitude | 0.0283 | 0.1165 | 0.5284 | 0.145 | −20.5 |
+
+thanks-blue and thanks-support are genuinely axis-aligned (no angle). Method, for when more rotated templates arrive: scratchpad `detect3.py` masks the guide marks by colour, takes the principal axis for the angle, then reads the edges from the density profile **when the zone is a full dashed rectangle** (thanks-multi). Where the zone is only marked by four corner brackets with decorative dashes inside (rock, gratitude) the profile locks onto the wrong lines — those two were measured off a labelled grid overlay (`grid.py`) and confirmed with `verify.py`, which draws a candidate rect back over the artwork.
+
 **Still open from Stephen's list** (he said he'd follow up): Customer Appreciation tool rework ("ideas mentioned later"), the extra QR template he wants to add, and which current photos he plans to swap.
 
 ## July 23, 2026 session (Stephen's bug list + content drop)
