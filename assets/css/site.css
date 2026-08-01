@@ -1555,3 +1555,66 @@ a:hover { color: var(--color-primary-hover); }
 }
 .admin-link:hover { background: rgba(255, 255, 255, 0.12); border-color: rgba(255, 255, 255, 0.7); color: inherit; }
 .admin-link svg { width: 16px; height: 16px; }
+
+/* =====================================================
+   ADMIN — visual placer for a template's editable area
+   ===================================================== */
+/* The stage must never push the Angle / Use-this-area controls off screen,
+   so the card is a fixed-height column and only the body scrolls. */
+.zone-card {
+  max-width: 1000px;
+  width: 100%;
+  max-height: 92vh;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+.zone-card .wiz-head, .zone-card .wiz-nav { flex: none; }
+.zone-body { flex: 1; min-height: 0; overflow: auto; }
+.zone-body {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 260px;
+  gap: var(--sp-5);
+  align-items: start;
+}
+.zone-stage {
+  display: grid;
+  place-items: center;
+  align-content: start;
+  padding: var(--sp-4);
+  border-radius: var(--radius);
+  /* checkerboard so a transparent template still reads clearly */
+  background:
+    linear-gradient(45deg, #e9eef5 25%, transparent 25%, transparent 75%, #e9eef5 75%),
+    linear-gradient(45deg, #e9eef5 25%, #fff 25%, #fff 75%, #e9eef5 75%);
+  background-size: 22px 22px;
+  background-position: 0 0, 11px 11px;
+  border: 1px solid var(--color-border);
+  min-height: 320px;
+}
+.zone-side { display: flex; flex-direction: column; gap: var(--sp-4); }
+.zone-check { display: flex; align-items: center; gap: var(--sp-2); font-weight: 700; font-size: var(--text-sm); }
+.zone-field label { display: block; font-weight: 700; font-size: var(--text-sm); margin-bottom: var(--sp-2); }
+.zone-angle-row { display: flex; align-items: center; gap: var(--sp-2); }
+.zone-angle-row input[type="range"] { flex: 1; min-width: 0; }
+.zone-angle-row input[type="number"] {
+  width: 76px;
+  padding: 0.35rem 0.5rem;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  font: inherit;
+}
+.zone-readout {
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: var(--text-xs);
+  line-height: 1.7;
+  color: var(--ink-soft);
+  background: var(--paper-2);
+  border-radius: var(--radius-sm);
+  padding: var(--sp-3);
+  word-break: break-all;
+}
+.t-place { white-space: nowrap; }
+@media (max-width: 860px) {
+  .zone-body { grid-template-columns: 1fr; }
+}

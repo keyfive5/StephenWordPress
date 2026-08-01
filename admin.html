@@ -45,6 +45,36 @@
 	<div class="ato-modal-card" id="prod-modal-card"></div>
 </div>
 
+<!-- Visual placer for a template's editable area: drag, resize and rotate
+     the zone straight on the artwork instead of typing fractions. -->
+<div class="ato-modal" id="zone-modal" hidden>
+	<div class="ato-modal-card zone-card">
+		<div class="wiz-head">
+			<h2>Place the editable area</h2>
+			<p class="hint" style="margin:0;color:var(--ink-faint);">Drag the blue box where customers should be able to type and drop artwork. Use the corner handles to resize and the top handle to rotate.</p>
+		</div>
+		<div class="zone-body">
+			<div class="zone-stage" id="zone-stage"><canvas id="zone-canvas"></canvas></div>
+			<div class="zone-side">
+				<label class="zone-check"><input type="checkbox" id="zone-square"> Lock to a square</label>
+				<div class="zone-field"><label for="zone-angle-in">Angle</label>
+					<div class="zone-angle-row">
+						<input type="range" id="zone-angle-in" min="-180" max="180" step="0.5" value="0">
+						<input type="number" id="zone-angle-num" step="0.5" value="0">
+					</div>
+				</div>
+				<button type="button" class="btn btn--ghost btn--sm" id="zone-reset">Reset to full label</button>
+				<div class="zone-readout" id="zone-readout"></div>
+				<p class="hint" style="color:var(--ink-faint);font-size:var(--text-xs);">The white box is exactly what the customer sees as their editable space — everything outside it stays fixed artwork.</p>
+			</div>
+		</div>
+		<div class="wiz-nav">
+			<button type="button" class="btn btn--ghost" id="zone-cancel">Cancel</button>
+			<button type="button" class="btn btn--primary" id="zone-save">Use this area</button>
+		</div>
+	</div>
+</div>
+
 <!-- Editor overlay (admin mode) -->
 <div class="ato-editor-overlay" id="ato-editor" hidden aria-modal="true" role="dialog" aria-label="Label design editor">
 	<div class="ato-ed-top">
@@ -424,15 +454,182 @@
 				'<td><input class="t-img" data-i="' + i + '" value="' + A.esc(t.image || '') + '" placeholder="assets/templates/..."></td>' +
 				'<td><input class="t-area" data-i="' + i + '" value="' + [a.x, a.y, a.w, a.h].map(function (n) { return n == null ? '' : n; }).join(', ') + '" placeholder="0.05, 0.05, 0.9, 0.9"></td>' +
 				'<td><input class="t-angle" data-i="' + i + '" type="number" step="0.01" value="' + (a.angle || 0) + '"></td>' +
+				'<td><button type="button" class="btn btn--ghost btn--sm t-place" data-tplace="' + i + '">Place area</button></td>' +
 				'<td><button type="button" class="remove-link" data-tdel="' + i + '">Remove</button></td>' +
 				'</tr>';
 		}).join('');
 		return '<h3>Templates</h3>' +
-			'<div class="notice">Each template is the fixed artwork plus the printable area the customer edits — x, y, w, h as fractions of the image. Angle tilts the zone for diagonal designs. Leave the list empty for a blank canvas.</div>' +
+			'<div class="notice">Each template is the fixed artwork plus the printable area the customer edits. Add the image, then hit <strong>Place area</strong> to drag, resize and rotate that zone straight on the artwork — the numbers fill themselves in.</div>' +
 			'<div class="wiz-scroll"><table class="ato-table"><thead><tr>' +
-			'<th>Name</th><th>Image URL</th><th>Area x, y, w, h</th><th>Angle</th><th></th>' +
-			'</tr></thead><tbody>' + (rows || '<tr><td colspan="5" style="color:var(--ink-faint)">No templates — customers get a blank canvas.</td></tr>') + '</tbody></table></div>' +
+			'<th>Name</th><th>Image URL</th><th>Area x, y, w, h</th><th>Angle</th><th>Editable area</th><th></th>' +
+			'</tr></thead><tbody>' + (rows || '<tr><td colspan="6" style="color:var(--ink-faint)">No templates — customers get a blank canvas.</td></tr>') + '</tbody></table></div>' +
 			'<button type="button" class="btn btn--ghost btn--sm" id="t-add">Add template</button>';
+	}
+
+	// ---- Visual placer for the editable area -------------------------
+	// Same Fabric engine the customer editor uses, so a zone dragged here
+	// lands exactly where the customer will find it. Reads back the model
+	// the editor expects: x/y/w/h are the UNROTATED box as fractions of the
+	// image, angle pivots about its centre.
+	var zoneState = null;
+
+	function openZonePicker(index) {
+		var urlInput = document.querySelector('.t-img[data-i="' + index + '"]');
+		var url = urlInput ? urlInput.value.trim() : '';
+		if (!url) { window.alert('Add the template image URL first, then place the area on it.'); return; }
+
+		var areaNums = (document.querySelector('.t-area[data-i="' + index + '"]').value || '')
+			.split(',').map(function (n) { return parseFloat(n); });
+		var startArea = (areaNums.length === 4 && areaNums.every(function (n) { return !isNaN(n); }))
+			? { x: areaNums[0], y: areaNums[1], w: areaNums[2], h: areaNums[3] }
+			: { x: 0.1, y: 0.1, w: 0.8, h: 0.4 };
+		startArea.angle = parseFloat(document.querySelector('.t-angle[data-i="' + index + '"]').value) || 0;
+
+		document.getElementById('zone-modal').hidden = false;
+
+		fabric.Image.fromURL(url, function (img) {
+			if (!img || !img.width) {
+				document.getElementById('zone-modal').hidden = true;
+				window.alert('Could not load that image. Check the URL.');
+				return;
+			}
+			// Fit the artwork into the stage; every figure below is in
+			// display pixels and converted back to fractions on save.
+			var maxW = 560;
+			var maxH = Math.max(260, Math.min(460, window.innerHeight * 0.5));
+			var view = Math.min(maxW / img.width, maxH / img.height, 1);
+			var cw = Math.round(img.width * view);
+			var ch = Math.round(img.height * view);
+
+			// Fabric wraps the <canvas> in its own container, so hand it a
+			// fresh element rather than reusing a disposed one.
+			if (zoneState && zoneState.canvas) zoneState.canvas.dispose();
+			document.getElementById('zone-stage').innerHTML = '<canvas id="zone-canvas"></canvas>';
+			var canvas = new fabric.Canvas('zone-canvas', {
+				width: cw, height: ch,
+				backgroundColor: 'transparent',
+				selection: false
+			});
+			img.set({ left: 0, top: 0, scaleX: view, scaleY: view, selectable: false, evented: false });
+			canvas.add(img);
+			canvas.sendToBack(img);
+
+			var rect = new fabric.Rect({
+				left: (startArea.x + startArea.w / 2) * cw,
+				top: (startArea.y + startArea.h / 2) * ch,
+				originX: 'center',
+				originY: 'center',
+				width: startArea.w * cw,
+				height: startArea.h * ch,
+				angle: startArea.angle,
+				fill: 'rgba(255,255,255,0.78)',
+				stroke: '#2E6DB4',
+				strokeDashArray: [7, 6],
+				strokeWidth: 2,
+				strokeUniform: true,
+				cornerColor: '#2E6DB4',
+				cornerStrokeColor: '#ffffff',
+                                borderColor: '#2E6DB4',
+				cornerSize: 12,
+				transparentCorners: false,
+				lockScalingFlip: true
+			});
+			rect.setControlsVisibility({ ml: true, mr: true, mt: true, mb: true, mtr: true });
+			canvas.add(rect);
+			canvas.setActiveObject(rect);
+
+			zoneState = { canvas: canvas, rect: rect, cw: cw, ch: ch, index: index };
+
+			canvas.on('object:modified', syncZoneUi);
+			canvas.on('object:scaling', function () {
+				if (document.getElementById('zone-square').checked) squareLock();
+				syncZoneUi();
+			});
+			canvas.on('object:moving', syncZoneUi);
+			canvas.on('object:rotating', syncZoneUi);
+			syncZoneUi();
+		}, { crossOrigin: 'anonymous' });
+	}
+
+	/** Keep width and height equal in on-screen pixels. */
+	function squareLock() {
+		if (!zoneState) return;
+		var r = zoneState.rect;
+		var w = r.width * r.scaleX;
+		var h = r.height * r.scaleY;
+		var side = Math.min(w, h);
+		r.set({ scaleX: side / r.width, scaleY: side / r.height });
+		r.setCoords();
+	}
+
+	/** Current rect → the editor's {x, y, w, h, angle} fractions. */
+	function zoneArea() {
+		var r = zoneState.rect;
+		var w = (r.width * r.scaleX) / zoneState.cw;
+		var h = (r.height * r.scaleY) / zoneState.ch;
+		var cx = r.left / zoneState.cw;
+		var cy = r.top / zoneState.ch;
+		var round = function (n) { return Math.round(n * 10000) / 10000; };
+		var ang = ((r.angle % 360) + 540) % 360 - 180; // normalise to -180..180
+		return {
+			x: round(cx - w / 2), y: round(cy - h / 2),
+			w: round(w), h: round(h),
+			angle: Math.round(ang * 100) / 100
+		};
+	}
+
+	function syncZoneUi() {
+		if (!zoneState) return;
+		var a = zoneArea();
+		document.getElementById('zone-readout').textContent =
+			'x ' + a.x + '\ny ' + a.y + '\nw ' + a.w + '\nh ' + a.h + '\nangle ' + a.angle + '°';
+		document.getElementById('zone-angle-in').value = a.angle;
+		document.getElementById('zone-angle-num').value = a.angle;
+		zoneState.canvas.requestRenderAll();
+	}
+
+	function closeZonePicker() {
+		if (zoneState && zoneState.canvas) zoneState.canvas.dispose();
+		zoneState = null;
+		document.getElementById('zone-modal').hidden = true;
+	}
+
+	function bindZonePicker() {
+		document.getElementById('zone-cancel').addEventListener('click', closeZonePicker);
+		document.getElementById('zone-modal').addEventListener('click', function (e) {
+			if (e.target.id === 'zone-modal') closeZonePicker();
+		});
+		document.getElementById('zone-reset').addEventListener('click', function () {
+			if (!zoneState) return;
+			zoneState.rect.set({
+				left: zoneState.cw / 2, top: zoneState.ch / 2,
+				width: zoneState.cw * 0.8, height: zoneState.ch * 0.8,
+				scaleX: 1, scaleY: 1, angle: 0
+			});
+			zoneState.rect.setCoords();
+			syncZoneUi();
+		});
+		var applyAngle = function (v) {
+			if (!zoneState) return;
+			var n = parseFloat(v);
+			if (isNaN(n)) return;
+			zoneState.rect.set('angle', n);
+			zoneState.rect.setCoords();
+			syncZoneUi();
+		};
+		document.getElementById('zone-angle-in').addEventListener('input', function (e) { applyAngle(e.target.value); });
+		document.getElementById('zone-angle-num').addEventListener('input', function (e) { applyAngle(e.target.value); });
+		document.getElementById('zone-square').addEventListener('change', function (e) {
+			if (e.target.checked) { squareLock(); syncZoneUi(); }
+		});
+		document.getElementById('zone-save').addEventListener('click', function () {
+			if (!zoneState) return closeZonePicker();
+			var a = zoneArea();
+			var i = zoneState.index;
+			document.querySelector('.t-area[data-i="' + i + '"]').value = [a.x, a.y, a.w, a.h].join(', ');
+			document.querySelector('.t-angle[data-i="' + i + '"]').value = a.angle;
+			closeZonePicker();
+		});
 	}
 
 	function renderWizard() {
@@ -554,6 +751,11 @@
 					renderWizard();
 				});
 			});
+			document.querySelectorAll('[data-tplace]').forEach(function (b) {
+				b.addEventListener('click', function () {
+					openZonePicker(parseInt(b.getAttribute('data-tplace'), 10));
+				});
+			});
 		}
 	}
 
@@ -672,6 +874,7 @@
 	document.getElementById('tab-orders').innerHTML = ordersTable();
 	document.getElementById('tab-poll').innerHTML = pollPanel();
 	bindProductsPanel();
+	bindZonePicker();
 
 	document.querySelectorAll('.admin-tab').forEach(function (tab) {
 		tab.addEventListener('click', function () {
