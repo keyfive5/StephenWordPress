@@ -19,8 +19,16 @@
 			return raw ? JSON.parse(raw) : fallback;
 		} catch (e) { return fallback; }
 	}
+	/** Returns false when the browser refused the write (usually a full
+	 *  quota — uploaded artwork is stored inline in this demo). Callers
+	 *  that can lose real work should check it rather than assume success. */
 	function write(key, value) {
-		try { window.localStorage.setItem(key, JSON.stringify(value)); } catch (e) { /* storage full */ }
+		try {
+			window.localStorage.setItem(key, JSON.stringify(value));
+			return true;
+		} catch (e) {
+			return false;
+		}
 	}
 
 	// Products added/edited in the admin dashboard live in localStorage and
@@ -39,18 +47,26 @@
 	function addProduct(prod) {
 		var list = read('ato_products', []);
 		list.push(prod);
-		write('ato_products', list);
-		D.products.push(prod);
+		var ok = write('ato_products', list);
+		if (ok) D.products.push(prod);
+		return ok;
 	}
 	function updateProduct(slug, partial) {
 		var overrides = read('ato_product_overrides', {});
+		var previous = overrides[slug];
 		overrides[slug] = Object.assign(overrides[slug] || {}, partial);
-		write('ato_product_overrides', overrides);
+		var ok = write('ato_product_overrides', overrides);
+		if (!ok) {
+			// Put the stored copy back so memory and storage don't disagree.
+			if (previous === undefined) delete overrides[slug]; else overrides[slug] = previous;
+			return false;
+		}
 		D.products.forEach(function (prod) {
 			if (prod.slug === slug) {
 				Object.keys(partial).forEach(function (k) { prod[k] = partial[k]; });
 			}
 		});
+		return true;
 	}
 	function removeCustomProduct(slug) {
 		write('ato_products', read('ato_products', []).filter(function (p) { return p.slug !== slug; }));

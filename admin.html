@@ -446,24 +446,93 @@
 	}
 
 	// ---- Step 3: templates -------------------------------------------
+	// One card per template: upload the artwork, then place the editable
+	// area on it. The image path / data URL and the area numbers ride along
+	// in hidden inputs — nobody should have to type a file path.
+	function templateCard(t, i) {
+		var a = t.area || {};
+		var hasImg = !!t.image;
+		var areaSet = a.w != null && a.h != null;
+		var art = hasImg
+			? '<img src="' + A.esc(t.image) + '" alt="">'
+			: '<span class="tpl-drop-hint">Drop artwork here<br><small>or use Upload</small></span>';
+		var meta = hasImg
+			? (areaSet
+				? 'Editable area: ' + a.x + ', ' + a.y + ', ' + a.w + ', ' + a.h + (a.angle ? ' · ' + a.angle + '°' : ' · straight')
+				: 'No editable area set yet')
+			: 'No artwork yet';
+		return '<div class="tpl-edit' + (hasImg ? '' : ' is-empty') + '" data-card="' + i + '">' +
+			'<label class="tpl-edit-art" data-drop="' + i + '">' + art +
+			'<input type="file" class="t-file" data-i="' + i + '" accept="image/*" hidden></label>' +
+			'<div class="tpl-edit-body">' +
+			'<input class="t-name" data-i="' + i + '" value="' + A.esc(t.name || '') + '" placeholder="Template name">' +
+			'<div class="tpl-edit-actions">' +
+			'<label class="btn btn--ghost btn--sm tpl-upload-btn">' + (hasImg ? 'Replace artwork' : 'Upload artwork') +
+			'<input type="file" class="t-file" data-i="' + i + '" accept="image/*" hidden></label> ' +
+			'<button type="button" class="btn btn--primary btn--sm t-place" data-tplace="' + i + '"' + (hasImg ? '' : ' disabled') + '>' +
+			(areaSet ? 'Edit editable area' : 'Place editable area') + '</button>' +
+			'</div>' +
+			'<p class="tpl-edit-meta">' + A.esc(meta) + '</p>' +
+			'</div>' +
+			'<button type="button" class="remove-link" data-tdel="' + i + '">Remove</button>' +
+			'<input type="hidden" class="t-img" data-i="' + i + '" value="' + A.esc(t.image || '') + '">' +
+			'<input type="hidden" class="t-area" data-i="' + i + '" value="' + [a.x, a.y, a.w, a.h].map(function (n) { return n == null ? '' : n; }).join(', ') + '">' +
+			'<input type="hidden" class="t-angle" data-i="' + i + '" value="' + (a.angle || 0) + '">' +
+			'</div>';
+	}
+
 	function stepTemplates(d) {
-		var rows = d.templates.map(function (t, i) {
-			var a = t.area || {};
-			return '<tr>' +
-				'<td><input class="t-name" data-i="' + i + '" value="' + A.esc(t.name || '') + '" placeholder="Template name"></td>' +
-				'<td><input class="t-img" data-i="' + i + '" value="' + A.esc(t.image || '') + '" placeholder="assets/templates/..."></td>' +
-				'<td><input class="t-area" data-i="' + i + '" value="' + [a.x, a.y, a.w, a.h].map(function (n) { return n == null ? '' : n; }).join(', ') + '" placeholder="0.05, 0.05, 0.9, 0.9"></td>' +
-				'<td><input class="t-angle" data-i="' + i + '" type="number" step="0.01" value="' + (a.angle || 0) + '"></td>' +
-				'<td><button type="button" class="btn btn--ghost btn--sm t-place" data-tplace="' + i + '">Place area</button></td>' +
-				'<td><button type="button" class="remove-link" data-tdel="' + i + '">Remove</button></td>' +
-				'</tr>';
-		}).join('');
+		var cards = d.templates.map(templateCard).join('');
 		return '<h3>Templates</h3>' +
-			'<div class="notice">Each template is the fixed artwork plus the printable area the customer edits. Add the image, then hit <strong>Place area</strong> to drag, resize and rotate that zone straight on the artwork — the numbers fill themselves in.</div>' +
-			'<div class="wiz-scroll"><table class="ato-table"><thead><tr>' +
-			'<th>Name</th><th>Image URL</th><th>Area x, y, w, h</th><th>Angle</th><th>Editable area</th><th></th>' +
-			'</tr></thead><tbody>' + (rows || '<tr><td colspan="6" style="color:var(--ink-faint)">No templates — customers get a blank canvas.</td></tr>') + '</tbody></table></div>' +
+			'<div class="notice">A template is the fixed artwork plus the area your customer can edit. <strong>Upload the artwork</strong>, then hit <strong>Place editable area</strong> to drag, resize and rotate that zone right on the picture. No templates at all means customers get a blank canvas.</div>' +
+			'<div class="wiz-scroll tpl-edit-list">' +
+			(cards || '<p style="color:var(--ink-faint)">No templates yet — customers would get a blank canvas.</p>') +
+			'</div>' +
 			'<button type="button" class="btn btn--ghost btn--sm" id="t-add">Add template</button>';
+	}
+
+	/**
+	 * Read an uploaded template into a data URL. Big camera-sized files get
+	 * scaled down first — the design tool never renders a template above
+	 * ~1200px and browser storage is small, so full-resolution uploads would
+	 * blow the quota for no visible gain. PNG keeps any transparency.
+	 */
+	function readTemplateImage(file, cb) {
+		var reader = new FileReader();
+		reader.onload = function (ev) {
+			var img = new Image();
+			img.onload = function () {
+				var max = 1200;
+				var scale = Math.min(1, max / Math.max(img.width, img.height));
+				if (scale === 1) { cb(ev.target.result); return; }
+				var c = document.createElement('canvas');
+				c.width = Math.round(img.width * scale);
+				c.height = Math.round(img.height * scale);
+				c.getContext('2d').drawImage(img, 0, 0, c.width, c.height);
+				cb(c.toDataURL('image/png'));
+			};
+			img.onerror = function () { cb(null); };
+			img.src = ev.target.result;
+		};
+		reader.onerror = function () { cb(null); };
+		reader.readAsDataURL(file);
+	}
+
+	function acceptTemplateFile(index, file) {
+		if (!file || !/^image\//.test(file.type)) {
+			window.alert('That needs to be an image file (PNG or JPG).');
+			return;
+		}
+		readTemplateImage(file, function (dataUrl) {
+			if (!dataUrl) { window.alert('Could not read that image.'); return; }
+			collectStep();
+			if (!draft.templates[index]) return;
+			draft.templates[index].image = dataUrl;
+			if (!draft.templates[index].name) {
+				draft.templates[index].name = file.name.replace(/\.[^.]+$/, '');
+			}
+			renderWizard();
+		});
 	}
 
 	// ---- Visual placer for the editable area -------------------------
@@ -486,11 +555,18 @@
 		startArea.angle = parseFloat(document.querySelector('.t-angle[data-i="' + index + '"]').value) || 0;
 
 		document.getElementById('zone-modal').hidden = false;
+		// Artwork loads asynchronously — don't let anyone "save" an area
+		// that hasn't been drawn yet.
+		var saveBtn = document.getElementById('zone-save');
+		saveBtn.disabled = true;
+		saveBtn.textContent = 'Loading artwork…';
 
 		fabric.Image.fromURL(url, function (img) {
+			saveBtn.disabled = false;
+			saveBtn.textContent = 'Use this area';
 			if (!img || !img.width) {
 				document.getElementById('zone-modal').hidden = true;
-				window.alert('Could not load that image. Check the URL.');
+				window.alert('Could not load that artwork. Try uploading it again.');
 				return;
 			}
 			// Fit the artwork into the stage; every figure below is in
@@ -629,6 +705,10 @@
 			document.querySelector('.t-area[data-i="' + i + '"]').value = [a.x, a.y, a.w, a.h].join(', ');
 			document.querySelector('.t-angle[data-i="' + i + '"]').value = a.angle;
 			closeZonePicker();
+			// Re-render so the card's summary line reflects the new zone
+			// instead of showing what it said before the picker ran.
+			collectStep();
+			renderWizard();
 		});
 	}
 
@@ -677,11 +757,13 @@
 			});
 			draft.variants = out;
 		} else {
+			// Keep every card, including one that has no artwork yet — the
+			// owner may have just added it. Imageless templates are dropped
+			// at save time instead.
 			var tpls = [];
 			document.querySelectorAll('.t-img').forEach(function (inp) {
 				var i = inp.getAttribute('data-i');
 				var url = inp.value.trim();
-				if (!url) return;
 				var nums = (document.querySelector('.t-area[data-i="' + i + '"]').value || '')
 					.split(',').map(function (n) { return parseFloat(n); });
 				var area = (nums.length === 4 && nums.every(function (n) { return !isNaN(n); }))
@@ -690,7 +772,7 @@
 				var ang = parseFloat(document.querySelector('.t-angle[data-i="' + i + '"]').value);
 				if (ang) area.angle = ang;
 				tpls.push({
-					name: (document.querySelector('.t-name[data-i="' + i + '"]').value || 'Template').trim(),
+					name: (document.querySelector('.t-name[data-i="' + i + '"]').value || '').trim(),
 					image: url, area: area,
 					shape: (draft.shapes[0] || 'Rectangle').toLowerCase(),
 					restrict: null
@@ -741,8 +823,33 @@
 		if (step === 3) {
 			document.getElementById('t-add').addEventListener('click', function () {
 				collectStep();
-				draft.templates.push({ name: '', image: '', area: { x: 0.05, y: 0.05, w: 0.9, h: 0.9 } });
+				draft.templates.push({ name: '', image: '', area: null });
 				renderWizard();
+			});
+			// Upload buttons and the artwork tile both take a file.
+			document.querySelectorAll('.t-file').forEach(function (inp) {
+				inp.addEventListener('change', function (e) {
+					var f = e.target.files[0];
+					e.target.value = '';
+					if (f) acceptTemplateFile(parseInt(inp.getAttribute('data-i'), 10), f);
+				});
+			});
+			// Drag artwork straight onto the tile.
+			document.querySelectorAll('[data-drop]').forEach(function (zone) {
+				['dragenter', 'dragover'].forEach(function (ev) {
+					zone.addEventListener(ev, function (e) {
+						e.preventDefault();
+						zone.classList.add('is-dragover');
+					});
+				});
+				['dragleave', 'drop'].forEach(function (ev) {
+					zone.addEventListener(ev, function () { zone.classList.remove('is-dragover'); });
+				});
+				zone.addEventListener('drop', function (e) {
+					e.preventDefault();
+					var f = e.dataTransfer && e.dataTransfer.files && e.dataTransfer.files[0];
+					if (f) acceptTemplateFile(parseInt(zone.getAttribute('data-drop'), 10), f);
+				});
 			});
 			document.querySelectorAll('[data-tdel]').forEach(function (b) {
 				b.addEventListener('click', function () {
@@ -774,6 +881,12 @@
 			return best || { qty: q, price: 0, cad: null };
 		}).filter(function (t) { return t.qty > 0; });
 
+		// A card with no artwork was never finished — don't ship it to the
+		// storefront, where it would render as a broken template.
+		var usable = d.templates.filter(function (t) { return t.image; }).map(function (t, i) {
+			return Object.assign({}, t, { name: t.name || ('Template ' + (i + 1)) });
+		});
+
 		var partial = {
 			name: d.name, desc: d.desc, cat: d.cat, sub: d.sub, image: d.image,
 			materials: d.materials,
@@ -781,16 +894,23 @@
 			shapes: d.shapes.map(function (s) { return { shape: s.toLowerCase(), label: s }; }),
 			tiers: tiers.length ? tiers : [{ qty: 100, price: 0, cad: null }],
 			variants: d.variants,
-			templates: d.templates.length ? d.templates : [{ name: 'Blank canvas', image: '', shape: 'rectangle' }]
+			templates: usable.length ? usable : [{ name: 'Blank canvas', image: '', shape: 'rectangle' }]
 		};
 
-		if (d.slug) {
-			A.updateProduct(d.slug, partial);
-		} else {
-			A.addProduct(Object.assign({
+		var saved = d.slug
+			? A.updateProduct(d.slug, partial)
+			: A.addProduct(Object.assign({
 				slug: d.name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '') + '-' + Math.random().toString(36).slice(2, 5),
 				icon: 'sticker', shapeHint: 'rectangle', swatch: '#2E639E', custom: true
 			}, partial));
+
+		if (!saved) {
+			// Uploaded artwork is held in browser storage in this demo, so a
+			// few large templates can fill it. Say so rather than pretending.
+			window.alert('This browser ran out of storage space, so the product was NOT saved.\n\n' +
+				'Uploaded artwork is kept in the browser for this demo. Remove a template or delete an old product and try again. ' +
+				'On the live site artwork goes to the server instead, so this limit disappears.');
+			return;
 		}
 		closeWizard();
 		bindProductsPanel();
